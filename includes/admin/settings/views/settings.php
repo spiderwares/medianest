@@ -14,14 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @var array $fields Array of settings fields.
  * 
  */
-$fields = WPMN_Settings_Fields::settings_field();
+$wpmn_fields  = WPMN_Settings_Fields::settings_field();
 
 /**
  * Fetch the saved settings from the WordPress options table.
  * @var array|false $options Retrieved settings or false if not set.
  * 
  */
-$options = get_option( 'wpmn_settings', true );
+$wpmn_options = get_option( 'wpmn_settings', true );
 
 /**
  * Load the settings form template for the Settings tab.
@@ -31,7 +31,7 @@ wpmn_get_template(
 	array(
 		'title'   => 'Settings',         // Section title.
 		'metaKey' => 'wpmn_settings',   // Option meta key.
-		'fields'  => $fields,           // Field definitions.
-		'options' => $options,          // Saved option values.
+		'fields'  => $wpmn_fields,           // Field definitions.
+		'options' => $wpmn_options,          // Saved option values.
 	),
 );

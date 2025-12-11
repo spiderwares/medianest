@@ -7,12 +7,24 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
+	/**
+     * Main WPMN_Media_Folders Class
+     *
+     * @class WPMN_Media_Folders
+     * @version 1.0.0
+     */
 	class WPMN_Media_Folders {
 
+		/**
+         * Constructor for the class.
+         */
 		public function __construct() {
 			$this->events_handler();
 		}
 
+		/**
+         * Initialize hooks and filters.
+         */
 		public function events_handler() {
 			add_action( 'init', [ $this, 'register_taxonomy' ] );
 			add_action( 'wp_ajax_wpmn_ajax', [ $this, 'handle_request' ] );
@@ -20,10 +32,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 		public function register_taxonomy() {
 
-			$labels = [
+			$labels = array(
 				'name'          => esc_html__('Media Folders', 'medianest'),
 				'singular_name' => esc_html__('Media Folder', 'medianest'),
-			];
+			);
 
 			register_taxonomy(
 				'wpmn_media_folder',
@@ -40,10 +52,9 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 		}
 
 		public function handle_request() {
-
 			$type = isset($_POST['request_type']) ? sanitize_text_field($_POST['request_type']) : '';
 
-			switch ($type) {
+			switch ($type) :
 				case 'get_folders':
 					wp_send_json_success(self::payload());
 					break;
@@ -60,6 +71,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 					WPMN_Helper::delete_folder_request();
 					break;
 
+				case 'delete_folders_bulk':
+					WPMN_Helper::delete_folders_bulk_request();
+					break;
+
 				case 'assign_media':
 					WPMN_Helper::assign_media_request();
 					break;
@@ -67,7 +82,19 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 				case 'wpmn_clear_all_data':
 					WPMN_Helper::clear_all_data_request();
 					break;
-			}
+
+				case 'wpmn_export_folders':
+					WPMN_Helper::export_folders_request();
+					break;
+
+				case 'move_folder':
+					WPMN_Helper::move_folder_request();
+					break;
+
+                case 'wpmn_generate_attachment_size':
+                    WPMN_Helper::generate_attachment_size_request();
+                    break;
+			endswitch;
 		}
 
 		public static function payload() {
@@ -79,20 +106,20 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 		public static function folder_tree() {
 
-			$terms = get_terms([
+			$terms = get_terms(array(
 				'taxonomy'   => 'wpmn_media_folder',
 				'hide_empty' => false,
 				'orderby'    => 'term_id',
 				'order'      => 'ASC',
-			]);
+			) );
 
 			if (is_wp_error($terms)) return [];
 			$group = [];
 
-			foreach ($terms as $t) {
+			foreach ($terms as $t) :
 				$t->count_with_children = self::folder_count($t->term_id);
 				$group[$t->parent][] = $t;
-			}
+			endforeach;
 
 			return self::build_tree(0, $group);
 		}
@@ -102,12 +129,12 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			if (empty($group[$parent])) return [];
 			$list = [];
 
-			foreach ($group[$parent] as $term) {
+			foreach ($group[$parent] as $term) :
 				$children = self::build_tree($term->term_id, $group);
 				$total = $term->count_with_children;
-				foreach ($children as $c) {
+				foreach ($children as $c) :
 					$total += $c['total'];
-				}
+				endforeach;
 
 				$list[] = array(	
 					'id'       => $term->term_id,
@@ -116,8 +143,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 					'total'    => $total,
 					'children' => $children,
 				);
-			}
-
+			endforeach;
 			return $list;
 		}
 
@@ -134,7 +160,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 				AND p.post_type = %s
 				AND p.post_status != %s",
 				'wpmn_media_folder', $id, 'attachment', 'trash'
-			));
+			) );
 		}
 
 		public static function special_counts() {
@@ -155,7 +181,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 				AND p.post_status!='trash'
 				AND tt.term_taxonomy_id IS NULL",
 				'wpmn_media_folder'
-			));
+			) );
 
 			return array(
 				'all'           => $total,

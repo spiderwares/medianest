@@ -1,45 +1,51 @@
 <?php
 /**
- *  Checkbox Field Template
+ * Checkbox Field Template
  */
 
-// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 
 <td>
     <div class="wpmn_checkbox_field">
         <?php if ( isset( $field['options'] ) && is_array( $field['options'] ) ) : ?>
-            <?php 
+
+            <?php
             // Get current value
-            $current_values = isset( $field_Val ) ? $field_Val : ( isset( $field['default'] ) ? $field['default'] : array() );
-            if ( ! is_array( $current_values ) ) {
-                $current_values = array();
+            $wpmn_current_values = isset( $field_Val ) ? $field_Val : ( $field['default'] ?? array() );
+
+            if ( ! is_array( $wpmn_current_values ) ) {
+                $wpmn_current_values = array();
             }
 
-            foreach ( $field['options'] as $option_key => $option_label ) : 
-                $input_name = isset( $field['name'] ) && ! empty( $field['name'] ) 
-                    ? $field['name'] . '[]' 
+            foreach ( $field['options'] as $wpmn_option_key => $wpmn_option_label ) :
+
+                $wpmn_input_name = ! empty( $field['name'] )
+                    ? $field['name'] . '[]'
                     : 'wpmn_settings[' . esc_attr( $field_Key ) . '][]';
-                
-                $checkbox_id = esc_attr( $field_Key . '_' . $option_key );
-                $is_checked = in_array( $option_key, $current_values, true );
+
+                $wpmn_checkbox_id = esc_attr( $field_Key . '_' . $wpmn_option_key );
+                $wpmn_is_checked  = in_array( $wpmn_option_key, $wpmn_current_values, true );
             ?>
+
                 <div class="wpmn_checkbox_item">
-                    <input 
+                    <input
                         type="checkbox"
-                        id="<?php echo $checkbox_id; ?>"
-                        name="<?php echo esc_attr( $input_name ); ?>"
-                        value="<?php echo esc_attr( $option_key ); ?>"
-                        <?php checked( $is_checked ); ?>
+                        id="<?php echo esc_attr( $wpmn_checkbox_id ); ?>"
+                        name="<?php echo esc_attr( $wpmn_input_name ); ?>"
+                        value="<?php echo esc_attr( $wpmn_option_key ); ?>"
+                        <?php checked( $wpmn_is_checked ); ?>
                     />
-                    <label for="<?php echo $checkbox_id; ?>">
-                        <?php echo esc_html( $option_label ); ?>
+
+                    <label for="<?php echo esc_attr( $wpmn_checkbox_id ); ?>">
+                        <?php echo esc_html( $wpmn_option_label ); ?>
                     </label>
                 </div>
+
             <?php endforeach; ?>
+
         <?php endif; ?>
     </div>
-    
+
     <p><?php echo isset( $field['desc'] ) ? wp_kses_post( $field['desc'] ) : ''; ?></p>
 </td>

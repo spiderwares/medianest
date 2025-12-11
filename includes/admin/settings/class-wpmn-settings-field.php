@@ -57,12 +57,14 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                 
                 'folder_count_mode' => array(
                     'title'      => esc_html__( 'Folder Count Mode', 'medianest' ),
-                    'field_type' => 'wpmnradio',
+                    'field_type' => 'wpmnselect',
                     'default'    => 'folder_only',
                     'name'       => 'wpmn_settings[folder_count_mode]',
                     'options'    => array(
-                        'folder_only'  => esc_html__( 'Count only files in this folder', 'medianest' )
+                        'folder_only'  => esc_html__( 'Count only files in this folder', 'medianest' ),
+                        'all_files'    => esc_html__( 'Count all files in this folder and its subfolders (Pro)', 'medianest' ),
                     ),
+                    'disabled_options' => array('all_files' ),
                 ),
 
                 'choose_theme' => array(
@@ -76,13 +78,13 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                     'title'          => esc_html__( 'Select Theme Design', 'medianest' ),
                     'field_type'    => 'wpmnradio',
                     'options'       => array(
-                        'default'   =>  'default.svg',
-                        'windows'   =>  'windows.svg',
-                        'dropbox'   =>  'dropbox.svg',
+                        'default'       =>  'default.svg',
+                        'windows (Pro)' =>  'windows.svg',
+                        'dropbox (Pro)' =>  'dropbox.svg',
                     ),
                     'default'       => 'default',
                     'name'          => 'wpmn_settings[theme_design]',
-                    'disabled_options' => array('windows', 'dropbox' ),
+                    'disabled_options' => array('windows (Pro)', 'dropbox (Pro)' ),
                 ),
 
                 // 'post_type_selection' => array(
@@ -128,6 +130,16 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
 
         public static function tools_field() {
             $fields = array(
+
+                'wpmn_attachment_size' => array(
+                    'title'       => esc_html__( 'Attachment Size', 'medianest' ),
+                    'field_type'  => 'wpmnexport',
+                    'desc'        => esc_html__( 'Generate attachment size used in "Sort by size" function.', 'medianest' ),
+                    'button_text' => esc_html__( 'Generate', 'medianest' ),
+                    'action'      => 'wpmn_generate_attachment_size',
+                    'btn_class'   => 'wpmn_generate_size_btn',
+                ),
+                
                 'wpmn_clear_all_data' => array(
                     'title'       => esc_html__( 'Clear Entire Data', 'medianest' ),
                     'field_type'  => 'wpmnrequest',
@@ -135,9 +147,83 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                     'button_text' => esc_html__( 'Clear', 'medianest' ),
                     'action'      => 'wpmn_clear_all_data',
                 ),
+
             );
             return apply_filters( 'wpmn_tools_fields', $fields );
         }
+
+        public static function import_export_field() {
+            $fields = array(
+
+                'export_csv' => array(
+                    'title'         => esc_html__('Export CSV', 'medianest'),
+                    'field_type'    => 'wpmnexport',
+                    'desc'          => esc_html__('The current directory structure will be exported.', 'medianest'),
+                    'button_text'   => esc_html__('Export Now', 'medianest'),
+                    'action'        => 'wpmn_export_folders',
+                ),
+            );
+            return apply_filters( 'wpmn_import_export_fields', $fields );
+        }
+
+
+        // public function add_folder_field( $form_fields, $post ) {
+
+        //     $current = 0;
+        //     $terms   = wp_get_object_terms( $post->ID, 'wpmn_media_folder' );
+
+        //     if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+        //         $current = $terms[0]->term_id;
+        //     }
+
+        //     // Get all folders in hierarchical order
+        //     $folders = get_terms([
+        //         'taxonomy'   => 'wpmn_media_folder',
+        //         'hide_empty' => false,
+        //         'orderby'    => 'name',
+        //         'parent'     => 0,
+        //     ]);
+
+        //     $html = '<select name="attachments['.$post->ID.'][wpmn_media_folder]">';
+        //     $html .= '<option value="0" '.selected($current,0,false).'>'.esc_html__('Uncategorized','medianest').'</option>';
+
+        //     // Build simple dropdown
+        //     foreach ( $folders as $folder ) {
+        //         $html .= $this->folder_option_row( $folder, $current, 0 );
+        //     }
+
+        //     $html .= '</select>';
+
+        //     $form_fields['wpmn_media_folder'] = [
+        //         'label' => esc_html__('MediaNest Folder','medianest'),
+        //         'input' => 'html',
+        //         'html'  => $html,
+        //     ];
+
+        //     return $form_fields;
+        // }
+
+        // private function folder_option_row( $folder, $current, $depth ) {
+
+        //     $indent = str_repeat('&nbsp;&nbsp;', $depth);
+
+        //     $html = '<option value="'.$folder->term_id.'" '.selected($current,$folder->term_id,false).'>';
+        //     $html .= $indent . esc_html($folder->name);
+        //     $html .= '</option>';
+
+        //     // Add sub-folders
+        //     $children = get_terms([
+        //         'taxonomy'   => 'wpmn_media_folder',
+        //         'hide_empty' => false,
+        //         'parent'     => $folder->term_id,
+        //     ]);
+
+        //     foreach ( $children as $child ) {
+        //         $html .= $this->folder_option_row( $child, $current, $depth + 1 );
+        //     }
+
+        //     return $html;
+        // }
 
     }
 

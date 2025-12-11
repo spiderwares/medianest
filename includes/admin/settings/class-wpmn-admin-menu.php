@@ -26,6 +26,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 		 * @var array
 		 */
         public $settings;
+        
         /**
          * Constructor for the class.
          */
@@ -42,6 +43,52 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             add_action( 'admin_init', [ $this, 'register_settings' ] );
             add_action( 'admin_menu', [ $this, 'admin_menu' ] );
             add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_styles' ], 15 );
+            add_filter( 'upload_mimes', [ $this, 'wpmn_enable_svg_upload' ] );
+            add_filter( 'wp_handle_upload_prefilter', [ $this, 'wpmn_sanitize_svg_upload' ] );
+        }
+
+        /**
+         * Enable SVG upload.
+         */
+        public function wpmn_enable_svg_upload( $mimes ) {
+            $svg_enabled = isset( $this->settings['secure_svg_upload'] ) ? $this->settings['secure_svg_upload'] : 'no';
+            
+            if ( $svg_enabled === 'yes' ) :
+                $mimes['svg']  = 'image/svg+xml';
+                $mimes['svgz'] = 'image/svg+xml';
+            endif;
+            
+            return $mimes;
+        }
+
+        public function wpmn_sanitize_svg_upload( $file ) {
+
+            $type = wp_check_filetype( $file['name'], null );
+            if ( $type['type'] !== 'image/svg+xml' ) :
+                return $file;
+            endif;
+
+            // Read SVG content
+            $svg = file_get_contents( $file['tmp_name'] );
+            if ( ! $svg ) :
+                return $file;
+            endif;
+
+            // Sanitize (if sanitizer exists)
+            if ( class_exists( 'Sanitizer' ) ) :
+                $sanitizer = new Sanitizer();
+                $clean_svg = $sanitizer->sanitize( $svg );
+            else :
+                $clean_svg = $svg; 
+            endif;
+
+            if ( $clean_svg ) :
+                file_put_contents( $file['tmp_name'], $clean_svg );
+            else :
+                $file['error'] = esc_html__( 'SVG sanitization failed.', 'medianest' );
+            endif;
+
+            return $file;
         }
 
         /*
@@ -94,8 +141,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 				true
 			);
 
-            // Localize upload selector data for media-new.php and upload.php pages
-            if ( in_array( $hook, array( 'media-new.php', 'upload.php' ), true ) ) {
+            if ( in_array( $hook, array( 'media-new.php' ), true ) ) {
                 wp_enqueue_script(
                     'wpmn-upload-folder',
                     WPMN_URL . 'assets/js/wpmn-upload-folder.js',
@@ -103,31 +149,22 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
                     WPMN_VERSION,
                     true
                 );
-                
-                wp_localize_script(
-                    'wpmn-media-library',
-                    'wpmnUploadSelector',
-                    array(
-                        'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-                        'nonce'   => wp_create_nonce( 'wpmn_upload_nonce' ),
-                    )
-                );
             }
 
             // Get saved theme design from settings
-            $saved_theme = isset( $this->settings['theme_design'] ) ? sanitize_key( $this->settings['theme_design'] ) : 'default';
+            $saved_theme     = isset( $this->settings['theme_design'] ) ? sanitize_key( $this->settings['theme_design'] ) : 'default';
             $show_breadcrumb = isset( $this->settings['breadcrumb_navigation'] ) ? $this->settings['breadcrumb_navigation'] : 'yes';
             
 			wp_localize_script(
 				'wpmn-media-library',
 				'wpmnMediaLibrary',
 				array(
-					'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
-					'baseUrl'      => WPMN_URL,
-					'nonce'        => wp_create_nonce( 'wpmn_media_nonce' ),
-					'theme'        => $saved_theme,
+					'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+					'baseUrl'        => WPMN_URL,
+					'nonce'          => wp_create_nonce( 'wpmn_media_nonce' ),
+					'theme'          => $saved_theme,
                     'showBreadcrumb' => $show_breadcrumb === 'yes',
-					'wpmn_folder'         => array(
+					'wpmn_folder'    => array(
 						'newFolderPrompt'    => esc_html__( 'Enter folder name', 'medianest' ),
 						'renamePrompt'       => esc_html__( 'Rename folder', 'medianest' ),
 						'selectFolderFirst'  => esc_html__( 'Please select a folder first.', 'medianest' ),
@@ -143,6 +180,13 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 						'emptyButton'        => esc_html__( 'Add Folder', 'medianest' ),
 						'deleteConfirm'      => esc_html__( 'Are you sure you want to delete this folder? The files it contains will be automatically moved to the “Uncategorized” folder.', 'medianest' ),
 						'confirmClearData'   => esc_html__( 'Are you sure you want to delete all Medianest data?', 'medianest' ),
+						'settingsSaved'      => esc_html__( 'Settings saved successfully!', 'medianest' ),
+						'itemMoved'          => esc_html__( 'Item moved successfully.', 'medianest' ),
+						'allDataCleared'     => esc_html__( 'All data cleared.', 'medianest' ),
+						'errorPrefix'        => esc_html__( 'Error: ', 'medianest' ),
+						'moveSelf'           => esc_html__( 'Cannot move folder into itself', 'medianest' ),
+						'moveSubfolder'      => esc_html__( 'Cannot move folder into its own subfolder', 'medianest' ),
+						'folderMoved'        => esc_html__( 'Folder moved successfully', 'medianest' ),
 					),
 				)
 			);

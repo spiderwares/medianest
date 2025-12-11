@@ -1,7 +1,7 @@
 <?php
 /**
- * Tools Tab: Tools
- * Loads the Tools section in the plugin settings page.
+ * Import/Export Tab: Import/Export
+ * Loads the Import/Export section in the plugin settings page.
  * 
  * @package Medianest
  */
@@ -10,11 +10,11 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Retrieve the tools fields from the Tools class.
- * @var array $fields Array of email api settings fields.
+ * Retrieve the import/export fields from the Settings class.
+ * @var array $fields Array of import/export settings fields.
  * 
  */
-$wpmn_fields = WPMN_Settings_Fields::tools_field();
+$wpmn_fields = WPMN_Settings_Fields::import_export_field();
 
 /**
  * Fetch the saved settings from the WordPress options table.
@@ -24,12 +24,12 @@ $wpmn_fields = WPMN_Settings_Fields::tools_field();
 $wpmn_options = get_option( 'wpmn_settings', true );
 
 /**
- * Load the tools form template for the Tools tab.
+ * Load the import/export form template for the Import/Export tab.
  */
 wpmn_get_template(
 	'fields/settings-forms.php',
 	array(
-		'title'       => 'Tools',         // Section title.
+		'title'       => 'Import/Export',         // Section title.
 		'metaKey'     => 'wpmn_settings',   // Option meta key.
 		'fields'      => $wpmn_fields,           // Field definitions.
 		'options' 	  => $wpmn_options,          // Saved option values.

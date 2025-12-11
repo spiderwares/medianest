@@ -14,7 +14,7 @@
  * @package Medianest
  */
 
- if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! defined( 'WPMN_FILE' ) ) :
     define( 'WPMN_FILE', __FILE__ ); // Define the plugin file path.

@@ -25,6 +25,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 <?php echo esc_html__( 'Tools', 'medianest' ); ?>
             </a>
 
+            <a href="<?php echo esc_url( admin_url( 'admin.php?page=cosmic-wpmn&tab=import-export' ) ); ?>" 
+               class="<?php echo esc_attr( $active_tab === 'import-export' ? 'nav-tab nav-tab-active' : 'nav-tab' ); ?>">
+                <img src="<?php echo esc_url( WPMN_URL . 'assets/img/import_export.svg'); ?>" />
+                <?php echo esc_html__( 'Import/Export', 'medianest' ); ?>
+            </a>
+
         </h2>
     </div>
 

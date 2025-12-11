@@ -3,7 +3,7 @@
 .wpmn_media_layout {
 	display: flex;
 	gap: 30px;
-	height: 50rem;
+	align-items: flex-start;
 }
 
 .wpmn_media_layout .wpmn_media_content {
@@ -14,8 +14,13 @@
 .wpmn_media_sidebar {
 	width: 300px;
 	padding: 5px;
-	position: relative;
+	position: sticky;
+	top: 40px;
+	height: calc(100vh - 120px);
 	transition: width 0.15s ease;
+	display: flex;
+	flex-direction: column;
+	z-index: 99;
 }
 
 .wpmn_media_sidebar_toggle {
@@ -424,11 +429,11 @@ button.wpmn_media_sidebar_action--more {
 	opacity: 0.6;
 }
 
-input[type=search] {
+.wpmn_media_sidebar_search[type="search"] {
 	width: 100%;
 	border-radius: 4px;
 	border-color: #d1cbcb;
-	padding: 4px 35px;
+	padding: 3px 0px 3px 35px;
 }
 
 .wpmn_folder_tree>ul {
@@ -456,7 +461,7 @@ input[type=search] {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	margin-bottom: 10px;
+	margin-bottom: 2px;
 }
 
 .wpmn_new_folder_form_field input {
@@ -520,7 +525,6 @@ button.wpmn_add_folder {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	margin-bottom: 6px;
 	flex-wrap: wrap;
 }
 
@@ -582,6 +586,8 @@ button.wpmn_add_folder {
 	justify-content: flex-end;
 	gap: 8px;
 }
+
+/*--------------------------- Toast Message ---------------------------*/
 
 .wpmn_toast {
 	position: fixed;
@@ -705,6 +711,21 @@ button.wpmn_add_folder {
 	gap: 8px;
 }
 
+/*--------------------------- Drag & Drop ---------------------------*/
+
+.wpmn_drag_helper_pill {
+	background: #444;
+	color: #fff;
+	padding: 6px 14px;
+	border-radius: 999px;
+	font-size: 13px;
+	font-weight: 500;
+	z-index: 160000;
+	pointer-events: none;
+	white-space: nowrap;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
 /*--------------------------- Clear Data Button ---------------------------*/
 
 .wpmn_clear_data_btn.button {
@@ -713,16 +734,40 @@ button.wpmn_add_folder {
 	border-color: #fbeaea;
 	margin-top: 15px;
 	width: 100px;
-	font-size: 15px;
+	font-size: 14px;
+	font-weight: 600;
 }
 
 .wpmn_clear_data_btn.button:hover {
 	background-color: rgb(250, 102, 102);
 	border-color: rgb(250, 102, 102);
 	color: #fff;
+	transition: all 0.3s;
+}
+
+/*--------------------------- Export Button ---------------------------*/
+
+.wpmn_export_btn,
+.wpmn_generate_size_btn {
+	background: #8044f0 !important;
+	border-color: #8044f0 !important;
+	color: #ffffff !important;
+	font-weight: 600 !important;
+	font-size: 13px !important;
+	padding: 3px 10px !important;
+	margin-top: 15px !important;
+	width: 100px;
+}
+
+.wpmn_export_btn:hover,
+.wpmn_generate_size_btn:hover {
+	background: #570FDC !important;
+	border-color: #570FDC !important;
+	transition: all 0.3s;
 }
 
 /*--------------------------- Theme Button ---------------------------*/
+
 
 .wpmn_theme_btn {
 	flex: 1;
@@ -764,16 +809,6 @@ button.wpmn_add_folder {
 	border-top: 1px solid #dcdcde;
 }
 
-@media (max-width: 1200px) {
-	.wpmn_media_sidebar {
-		display: none;
-	}
-
-	.wpmn_media_layout {
-		display: block;
-	}
-}
-
 .wpmn_media_sidebar_action_sort:focus {
 	border-color: none !important;
 }
@@ -794,11 +829,11 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 }
 
 .wpmn_sort_menu_submenu .wpmn_check_icon {
-	visibility: hidden;
 	margin-right: 6px;
 	font-size: 23px;
 	width: 23px;
 	height: 23px;
+	color: #2271b1;
 }
 
 .wpmn_count_mode_item {
@@ -973,4 +1008,218 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 	color: #2271b1;
 	cursor: pointer;
 	text-decoration: none;
+}
+
+/*--------------------------- Bulk Select ---------------------------*/
+
+.wpmn_folder_checkbox {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 18px;
+	height: 18px;
+	border: 2px solid #787c82;
+	border-radius: 4px;
+	background-color: #fff;
+	cursor: pointer;
+	position: relative;
+	outline: none;
+	margin: 0 !important;
+	margin-right: 8px !important;
+	display: none !important;
+	flex-shrink: 0;
+	transition: all 0.1s ease-in-out;
+}
+
+.wpmn_folder_checkbox:hover {
+	border-color: #2271b1;
+}
+
+.wpmn_folder_checkbox:checked {
+	background-color: #007cba;
+	border-color: #007cba;
+}
+
+.wpmn_folder_checkbox:checked::after {
+	content: '';
+	position: absolute;
+	top: 45%;
+	left: 50%;
+	width: 5px;
+	height: 10px;
+	border: solid white;
+	border-width: 0 2px 2px 0;
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_folder_checkbox {
+	display: block !important;
+	pointer-events: auto;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_folder_node .wpmn_folder_button {
+	pointer-events: none;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_folder_button {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_folder_button:hover {
+	background: transparent;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger {
+	color: #2271b1 !important;
+	border-color: #2271b1 !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger .wpmn_delete_icon {
+	filter: invert(33%) sepia(50%) saturate(1764%) hue-rotate(182deg) brightness(92%) contrast(93%);
+
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover {
+	background: #2271b1 !important;
+	color: #fff !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover .wpmn_delete_icon {
+	filter: brightness(0) invert(1);
+}
+
+
+button.wpmn_delete_trigger:disabled,
+button.wpmn_delete_trigger.disabled,
+.wpmn_media_sidebar.is-bulk-select button.wpmn_delete_trigger:disabled {
+	background: #f6f7f7 !important;
+	border-color: #dcdcde !important;
+	box-shadow: none !important;
+	color: #a7aaad !important;
+	cursor: default !important;
+	transform: none !important;
+	pointer-events: none;
+}
+
+button.wpmn_delete_trigger:disabled .wpmn_delete_icon,
+button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
+.wpmn_media_sidebar.is-bulk-select button.wpmn_delete_trigger:disabled .wpmn_delete_icon {
+	filter: grayscale(100%) opacity(0.4);
+}
+
+.wpmn_bulk_cancel_btn {
+	display: none !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_bulk_cancel_btn {
+	display: flex !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_media_sidebar_action_rename,
+.wpmn_media_sidebar.is-bulk-select .wpmn_action_wrapper {
+	display: none !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_media_sidebar_action_delete {
+	display: flex !important;
+}
+
+/*--------------------------- Folder Context Menu ---------------------------*/
+
+.wpmn_folder_context_menu {
+	position: fixed;
+	background: #fff;
+	border-radius: 6px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+	min-width: 250px;
+	z-index: 100002;
+	opacity: 0;
+	transform: scale(0.95);
+	transition: opacity 0.15s ease, transform 0.15s ease;
+	padding: 6px 0;
+}
+
+.wpmn_folder_context_menu.is-visible {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.wpmn_context_menu_item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 9px 14px;
+	cursor: pointer;
+	font-size: 13px;
+	color: #1d2327;
+	transition: background 0.15s ease;
+	user-select: none;
+}
+
+.wpmn_context_menu_item:hover:not(.disabled):not(.wpmn_pro_feature) {
+	background: #f0f0f1;
+}
+
+.wpmn_context_menu_item.wpmn_pro_feature {
+	color: #8c8f94;
+	position: relative;
+	cursor: default;
+}
+
+.wpmn_context_menu_item.wpmn_pro_feature:hover {
+	background: #fafafa;
+}
+
+.wpmn_context_menu_item.disabled {
+	opacity: 0.5;
+}
+
+.wpmn_context_menu_item .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+	color: #50575e;
+}
+
+.wpmn_context_menu_item.wpmn_pro_feature .dashicons {
+	color: #a7aaad;
+}
+
+.wpmn_context_menu_item span:nth-child(2) {
+	flex: 1;
+}
+
+.wpmn_pro_badge {
+	background-color: #46b450;
+	color: #fff;
+	font-size: 9px;
+	font-weight: 700;
+	padding: 2px 6px;
+	border-radius: 3px;
+	letter-spacing: 0.5px;
+	margin-left: auto;
+}
+
+.wpmn_folder_button.is-cut {
+	opacity: 0.5;
+	position: relative;
+}
+
+.wpmn_folder_content,
+.wpmn_folder_content_cut,
+.wpmn_folder_content_paste,
+.wpmn_folder_content_delete,
+.wpmn_folder_content_color,
+.wpmn_folder_content_download {
+	width: 20px;
+	display: block;
+	flex-shrink: 0;
+	filter: invert(29%) sepia(7%) saturate(618%) hue-rotate(169deg) brightness(96%) contrast(90%);
+}
+
+.wpmn_folder_content_rename {
+	width: 23px;
+	display: block;
+	flex-shrink: 0;
+	filter: invert(29%) sepia(7%) saturate(618%) hue-rotate(169deg) brightness(96%) contrast(90%);
 }

@@ -2,114 +2,101 @@
 /**
  * Media Upload Folder Selector
  *
- * Adds a folder selector to the WordPress media upload form
  */
+
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
 
+	/**
+     * Main WPMN_Upload_Folder Class
+     *
+     * @class WPMN_Upload_Folder
+     * @version 1.0.0
+     */
 	class WPMN_Upload_Folder {
 
 		/**
-		 * Constructor
+		 * Constructor for the class.
 		 */
 		public function __construct() {
-			add_action( 'pre-upload-ui', [ $this, 'render_folder_selector' ] );
-			add_action( 'wp_ajax_wpmn_get_folders_for_upload', [ $this, 'ajax_get_folders' ] );
-			add_action( 'wp_ajax_wpmn_assign_uploaded_media', [ $this, 'ajax_assign_media' ] );
+			$this->events_handler();
 		}
 
 		/**
-		 * Render the folder selector dropdown in the media upload section
-		 */
-		public function render_folder_selector() {
+         * Initialize hooks and filters.
+         */
+		public function events_handler(){
+			add_action( 'pre-upload-ui', [ $this, 'wpmn_render_folder' ] );
+			add_action( 'wp_ajax_wpmn_get_folders_for_upload', [ $this, 'wpmn_get_folders' ] );
+            add_action( 'add_attachment', [ $this, 'wpmn_auto_upload' ] );
+		}
+
+		public function wpmn_render_folder() {
 			wpmn_get_template(
 				'media/upload-folder.php',
 				array(),
 			);
 		}		
 		
-		/**
-		 * AJAX: Get folders for the upload dropdown
-		 */
-		public function ajax_get_folders() {
-			check_ajax_referer( 'wpmn_upload_nonce', 'nonce' );
+		public function wpmn_get_folders() {
+			check_ajax_referer( 'wpmn_media_nonce', 'nonce' );
 
-			// Get folders using the same logic as the sidebar
 			$folders = $this->get_folder_tree();
-			wp_send_json_success( [ 'folders' => $folders ] );
+			wp_send_json_success( array( 
+				'folders' => $folders 
+			) );
 		}
 
-		/**
-		 * Build folder tree
-		 */
-		private function get_folder_tree() {
-			$terms = get_terms( [
+		public function get_folder_tree() {
+
+			$terms = get_terms(array(
 				'taxonomy'   => 'wpmn_media_folder',
 				'hide_empty' => false,
 				'orderby'    => 'term_id',
 				'order'      => 'ASC',
-			] );
+			) );
 
-			if ( is_wp_error( $terms ) ) {
+			if ( is_wp_error( $terms ) ) :
 				return [];
-			}
+			endif;	
 
 			$group = [];
-			foreach ( $terms as $term ) {
-				$group[ $term->parent ][] = $term;
-			}
-
+			foreach ( $terms as $t ) :	
+				$group[ $t->parent ][] = $t;
+			endforeach;
 			return $this->build_tree( 0, $group );
 		}
 
-		/**
-		 * Recursively build tree structure
-		 */
-		private function build_tree( $parent, $group ) {
-			if ( empty( $group[ $parent ] ) ) {
-				return [];
-			}
+		public function build_tree( $parent, $group ) {
 
-			$list = [];
-			foreach ( $group[ $parent ] as $term ) {
-				$children = $this->build_tree( $term->term_id, $group );
-				$list[] = [
+			if ( empty( $group[ $parent ] ) ) :
+				return [];
+			endif;
+			
+			$tree = [];
+			foreach ( $group[ $parent ] as $term ) :	
+				$tree[] = array(
 					'id'       => $term->term_id,
 					'name'     => $term->name,
-					'children' => $children,
-				];
-			}
-
-			return $list;
+					'children' => $this->build_tree( $term->term_id, $group ),
+				);
+			endforeach;
+			return $tree;
 		}
 
-		/**
-		 * AJAX: Assign uploaded media to selected folder
-		 */
-		public function ajax_assign_media() {
-			check_ajax_referer( 'wpmn_upload_nonce', 'nonce' );
+        public function wpmn_auto_upload( $post_id ) {
+			$folder = sanitize_text_field($_REQUEST['wpmn_upload_folder'] ?? '');
 
-			$attachment_id = isset( $_POST['attachment_id'] ) ? absint( $_POST['attachment_id'] ) : 0;
-			$folder_id     = isset( $_POST['folder_id'] ) ? sanitize_text_field( $_POST['folder_id'] ) : '';
+			if (!$folder || $folder === 'all' || $folder === 'uncategorized') return;
 
-			if ( ! $attachment_id || ! $folder_id ) {
-				wp_send_json_error( [ 'message' => 'Invalid data' ] );
-			}
-
-			// Parse folder ID (could be "term-123" or "uncategorized" or "all")
-			$term_id = 0;
-			if ( strpos( $folder_id, 'term-' ) === 0 ) {
-				$term_id = absint( str_replace( 'term-', '', $folder_id ) );
-			}
-
-			// Assign media to folder
-			if ( $term_id > 0 ) {
-				wp_set_object_terms( $attachment_id, [ $term_id ], 'wpmn_media_folder' );
-			}
-
-			wp_send_json_success( [ 'message' => 'Media assigned to folder' ] );
+			$term_id = absint(str_replace('term-', '', $folder));
+			if ($term_id && term_exists($term_id, 'wpmn_media_folder')) :
+				wp_set_object_terms($post_id, [$term_id], 'wpmn_media_folder');
+			endif;
 		}
+
 	}
 
 	new WPMN_Upload_Folder();

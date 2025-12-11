@@ -26,9 +26,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/rename.svg'); ?>" alt="" class="wpmn_rename_icon" />
 			<?php echo esc_html__( 'Rename', 'medianest' ); ?>
 		</button>
-		<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_delete">
+		<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_delete wpmn_delete_trigger">
 			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/delete.svg'); ?>" alt="" class="wpmn_delete_icon" />
 			<?php echo esc_html__( 'Delete', 'medianest' ); ?>
+		</button>
+		
+		<!-- Bulk Actions (Hidden by default) -->
+		<button type="button" class="button button-secondary wpmn_bulk_cancel_btn" hidden>
+			<?php echo esc_html__( 'Cancel', 'medianest' ); ?>
 		</button>
 		<div class="wpmn_action_wrapper" style="position: relative;">
 			<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_sort">
@@ -74,7 +79,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<div class="wpmn_more_menu" hidden>
 				<ul class="wpmn_more_menu_list">
 					<li class="wpmn_more_menu_item" data-action="bulk-select">
-						<span class="dashicons dashicons-yes"></span>
+						<span class="dashicons dashicons-yes-alt"></span>
 						<span><?php echo esc_html__( 'Bulk Select', 'medianest' ); ?></span>
 					</li>
 					<li class="wpmn_more_menu_item" data-action="hide-folder-id">
@@ -203,6 +208,40 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 					<?php echo esc_html__( 'Save', 'medianest' ); ?>
 				</button>
 			</div>
+		</div>
+	</div>
+
+	<!-- Folder Context Menu -->
+	<div class="wpmn_folder_context_menu" data-folder-id="" hidden>
+		<div class="wpmn_context_menu_item" data-action="new_folder">
+			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/new-folder.svg'); ?>" alt="" class="wpmn_folder_content" />
+			<span><?php echo esc_html__( 'New Folder', 'medianest' ); ?></span>
+		</div><hr>
+		<div class="wpmn_context_menu_item" data-action="rename">
+			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/rename.svg'); ?>" alt="" class="wpmn_folder_content_rename" />
+			<span><?php echo esc_html__( 'Rename', 'medianest' ); ?></span>
+		</div>
+		<div class="wpmn_context_menu_item" data-action="cut">
+			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/cut.svg'); ?>" alt="" class="wpmn_folder_content_cut" />
+			<span><?php echo esc_html__( 'Cut', 'medianest' ); ?></span>
+		</div>
+		<div class="wpmn_context_menu_item" data-action="paste">
+			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/paste.svg'); ?>" alt="" class="wpmn_folder_content_paste" />
+			<span><?php echo esc_html__( 'Paste', 'medianest' ); ?></span>
+		</div>
+		<div class="wpmn_context_menu_item" data-action="delete">
+			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/delete.svg'); ?>" alt="" class="wpmn_folder_content_delete" />
+			<span><?php echo esc_html__( 'Delete', 'medianest' ); ?></span>
+		</div>
+		<div class="wpmn_context_menu_item wpmn_pro_feature" data-action="change_color">
+			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/color.svg'); ?>" alt="" class="wpmn_folder_content_color" />
+			<span><?php echo esc_html__( 'Modify Color', 'medianest' ); ?></span>
+			<span class="wpmn_pro_badge"><?php echo esc_html__( 'PRO', 'medianest' ); ?></span>
+		</div>
+		<div class="wpmn_context_menu_item wpmn_pro_feature" data-action="download">
+			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/download.svg'); ?>" alt="" class="wpmn_folder_content_download" />
+			<span><?php echo esc_html__( 'Download', 'medianest' ); ?></span>
+			<span class="wpmn_pro_badge"><?php echo esc_html__( 'PRO', 'medianest' ); ?></span>
 		</div>
 	</div>
 </div>
