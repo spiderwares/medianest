@@ -37,7 +37,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
         /**
          * Initialize hooks and filters.
          */
-        private function events_handler() {
+        public function events_handler() {
             // menu
             $this->settings = get_option( 'wpmn_settings', [] );
             add_action( 'admin_init', [ $this, 'register_settings' ] );
@@ -155,13 +155,13 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             $saved_theme     = isset( $this->settings['theme_design'] ) ? sanitize_key( $this->settings['theme_design'] ) : 'default';
             $show_breadcrumb = isset( $this->settings['breadcrumb_navigation'] ) ? $this->settings['breadcrumb_navigation'] : 'yes';
             
-			wp_localize_script(
-				'wpmn-media-library',
-				'wpmnMediaLibrary',
-				array(
+			wp_localize_script( 'wpmn-media-library',
+				'wpmn_media_library', array(
 					'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 					'baseUrl'        => WPMN_URL,
 					'nonce'          => wp_create_nonce( 'wpmn_media_nonce' ),
+                    'restUrl'        => esc_url_raw( rest_url( 'medianest/v1/' ) ),
+                    'restNonce'      => wp_create_nonce( 'wp_rest' ),
 					'theme'          => $saved_theme,
                     'showBreadcrumb' => $show_breadcrumb === 'yes',
 					'wpmn_folder'    => array(
@@ -187,6 +187,8 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 						'moveSelf'           => esc_html__( 'Cannot move folder into itself', 'medianest' ),
 						'moveSubfolder'      => esc_html__( 'Cannot move folder into its own subfolder', 'medianest' ),
 						'folderMoved'        => esc_html__( 'Folder moved successfully', 'medianest' ),
+						'selectCsvFile'      => esc_html__( 'Please select a CSV file.', 'medianest' ),
+                        'foldersImported'    => esc_html__( 'Folders imported successfully.', 'medianest' ),
 					),
 				)
 			);
@@ -203,7 +205,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 				'manage_options',                  // Capability required to access.
 				'cosmic-wpmn',                     // Menu slug.
 				[ $this, 'admin_menu_content' ],   // Callback function to render content.
-                'dashicons-images-alt2',                  // Icon URL.
+                'dashicons-portfolio',                  // Icon URL.
 				29                                // Position in the menu.
 			);
         } 
@@ -213,6 +215,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
          */
         public function admin_menu_content() {
 
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Tab navigation parameter, not form processing.
             $active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'settings';
             require_once WPMN_PATH . 'includes/admin/settings/views/file-menu.php';
         }

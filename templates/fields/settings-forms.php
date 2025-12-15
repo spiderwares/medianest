@@ -29,10 +29,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <tr class="submit">
             <th colspan="2">
                 <?php settings_fields( $metaKey );
-                if ( ! isset( $show_submit ) ) :
-                    $show_submit = true;
+                if ( ! isset( $wpmn_show_submit ) ) :
+                    $wpmn_show_submit = true;
                 endif;  
-                if ( $show_submit ) :
+                if ( $wpmn_show_submit ) :
                     submit_button(); 
                 endif;
                 settings_errors( 'wpmn_settings' ); ?>

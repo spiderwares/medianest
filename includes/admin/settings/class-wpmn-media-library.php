@@ -30,6 +30,8 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
          */
 		public function events_handler() {
 			add_action( 'admin_footer-upload.php', array( $this, 'wpmn_render_sidebar' ) );
+			add_action( 'admin_footer-post.php', array( $this, 'wpmn_render_sidebar' ) );
+			add_action( 'admin_footer-post-new.php', array( $this, 'wpmn_render_sidebar' ) );
             add_action( 'attachment_fields_to_edit', array( $this, 'add_folder_field' ), 10, 2 );
             add_filter( 'ajax_query_attachments_args', array( $this, 'wpmn_filter_attachments' ) );
             add_filter( 'manage_media_columns', array( $this, 'add_file_size_column' ) );
@@ -45,11 +47,14 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 		}
 
         public function wpmn_filter_attachments( $query ) {
+
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             if ( empty( $_REQUEST['query']['wpmn_folder'] ) ) :
                 return $query;
             endif;
 
-            $folder = sanitize_text_field( $_REQUEST['query']['wpmn_folder'] );
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $folder = sanitize_text_field( wp_unslash( $_REQUEST['query']['wpmn_folder'] ) );
             if ( $folder === 'uncategorized' ) :
 
                 $terms = get_terms(array(
@@ -125,7 +130,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             $file_path = get_attached_file( $id );
             if ( $file_path && file_exists( $file_path ) ) :
                 $bytes = filesize( $file_path );
-                echo size_format( $bytes, 2 );
+                echo esc_html( size_format( $bytes, 2 ) );
             else :
                 echo '—';
             endif;

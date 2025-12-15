@@ -52,7 +52,12 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 		}
 
 		public function handle_request() {
-			$type = isset($_POST['request_type']) ? sanitize_text_field($_POST['request_type']) : '';
+
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+
+			$type = isset($_POST['request_type']) ? sanitize_text_field( wp_unslash( $_POST['request_type'] ) ) : '';
 
 			switch ($type) :
 				case 'get_folders':
@@ -84,7 +89,11 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 					break;
 
 				case 'wpmn_export_folders':
-					WPMN_Helper::export_folders_request();
+					WPMN_Import_Export::export_folders_request();
+					break;
+
+				case 'wpmn_import_folders':
+					WPMN_Import_Export::import_folders_request();
 					break;
 
 				case 'move_folder':
@@ -93,6 +102,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
                 case 'wpmn_generate_attachment_size':
                     WPMN_Helper::generate_attachment_size_request();
+                    break;
+                
+                case 'wpmn_generate_api_key':
+                    WPMN_Helper::generate_api_key_request();
                     break;
 			endswitch;
 		}
@@ -150,6 +163,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 		public static function folder_count($id) {
 			global $wpdb;
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			return (int) $wpdb->get_var($wpdb->prepare(
 				"SELECT COUNT(DISTINCT tr.object_id)
 				FROM {$wpdb->term_relationships} tr
@@ -166,11 +180,13 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 		public static function special_counts() {
 			global $wpdb;
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$total = (int) $wpdb->get_var(
 				"SELECT COUNT(ID) FROM {$wpdb->posts}
 				WHERE post_type='attachment' AND post_status!='trash'"
 			);
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$uncat = (int) $wpdb->get_var($wpdb->prepare(
 				"SELECT COUNT(p.ID)
 				FROM {$wpdb->posts} p

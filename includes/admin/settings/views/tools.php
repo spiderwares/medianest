@@ -29,10 +29,10 @@ $wpmn_options = get_option( 'wpmn_settings', true );
 wpmn_get_template(
 	'fields/settings-forms.php',
 	array(
-		'title'       => 'Tools',         // Section title.
-		'metaKey'     => 'wpmn_settings',   // Option meta key.
-		'fields'      => $wpmn_fields,           // Field definitions.
-		'options' 	  => $wpmn_options,          // Saved option values.
-		'show_submit' => false,         // Hide submit button.
+		'title'       	   => 'Tools',         // Section title.
+		'metaKey'     	   => 'wpmn_settings',   // Option meta key.
+		'fields'      	   => $wpmn_fields,           // Field definitions.
+		'options' 	  	   => $wpmn_options,          // Saved option values.
+		'wpmn_show_submit' => false,         // Hide submit button.
 	),
 );

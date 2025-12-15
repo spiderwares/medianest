@@ -44,17 +44,6 @@ foreach ( $fields as $wpmn_field_key => $wpmn_field ) :
                 );
                 break;
 
-            case "wpmncheckbox":
-                wpmn_get_template(
-                    'fields/checkbox-field.php',
-                    array(
-                        'field'     => $wpmn_field,
-                        'field_Val' => $wpmn_field_val,
-                        'field_Key' => $wpmn_field_key,
-                    ),
-                );
-                break;
-
             case "wpmnselect":
                 wpmn_get_template(
                     'fields/select-field.php',
@@ -66,9 +55,9 @@ foreach ( $fields as $wpmn_field_key => $wpmn_field ) :
                 );
                 break;
 
-            case "wpmnrequest":
+            case "wpmnbutton":
                 wpmn_get_template(
-                    'fields/clear-data-field.php',
+                    'fields/button-field.php',
                     array(
                         'field'     => $wpmn_field,
                         'field_Val' => $wpmn_field_val,
@@ -77,31 +66,16 @@ foreach ( $fields as $wpmn_field_key => $wpmn_field ) :
                 );
                 break;
 
-            case "wpmnexport":
-                wpmn_get_template(
-                    'fields/export-field.php',
-                    array(
-                        'field'     => $wpmn_field,
-                        'field_Val' => $wpmn_field_val,
-                        'field_Key' => $wpmn_field_key,
-                    ),
-                );
-                break;
-
-            case "wpmn_generate_size":
-                wpmn_get_template(
-                    'fields/export-field.php',
-                    array(
-                        'field'     => $wpmn_field,
-                        'field_Val' => $wpmn_field_val,
-                        'field_Key' => $wpmn_field_key,
-                    ),
-                );
+            case "wpmncheckbox":
+                ob_start();
+                $wpmn_html = ob_get_clean();
+    
+                // Apply Pro filter only for srwctime field
+                echo wp_kses_post( apply_filters( 'wpmn_checkbox_field', $wpmn_html, $wpmn_field, $wpmn_field_val, $wpmn_field_key ) );
                 break;
 
         endswitch;
     ?>
-
 </tr>
 
 <?php endforeach; ?>

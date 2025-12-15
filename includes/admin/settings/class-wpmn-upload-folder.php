@@ -87,7 +87,8 @@ if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
 		}
 
         public function wpmn_auto_upload( $post_id ) {
-			$folder = sanitize_text_field($_REQUEST['wpmn_upload_folder'] ?? '');
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$folder = sanitize_text_field( wp_unslash( $_REQUEST['wpmn_upload_folder'] ?? '' ) );
 
 			if (!$folder || $folder === 'all' || $folder === 'uncategorized') return;
 

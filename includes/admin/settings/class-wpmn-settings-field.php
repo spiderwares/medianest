@@ -87,53 +87,28 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                     'disabled_options' => array('windows (Pro)', 'dropbox (Pro)' ),
                 ),
 
-                // 'post_type_selection' => array(
-                //     'title'         => esc_html__('Post Type Selection', 'medianest'),
-                //     'field_type'    => 'wpmntitle',
-                //     'extra_class'   => 'heading',
-                //     'default'       => '',
-                // ),
-
-                // 'post_types' => array(
-                //     'title'      => esc_html__( 'Choose MediaNest Post Types', 'medianest' ),
-                //     'field_type' => 'wpmncheckbox',
-                //     'default'    => array( '' ),
-                //     'name'       => 'wpmn_settings[post_types]',
-                //     'options'    => self::get_post_types(),
-                // ),
-
             );
 
             return apply_filters( 'wpmn_settings_fields', $fields );
         }
 
-        /**
-         * Get all available post types for checkbox selection.
-         *
-         * @return array Post types array.
-         */
-        // public static function get_post_types() {
-
-        //     $args = array( 'show_ui' => true );
-
-        //     $post_types = get_post_types($args, 'objects');
-        //     $post_type_options = array();
-
-        //     foreach ($post_types as $post_type) {
-        //         if ($post_type->name !== 'attachment') {
-        //             $post_type_options[$post_type->name] = $post_type->label;
-        //         }
-        //     }
-
-        //     return $post_type_options;
-        // }
-
         public static function tools_field() {
             $fields = array(
 
+                'rest_api_key' => array(
+                    'title'      => 'REST API key',
+                    'field_type' => 'wpmnbutton',
+                    'desc'       => esc_html__( 'Please see MediaNest API for developers', 'medianest' ) .
+                                ' <a href="https://plugin.cosmicinfosoftware.com/medianest/" target="_blank">' . 
+                                esc_html__( 'here.', 'medianest' ) . '</a>',
+                    'name'       => 'wpmn_settings[rest_api_key]',
+                    'button_text' => esc_html__( 'Generate', 'medianest' ),
+                    'action'      => 'wpmn_generate_api_key',
+                ),
+
                 'wpmn_attachment_size' => array(
                     'title'       => esc_html__( 'Attachment Size', 'medianest' ),
-                    'field_type'  => 'wpmnexport',
+                    'field_type'  => 'wpmnbutton',
                     'desc'        => esc_html__( 'Generate attachment size used in "Sort by size" function.', 'medianest' ),
                     'button_text' => esc_html__( 'Generate', 'medianest' ),
                     'action'      => 'wpmn_generate_attachment_size',
@@ -142,10 +117,11 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                 
                 'wpmn_clear_all_data' => array(
                     'title'       => esc_html__( 'Clear Entire Data', 'medianest' ),
-                    'field_type'  => 'wpmnrequest',
+                    'field_type'  => 'wpmnbutton',
                     'desc'        => esc_html__( 'This action will remove all MediaNest data and settings and restore the WordPress media library to its default state.', 'medianest' ),
                     'button_text' => esc_html__( 'Clear', 'medianest' ),
                     'action'      => 'wpmn_clear_all_data',
+                    'btn_class'   => 'wpmn_clear_data_btn', 
                 ),
 
             );
@@ -157,73 +133,23 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
 
                 'export_csv' => array(
                     'title'         => esc_html__('Export CSV', 'medianest'),
-                    'field_type'    => 'wpmnexport',
+                    'field_type'    => 'wpmnbutton',
                     'desc'          => esc_html__('The current directory structure will be exported.', 'medianest'),
                     'button_text'   => esc_html__('Export Now', 'medianest'),
                     'action'        => 'wpmn_export_folders',
+                ),
+
+                'import_csv' => array(
+                    'title'         => esc_html__('Import CSV', 'medianest'),
+                    'field_type'    => 'wpmnbutton',
+                    'desc'          => esc_html__('Import directory structure from a CSV file.', 'medianest'),
+                    'button_text'   => esc_html__('Import Now', 'medianest'),
+                    'action'        => 'wpmn_import_folders',
                 ),
             );
             return apply_filters( 'wpmn_import_export_fields', $fields );
         }
 
-
-        // public function add_folder_field( $form_fields, $post ) {
-
-        //     $current = 0;
-        //     $terms   = wp_get_object_terms( $post->ID, 'wpmn_media_folder' );
-
-        //     if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
-        //         $current = $terms[0]->term_id;
-        //     }
-
-        //     // Get all folders in hierarchical order
-        //     $folders = get_terms([
-        //         'taxonomy'   => 'wpmn_media_folder',
-        //         'hide_empty' => false,
-        //         'orderby'    => 'name',
-        //         'parent'     => 0,
-        //     ]);
-
-        //     $html = '<select name="attachments['.$post->ID.'][wpmn_media_folder]">';
-        //     $html .= '<option value="0" '.selected($current,0,false).'>'.esc_html__('Uncategorized','medianest').'</option>';
-
-        //     // Build simple dropdown
-        //     foreach ( $folders as $folder ) {
-        //         $html .= $this->folder_option_row( $folder, $current, 0 );
-        //     }
-
-        //     $html .= '</select>';
-
-        //     $form_fields['wpmn_media_folder'] = [
-        //         'label' => esc_html__('MediaNest Folder','medianest'),
-        //         'input' => 'html',
-        //         'html'  => $html,
-        //     ];
-
-        //     return $form_fields;
-        // }
-
-        // private function folder_option_row( $folder, $current, $depth ) {
-
-        //     $indent = str_repeat('&nbsp;&nbsp;', $depth);
-
-        //     $html = '<option value="'.$folder->term_id.'" '.selected($current,$folder->term_id,false).'>';
-        //     $html .= $indent . esc_html($folder->name);
-        //     $html .= '</option>';
-
-        //     // Add sub-folders
-        //     $children = get_terms([
-        //         'taxonomy'   => 'wpmn_media_folder',
-        //         'hide_empty' => false,
-        //         'parent'     => $folder->term_id,
-        //     ]);
-
-        //     foreach ( $children as $child ) {
-        //         $html .= $this->folder_option_row( $child, $current, $depth + 1 );
-        //     }
-
-        //     return $html;
-        // }
 
     }
 

@@ -10,8 +10,8 @@ jQuery(function ($) {
         init() {
             this.select = $('#wpmn_select_upload_folder');
             this.wrapper = $('#wpmn_upload_folder_selector');
-            this.ajaxUrl = wpmnMediaLibrary.ajaxUrl;
-            this.nonce = wpmnMediaLibrary.nonce;
+            this.ajaxUrl = wpmn_media.ajaxUrl;
+            this.nonce = wpmn_media.nonce;
             this.loadFolders();
             this.bindEvents();
         }

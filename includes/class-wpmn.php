@@ -38,8 +38,15 @@ if ( ! class_exists( 'WPMN' ) ) :
         /**
          * Initialize hooks and filters.
          */
-        private function events_handler() {
+        public function events_handler() {
             add_action( 'plugins_loaded', array( $this, 'includes' ), 11 );
+        }
+
+        /**
+         * Register Gutenberg Blocks
+         */
+        public function register_blocks() {
+            register_block_type( WPMN_PATH . 'blocks/medianest-gallery' );
         }
 
         /**
@@ -90,17 +97,20 @@ if ( ! class_exists( 'WPMN' ) ) :
             
             require_once WPMN_PATH . 'includes/wpmn-core-functions.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-helper.php';
+            require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-media-folders.php';
+            require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-rest-api.php';
+            include_once WPMN_PATH . 'blocks/medianest-gallery/init.php';
         }
         
         /**
          * Include Admin required files.
-         */
+        */
         public function includes_admin() {
             require_once WPMN_PATH . 'includes/class-wpmn-install.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-admin-menu.php';
             require_once WPMN_PATH . 'includes/admin/tab/class-wpmn.tab.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-settings-field.php';
-            require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-media-folders.php';
+            require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-import-export.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-media-library.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-upload-folder.php';
         }

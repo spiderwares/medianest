@@ -30,7 +30,7 @@ if ( ! class_exists( 'WPMN_Tab' ) ) {
 		/**
 		 * Initialize hooks for admin functionality.
 		 */
-		private function events_handler() {
+		public function events_handler() {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
 

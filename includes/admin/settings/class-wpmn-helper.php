@@ -33,7 +33,12 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 		}
 
 		public static function create_folder_request() {
-			$name   = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : '';
+
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+			
+			$name   = isset($_POST['name']) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 			$parent = isset($_POST['parent']) ? absint($_POST['parent']) : 0;
 
 			if (!$name) :
@@ -45,8 +50,13 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 		}
 
 		public static function rename_folder_request() {
+
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+
 			$id   = isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
-			$name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : '';
+			$name = isset($_POST['name']) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 
 			if (!$id || !$name) :
 				wp_send_json_error(['message' => 'Invalid folder data.']);
@@ -61,6 +71,10 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 		}
 
 		public static function delete_folder_request() {
+
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
 			$id = isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
 
 			if (!$id) :
@@ -72,6 +86,11 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 		}
 
 		public static function delete_folders_bulk_request() {
+
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+
 			$ids = isset($_POST['folder_ids']) ? array_map('absint', (array) $_POST['folder_ids']) : [];
 
 			if (empty($ids)) :
@@ -85,6 +104,11 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 		}
 
 		public static function assign_media_request() {
+
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+
 			global $wpdb;
 			
 			$folder_id = isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
@@ -95,6 +119,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 			endif;
 
 			foreach ($items as $attachment_id) :
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				$wpdb->query( $wpdb->prepare(
 					"DELETE tr FROM {$wpdb->term_relationships} tr
 					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
@@ -104,6 +129,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 				
 				if ( $folder_id > 0 ) :
 					// Verify term exists and get taxonomy_id
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 					$tt_id = $wpdb->get_var( $wpdb->prepare(
 						"SELECT tt.term_taxonomy_id FROM {$wpdb->term_taxonomy} tt
 						WHERE tt.term_id = %d AND tt.taxonomy = %s",
@@ -111,6 +137,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 					));
 					
 					if ( $tt_id ) :
+						// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 						$wpdb->insert( $wpdb->term_relationships, array(
 							'object_id' => $attachment_id,
 							'term_taxonomy_id' => $tt_id,
@@ -145,72 +172,12 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 			wp_send_json_success(['message' => esc_html__('All data cleared.', 'medianest')]);
 		}
 
-		public static function export_folders_request() {
-			global $wpdb;
-
-			$terms = get_terms(array(
-				'taxonomy'   => 'wpmn_media_folder',
-				'hide_empty' => false,
-				'orderby'    => 'term_id',
-				'order'      => 'ASC',
-			) );
-
-			if (is_wp_error($terms)) :
-				wp_send_json_error(['message' => 'Failed to fetch folders.']);
-			endif;
-
-			$csv_data   = [['id','name','parent','type','ord','created_by','attachment_ids']];
-			$grouped    = [];
-
-			// Group folders by parent
-			foreach ($terms as $t) :
-				$grouped[$t->parent][] = $t;
-			endforeach;
-
-			foreach ($terms as $term) :
-				$created_by  = get_term_meta($term->term_id, 'wpmn_folder_owner', true) ?: 1;
-				$siblings    = isset($grouped[$term->parent]) ? $grouped[$term->parent] : [];
-				$ord         = array_search($term, $siblings) ?: 0;
-
-				// Get attachments inside this folder
-				$attachment_ids = $wpdb->get_col($wpdb->prepare(
-					"SELECT DISTINCT tr.object_id
-					FROM {$wpdb->term_relationships} tr
-					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-					INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
-					WHERE tt.taxonomy = %s AND tt.term_id = %d
-					AND p.post_type = 'attachment' AND p.post_status != 'trash'
-					ORDER BY tr.object_id ASC",
-					'wpmn_media_folder', $term->term_id
-				));
-
-				$csv_data[] = array(	
-					$term->term_id,
-					$term->name,
-					$term->parent,
-					0,
-					$ord,
-					$created_by,
-					implode('|', $attachment_ids ?: [])
-				);
-			endforeach;
-
-			// Output CSV
-			$filename = 'medianest.csv';
-			header('Content-Type: text/csv; charset=utf-8');
-			header("Content-Disposition: attachment; filename=$filename");
-
-			$output = fopen('php://output', 'w');
-			fwrite($output, "\xEF\xBB\xBF");
-			foreach ($csv_data as $row) :
-				fputcsv($output, $row);
-			endforeach;
-
-			fclose($output);
-			exit;
-		}
-
 		public static function move_folder_request() {
+
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+
 			$folder_id  = absint($_POST['folder_id'] ?? 0);
 			$new_parent = absint($_POST['new_parent'] ?? 0);
 
@@ -255,7 +222,19 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
             endforeach;
 
             wp_send_json_success( array(
+                /* translators: %d: number of attachments */
                 'message' => sprintf( esc_html__( 'Generated sizes for %d attachments.', 'medianest' ), $count )
+            ));
+        }
+        public static function generate_api_key_request() {
+            $key = wp_generate_password( 40, false );
+            $options = get_option( 'wpmn_settings', [] );
+            $options['rest_api_key'] = $key;
+            update_option( 'wpmn_settings', $options );
+
+            wp_send_json_success( array(
+                'key'     => $key,
+                'message' => esc_html__( 'API Key generated successfully.', 'medianest' )
             ));
         }
 	}

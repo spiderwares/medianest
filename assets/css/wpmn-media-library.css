@@ -88,6 +88,67 @@
 	font-size: 20px;
 }
 
+/*--------------------------- Sidebar Modal Fixes ---------------------------*/
+
+.wpmn_media_sidebar.in-modal {
+	position: relative !important;
+	top: 0 !important;
+	left: 0 !important;
+	height: 100% !important;
+	max-height: none !important;
+	width: 100% !important;
+	z-index: 1500;
+	border-right: none;
+	box-sizing: border-box;
+	background: #f6f7f7;
+	padding: 12px 14px 12px 12px;
+}
+
+.wpmn_media_sidebar.in-modal .wpmn_media_sidebar_toggle {
+	display: none !important;
+}
+
+.wpmn_custom_sidebar_container .media-frame-menu-heading {
+	display: block;
+}
+
+.wpmn_media_sidebar.in-modal .wpmn_media_sidebar_actions {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+	background: #fff;
+	padding: 10px;
+	border: 1px solid #c1c5cc;
+	border-radius: 7px;
+}
+
+.media-frame-menu .wpmn_custom_sidebar_container {
+	overflow: hidden;
+	background: #f6f7f7;
+	margin-top: 90px;
+	border-right: 1px solid #c1c5cc;
+}
+
+.wpmn_media_sidebar.in-modal .wpmn_media_sidebar_search[type="search"] {
+	width: 100%;
+	border-radius: 4px;
+	border-color: #d1cbcb;
+	padding: 3px 0px 3px 35px;
+}
+
+/* Modal Layout Overrides */
+.media-modal .media-frame-menu {
+	width: 330px !important;
+	display: block !important;
+}
+
+.media-modal .media-frame-content,
+.media-modal .media-frame-title,
+.media-modal .media-frame-router {
+	left: 330px !important;
+}
+
 /*--------------------------- Media Sidebar ---------------------------*/
 
 .wpmn_media_sidebar_new_folder,
@@ -210,7 +271,7 @@ button.wpmn_media_sidebar_action--more {
 	border-radius: 4px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	min-width: 250px;
-	z-index: 1000;
+	z-index: 10002;
 }
 
 .wpmn_sort_menu_list {
@@ -328,7 +389,9 @@ button.wpmn_media_sidebar_action--more {
 	font-size: 13px;
 	gap: 8px;
 	color: #3c434a;
+	background: none;
 }
+
 
 .wpmn_folder_button span:not(.wpmn_count) {
 	flex: 1;
@@ -720,7 +783,7 @@ button.wpmn_add_folder {
 	border-radius: 999px;
 	font-size: 13px;
 	font-weight: 500;
-	z-index: 160000;
+	z-index: 200000;
 	pointer-events: none;
 	white-space: nowrap;
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
@@ -745,10 +808,12 @@ button.wpmn_add_folder {
 	transition: all 0.3s;
 }
 
-/*--------------------------- Export Button ---------------------------*/
+/*--------------------------- Import & Export Button ---------------------------*/
 
 .wpmn_export_btn,
-.wpmn_generate_size_btn {
+.wpmn_generate_size_btn,
+.wpmn_import_btn,
+.wpmn_generate_api_btn {
 	background: #8044f0 !important;
 	border-color: #8044f0 !important;
 	color: #ffffff !important;
@@ -760,10 +825,42 @@ button.wpmn_add_folder {
 }
 
 .wpmn_export_btn:hover,
-.wpmn_generate_size_btn:hover {
+.wpmn_generate_size_btn:hover,
+.wpmn_import_btn:hover,
+.wpmn_generate_api_btn:hover {
 	background: #570FDC !important;
 	border-color: #570FDC !important;
 	transition: all 0.3s;
+}
+
+.wpmn_import_btn:focus {
+	border: none !important;
+	box-shadow: none !important;
+}
+
+.wpmn_import_input {
+	display: block;
+	margin-bottom: 10px;
+}
+
+.wpmn_import_btn {
+	margin-top: 5px;
+	display: inline-block;
+}
+
+/*--------------------------- API Key Button ---------------------------*/
+
+.wpmn_api_key_wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-width: 100px;
+}
+
+.wpmn_api_key_wrapper input {
+	margin-top: 10px;
+	background: #f0f0f1;
+	color: #666;
 }
 
 /*--------------------------- Theme Button ---------------------------*/
@@ -971,7 +1068,7 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 
 /*--------------------------- Breadcrumb ---------------------------*/
 
-.wpmn_custom_class {
+.wpmn_breadcrumb {
 	display: flex;
 	align-items: center;
 	padding: 10px 15px;
@@ -984,7 +1081,7 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 	line-height: 1.5;
 }
 
-.wpmn_custom_class .dashicons {
+.wpmn_breadcrumb .dashicons {
 	margin-right: 4px;
 	color: #646970;
 	font-size: 20px;
@@ -994,17 +1091,17 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 	cursor: pointer;
 }
 
-.wpmn_path_separator {
+.wpmn_breadcrumb_line {
 	color: #646970;
 	margin: 0 4px;
 }
 
-.wpmn_path_folder {
+.wpmn_breadcrumb_folder {
 	color: #3c434a;
 	font-weight: 500;
 }
 
-.wpmn_path_folders {
+.wpmn_breadcrumb_folders {
 	color: #2271b1;
 	cursor: pointer;
 	text-decoration: none;
