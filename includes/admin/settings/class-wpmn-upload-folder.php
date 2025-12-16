@@ -41,49 +41,21 @@ if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
 		}		
 		
 		public function wpmn_get_folders() {
-			check_ajax_referer( 'wpmn_media_nonce', 'nonce' );
+			
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+            
+            // Check if WPMN_Media_Folders class exists to avoid fatal error
+            if ( class_exists( 'WPMN_Media_Folders' ) ) {
+			    $folders = WPMN_Media_Folders::folder_tree();
+            } else {
+                $folders = [];
+            }
 
-			$folders = $this->get_folder_tree();
 			wp_send_json_success( array( 
 				'folders' => $folders 
 			) );
-		}
-
-		public function get_folder_tree() {
-
-			$terms = get_terms(array(
-				'taxonomy'   => 'wpmn_media_folder',
-				'hide_empty' => false,
-				'orderby'    => 'term_id',
-				'order'      => 'ASC',
-			) );
-
-			if ( is_wp_error( $terms ) ) :
-				return [];
-			endif;	
-
-			$group = [];
-			foreach ( $terms as $t ) :	
-				$group[ $t->parent ][] = $t;
-			endforeach;
-			return $this->build_tree( 0, $group );
-		}
-
-		public function build_tree( $parent, $group ) {
-
-			if ( empty( $group[ $parent ] ) ) :
-				return [];
-			endif;
-			
-			$tree = [];
-			foreach ( $group[ $parent ] as $term ) :	
-				$tree[] = array(
-					'id'       => $term->term_id,
-					'name'     => $term->name,
-					'children' => $this->build_tree( $term->term_id, $group ),
-				);
-			endforeach;
-			return $tree;
 		}
 
         public function wpmn_auto_upload( $post_id ) {

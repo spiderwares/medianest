@@ -192,8 +192,8 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 $wpdb->query($wpdb->prepare("
                     DELETE tr FROM {$wpdb->term_relationships} tr
                     JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-                    WHERE tr.object_id = %d AND tt.taxonomy = %s
-                ", $att_id, 'wpmn_media_folder'));
+                    WHERE tr.object_id = %d AND tt.taxonomy = %s", 
+                $att_id, 'wpmn_media_folder'));
 
                 // Assign new
                 if ($folder_id > 0) :

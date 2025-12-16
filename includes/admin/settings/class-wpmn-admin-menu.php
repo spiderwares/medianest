@@ -94,8 +94,6 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
         /*
         * Main WPMN_Admin_Menu Instance..
         *
-        * @static
-        * @return WPMN_Admin_Menu - Main instance.
         */
         public function register_settings() {
             register_setting(
@@ -106,6 +104,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 
         /**
          * Sanitize settings and add success message.
+         * 
          */
         public function sanitize_settings( $input ) {
             add_settings_error(
@@ -117,6 +116,10 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             return $input;
         }
 
+        /**
+         * Enqueue admin styles.
+         * 
+         */
          public function enqueue_admin_styles( $hook ) {
 
             wp_enqueue_style( 
@@ -134,28 +137,35 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 			);
 
 			wp_enqueue_script(
-				'wpmn-media-library',
-				WPMN_URL . 'assets/js/wpmn-media-library.js',
+				'wpmn-admin',
+				WPMN_URL . 'assets/js/wpmn-admin.js',
 				array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable', 'wp-data' ),
 				WPMN_VERSION,
 				true
 			);
 
-            if ( in_array( $hook, array( 'media-new.php' ), true ) ) {
-                wp_enqueue_script(
-                    'wpmn-upload-folder',
-                    WPMN_URL . 'assets/js/wpmn-upload-folder.js',
-                    array( 'jquery' ),
-                    WPMN_VERSION,
-                    true
-                );
-            }
+            wp_enqueue_script(
+				'wpmn-media-folder',
+				WPMN_URL . 'assets/js/wpmn-media-folder.js',
+				array( 'jquery', 'wpmn-admin' ),
+				WPMN_VERSION,
+				true
+			);
+
+            // Enqueue on all admin pages to support Media Modal in Gutenberg/Classic Editor
+            wp_enqueue_script(
+                'wpmn-upload-folder',
+                WPMN_URL . 'assets/js/wpmn-upload-folder.js',
+                array( 'jquery', 'wpmn-admin' ),
+                WPMN_VERSION,
+                true
+            );
 
             // Get saved theme design from settings
             $saved_theme     = isset( $this->settings['theme_design'] ) ? sanitize_key( $this->settings['theme_design'] ) : 'default';
             $show_breadcrumb = isset( $this->settings['breadcrumb_navigation'] ) ? $this->settings['breadcrumb_navigation'] : 'yes';
             
-			wp_localize_script( 'wpmn-media-library',
+			wp_localize_script( 'wpmn-admin',
 				'wpmn_media_library', array(
 					'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 					'baseUrl'        => WPMN_URL,

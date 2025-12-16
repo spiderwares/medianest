@@ -70,13 +70,12 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
             }
 
 
-            $ulClass = 'medianest-block-medianest-gallery';
+            $ulClass = 'wpmn_block_gallery';
             switch ( $attributes['layout'] ) {
                 case 'flex':     $ulClass .= ' wp-block-gallery blocks-gallery-grid'; break;
                 case 'grid':     $ulClass .= ' layout-grid'; break;
                 case 'masonry':  $ulClass .= ' layout-masonry'; break;
                 case 'carousel': $ulClass .= ' layout-carousel'; break;
-                case 'list':     $ulClass .= ' layout-list'; break;
             }
 
             $ulClass .= ! empty( $attributes['className'] ) ? ' ' . esc_attr( $attributes['className'] ) : '';

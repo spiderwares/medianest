@@ -10,8 +10,15 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 
 	class WPMN_Helper {
 
-		public static function create_folder( $name, $parent ) {
+		public static function wpmn_get_folder_labels() {
+			return array(
+				'choose_folder'  => esc_html__( 'Choose folder:', 'medianest' ),
+				'all'            => esc_html__( 'All Files', 'medianest' ),
+				'uncategorized'  => esc_html__( 'Uncategorized', 'medianest' ),
+			);
+		}
 
+		public static function create_folder( $name, $parent ) {
 			$result = wp_insert_term( $name, 'wpmn_media_folder', array( 'parent' => $parent ) );
 			if ( is_wp_error( $result ) && $result->get_error_code() === 'term_exists' ) {
 
@@ -19,7 +26,6 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 				while ( $counter <= 100 ) :
 					$new_name = $name . ' (' . $counter . ')';
 					if ( ! term_exists( $new_name, 'wpmn_media_folder', $parent ) ) :
-
 						return wp_insert_term( 
 							$new_name, 
 							'wpmn_media_folder',
@@ -75,6 +81,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
                 wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
             endif;
+
 			$id = isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
 
 			if (!$id) :

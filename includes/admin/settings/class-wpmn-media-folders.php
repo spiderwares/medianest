@@ -3,6 +3,7 @@
  * Media folder taxonomy
  */
 
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
@@ -17,6 +18,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 		/**
          * Constructor for the class.
+		 * 
          */
 		public function __construct() {
 			$this->events_handler();
@@ -24,12 +26,17 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 		/**
          * Initialize hooks and filters.
+		 * 
          */
 		public function events_handler() {
 			add_action( 'init', [ $this, 'register_taxonomy' ] );
 			add_action( 'wp_ajax_wpmn_ajax', [ $this, 'handle_request' ] );
 		}
 
+		/**
+         * Register media folder taxonomy.
+		 * 
+         */
 		public function register_taxonomy() {
 
 			$labels = array(
@@ -89,11 +96,11 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 					break;
 
 				case 'wpmn_export_folders':
-					WPMN_Import_Export::export_folders_request();
+					WPMN_Export::export_folders_request();
 					break;
 
 				case 'wpmn_import_folders':
-					WPMN_Import_Export::import_folders_request();
+					WPMN_Import::import_folders_request();
 					break;
 
 				case 'move_folder':

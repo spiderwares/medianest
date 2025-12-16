@@ -1,6 +1,7 @@
 'use strict';
 
 jQuery(function ($) {
+
     class WPMN_Upload_Folder {
 
         constructor() {
@@ -10,8 +11,8 @@ jQuery(function ($) {
         init() {
             this.select = $('#wpmn_select_upload_folder');
             this.wrapper = $('#wpmn_upload_folder_selector');
-            this.ajaxUrl = wpmn_media.ajaxUrl;
-            this.nonce = wpmn_media.nonce;
+            this.ajaxUrl = wpmn_media_library.ajaxUrl;
+            this.nonce = wpmn_media_library.nonce;
             this.loadFolders();
             this.bindEvents();
         }
@@ -84,7 +85,7 @@ jQuery(function ($) {
         }
 
         optionHTML(id, name) {
-            return `<option value="term-${id}">${name}</option>`;
+            return `<option value="${id}">${name}</option>`;
         }
 
         restoreSelection() {

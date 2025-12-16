@@ -95,28 +95,35 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
         public function add_folder_field( $form_fields, $post ) {
             $terms = wp_get_object_terms( $post->ID, 'wpmn_media_folder' );
-            $folder_name = esc_html__( 'Uncategorized', 'medianest' );
+            $labels = WPMN_Helper::wpmn_get_folder_labels();
+
+            // Allow moving via dropdown
+            $dropdown_args = array(
+                'taxonomy'          => 'wpmn_media_folder',
+                'hide_empty'        => false,
+                'name'              => 'wpmn_media_folder_select',
+                'id'                => 'wpmn_media_folder_select_' . $post->ID,
+                'class'             => 'wpmn-folder-dropdown',
+                'show_option_none'  => $labels['uncategorized'],
+                'option_none_value' => '0',
+                'selected'          => isset($terms[0]) ? $terms[0]->term_id : 0,
+                'echo'              => 0,
+                'hierarchical'      => true,
+            );
             
-            if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) :
-                $folder_name = $terms[0]->name;
-            endif;
+            $select_html = wp_dropdown_categories( $dropdown_args );
             
+            $all_files_option = '<option value="all">' . esc_html( $labels['all'] ) . '</option>';
+            $select_html = preg_replace( '/(<select[^>]*>)/', '$1' . $all_files_option, $select_html );
+
+            $loader_html = '<span class="spinner wpmn_folder_loader"></span>';
+
             $form_fields['wpmn_media_folder'] = array(
                 'label'   => esc_html__( 'MediaNest Folder', 'medianest' ),
                 'input'   => 'html',
-                'html'    => esc_html( $folder_name ),
+                'html'    => $select_html . $loader_html,
             );
             return $form_fields;
-        }
-
-        public function get_folders() {
-            $terms = get_terms(array(
-                'taxonomy'   => 'wpmn_media_folder',
-                'hide_empty' => false,
-                'fields'     => 'id=>name',
-            ) );
-
-            return is_array( $terms ) ? $terms : [];
         }
 
         public function add_file_size_column( $columns ) {

@@ -203,8 +203,7 @@
                                 { label: 'Flex', value: 'flex' },
                                 { label: 'Grid', value: 'grid' },
                                 { label: 'Masonry', value: 'masonry' },
-                                { label: 'Carousel', value: 'carousel' },
-                                { label: 'List', value: 'list' }
+                                { label: 'Carousel', value: 'carousel' }
                             ],
                             onChange: function (val) { setAttributes({ layout: val }); }
                         }),

@@ -1,7 +1,8 @@
 'use strict';
 
 jQuery(function ($) {
-    class WPMN_Media_Admin {
+
+    class WPMN_Admin {
 
         constructor() {
             this.init();
@@ -119,9 +120,7 @@ jQuery(function ($) {
             $(document.body).on('contextmenu', '.wpmn_folder_button', this.handleFolderContextMenu.bind(this));
             $(document.body).on('click', '.wpmn_context_menu_item', this.handleContextMenuClick.bind(this));
             $(document.body).on('click', '.wpmn_generate_api_btn', this.handleGenerateApiKey.bind(this));
-            // Monitor tab changes in media modal
-            // $(document.body).on('click', '.media-router .media-menu-item', this.handleMediaModalTabChange.bind(this));
-
+            $(document.body).on('change', '.wpmn-folder-dropdown', this.handleAttachmentFolderChange.bind(this));
         }
 
         handleToggleClick(e) {
@@ -159,7 +158,7 @@ jQuery(function ($) {
             this.sidebar.removeClass('is-bulk-select').find('.wpmn_media_sidebar_action_rename, .wpmn_action_wrapper').prop('hidden', false);
             this.sidebar.find('.wpmn_bulk_cancel_btn, .wpmn_folder_checkbox:checked').prop('hidden', true).prop('checked', false); // Hide cancel and uncheck
             this.sidebar.find('.wpmn_bulk_cancel_btn').prop('hidden', true); // Fix: ensure hidden
-            this.updateActionButtons();
+            wpmn_media_folder.folder.updateActionButtons();
         }
 
         handleCheckboxChange() {
@@ -188,31 +187,7 @@ jQuery(function ($) {
                 return;
             }
 
-            this.searchDebounce = setTimeout(() => this.performSearch(term), 300);
-        }
-
-        performSearch(term) {
-            const url = wpmn_media_library.restUrl + 'folders';
-
-            $.ajax({
-                url: url,
-                method: 'GET',
-                data: { search: term },
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader('X-WP-Nonce', wpmn_media_library.restNonce);
-                    this.sidebar.find('.wpmn_folder_tree').addClass('wpmn_loading');
-                },
-                success: (res) => {
-                    if (res && res.success && res.data && res.data.folders) {
-                        this.state.searchResults = res.data.folders;
-                        this.renderSidebar();
-                    }
-                },
-                error: (err) => console.error('Search failed', err),
-                complete: () => {
-                    this.sidebar.find('.wpmn_folder_tree').removeClass('wpmn_loading');
-                }
-            });
+            this.searchDebounce = setTimeout(() => wpmn_media_folder.folder.performSearch(term), 300);
         }
 
         openSettingsDialog(e) {
@@ -273,17 +248,11 @@ jQuery(function ($) {
         changeFolder(slug) {
             this.state.activeFolder = slug;
             this.setStorage('wpmnActiveFolder', slug);
-            this.highlightActive();
-            this.setupDroppableTargets();
-            this.updateActionButtons();
+            wpmn_media_folder.folder.highlightActive();
+            wpmn_media_folder.folder.setupDroppableTargets();
+            wpmn_media_folder.folder.updateActionButtons();
             this.updateCustomToolbar();
             this.triggerMediaFilter(slug);
-        }
-
-        updateActionButtons() {
-            const isSpecial = ['all', 'uncategorized'].includes(this.state.activeFolder);
-            this.sidebar.find('.wpmn_media_sidebar_action_rename, .wpmn_media_sidebar_action_delete')
-                .prop('disabled', isSpecial).toggleClass('disabled', isSpecial);
         }
 
         toggleNewFolderForm(show) {
@@ -297,7 +266,7 @@ jQuery(function ($) {
 
             const parent = this.state.activeFolder.startsWith('term-') ? this.state.activeFolder.replace('term-', '') : 0;
             this.apiCall('create_folder', { name, parent }).then(data => {
-                this.refreshState(data);
+                wpmn_media_folder.folder.refreshState(data);
                 this.toggleNewFolderForm(false);
                 this.showToast(this.getText('created', 'Folder created.'));
             }).catch(alert);
@@ -305,7 +274,7 @@ jQuery(function ($) {
 
         handleRenameFolder() {
             if (!this.state.activeFolder.startsWith('term-')) return alert(this.getText('selectFolderFirst', 'Select a folder first.'));
-            const folder = this.findFolderById(this.state.activeFolder.replace('term-', ''), this.state.folders);
+            const folder = wpmn_media_folder.folder.findFolderById(this.state.activeFolder.replace('term-', ''), this.state.folders);
             if (folder) this.startInlineRename(folder);
         }
 
@@ -315,13 +284,13 @@ jQuery(function ($) {
             if (!__this.length) return;
 
             const form = $(`<div class="wpmn_folder_rename_inline" data-folder-id="${folder.id}">
-				<img src="${wpmn_media_library.baseUrl || ''}assets/img/folder.svg" class="wpmn_folder_icon">
-				<input type="text" class="wpmn_rename_inline_input" value="${folder.name}">
-				<div class="wpmn_folder_rename_inline__actions">
-					<button type="button" class="button button-secondary wpmn_rename_inline_cancel">Cancel</button>
-					<button type="button" class="button button-primary wpmn_rename_inline_save">Save</button>
-				</div>
-			</div>`).data('originalButton', __this);
+        		<img src="${wpmn_media_library.baseUrl || ''}assets/img/folder.svg" class="wpmn_folder_icon">
+        		<input type="text" class="wpmn_rename_inline_input" value="${folder.name}">
+        		<div class="wpmn_folder_rename_inline__actions">
+        			<button type="button" class="button button-secondary wpmn_rename_inline_cancel">Cancel</button>
+        			<button type="button" class="button button-primary wpmn_rename_inline_save">Save</button>
+        		</div>
+        	</div>`).data('originalButton', __this);
 
             __this.hide().parent().prepend(form);
             setTimeout(() => form.find('input').focus().select(), 10);
@@ -333,7 +302,7 @@ jQuery(function ($) {
             if (!name) return form.find('input').focus();
 
             this.apiCall('rename_folder', { folder_id: id, name }).then(data => {
-                this.refreshState(data);
+                wpmn_media_folder.folder.refreshState(data);
                 this.showToast(this.getText('renamed', 'Folder renamed.'));
                 this.cleanupInlineRename();
             }).catch(alert);
@@ -354,7 +323,7 @@ jQuery(function ($) {
 
         handleDeleteFolder() {
             if (!this.state.activeFolder.startsWith('term-')) return alert(this.getText('selectFolderFirst', 'Select a folder first.'));
-            const folder = this.findFolderById(this.state.activeFolder.replace('term-', ''), this.state.folders);
+            const folder = wpmn_media_folder.folder.findFolderById(this.state.activeFolder.replace('term-', ''), this.state.folders);
             if (folder) this.openDeleteDialog(folder);
         }
 
@@ -381,35 +350,20 @@ jQuery(function ($) {
                 const ids = this.sidebar.find('.wpmn_folder_checkbox:checked').map((i, el) => $(el).val()).get();
                 if (!ids.length) return this.closeDeleteDialog();
                 this.apiCall('delete_folders_bulk', { folder_ids: ids }).then(data => {
-                    this.refreshState(data);
+                    wpmn_media_folder.folder.refreshState(data);
                     this.disableBulkSelect();
                     this.showToast(this.getText('deleted', 'Folders deleted.'));
                 }).catch(alert).finally(() => this.closeDeleteDialog());
             } else if (this.pendingDeleteId) {
                 this.apiCall('delete_folder', { folder_id: this.pendingDeleteId }).then(data => {
-                    this.refreshState(data);
+                    wpmn_media_folder.folder.refreshState(data);
                     this.showToast(this.getText('deleted', 'Folder deleted.'));
                 }).catch(alert).finally(() => this.closeDeleteDialog());
             }
         }
 
         fetchFolders() {
-            this.apiCall('get_folders').then(data => this.refreshState(data)).catch(console.error);
-        }
-
-        refreshState(data) {
-            this.state.folders = data.folders || [];
-            this.state.counts = data.counts || {};
-
-            // Validate active folder
-            if (this.state.activeFolder.startsWith('term-')) {
-                const id = this.state.activeFolder.replace('term-', '');
-                if (!this.findFolderById(id, this.state.folders)) {
-                    this.state.activeFolder = 'all';
-                    this.setStorage('wpmnActiveFolder', 'all');
-                }
-            }
-            this.renderSidebar();
+            this.apiCall('get_folders').then(data => wpmn_media_folder.folder.refreshState(data)).catch(console.error);
         }
 
         renderSidebar() {
@@ -417,7 +371,7 @@ jQuery(function ($) {
             this.sidebar.find('.wpmn_count_uncategorized').text(this.state.counts.uncategorized || 0);
 
             const tree = this.sidebar.find('.wpmn_folder_tree').empty();
-            const nodes = this.getFilteredTree();
+            const nodes = wpmn_media_folder.folder.getFilteredTree();
 
             if (!nodes.length) {
                 if (this.state.searchTerm) {
@@ -433,99 +387,13 @@ jQuery(function ($) {
 					`).find('.wpmn_add_folder').on('click', () => this.toggleNewFolderForm(true));
                 }
             } else {
-                tree.append(this.buildTreeList(nodes));
+                tree.append(wpmn_media_folder.folder.buildTreeList(nodes));
             }
 
-            this.highlightActive();
-            this.updateActionButtons();
-            this.setupDroppableTargets();
-            this.updateFolderIdVisibility();
+            wpmn_media_folder.folder.highlightActive();
+            wpmn_media_folder.folder.setupDroppableTargets();
+            wpmn_media_folder.folder.updateFolderIdVisibility();
             this.updateCustomToolbar();
-        }
-
-        getFilteredTree() {
-            if (!this.state.searchTerm) return this.state.folders;
-            return this.state.searchResults;
-        }
-
-        findFolderById(id, nodes) {
-            if (!nodes) return null;
-            for (const node of nodes) {
-                if (node.id == id) return node;
-                const found = this.findFolderById(id, node.children);
-                if (found) return found;
-            }
-            return null;
-        }
-
-        buildTreeList(nodes) {
-            const ul = $('<ul role="group"></ul>');
-            nodes.forEach(node => {
-                const slug = 'term-' + node.id;
-                const li = $('<li class="wpmn_folder_node" role="treeitem"></li>').attr('aria-expanded', !!node.children?.length);
-                const row = $('<div class="wpmn_folder_row"></div>');
-                const arrow = $('<span class="wpmn_toggle_arrow"></span>').toggleClass('has-children', !!node.children?.length);
-
-                const btn = $(`<button type="button" class="wpmn_folder_button" data-folder-slug="${slug}" data-folder-id="${node.id}" data-folder-name="${node.name}">
-					<input type="checkbox" class="wpmn_folder_checkbox" value="${node.id}">
-					<img src="${wpmn_media_library.baseUrl || ''}assets/img/folder.svg" class="wpmn_folder_icon" aria-hidden="true">
-					<span class="wpmn_folder_button__label"></span>
-					<span class="wpmn_count">${node.count || 0}</span>
-				</button>`);
-
-                // Set text safely
-                const labelText = (this.showFolderId ? `#${node.id} ` : '') + node.name;
-                btn.find('.wpmn_folder_button__label').text(labelText);
-
-                row.append(arrow, btn);
-                li.append(row);
-                if (node.children?.length) li.append(this.buildTreeList(node.children));
-                ul.append(li);
-            });
-            return ul;
-        }
-
-        highlightActive() {
-            this.sidebar.find('.is-active').removeClass('is-active');
-            const btn = this.sidebar.find(`.wpmn_folder_button[data-folder-slug="${this.state.activeFolder}"]`).addClass('is-active');
-            btn.find('.wpmn_folder_icon, .wpmn_all_files_icon, .wpmn_uncategorized_icon').addClass('is-active');
-        }
-
-        setupDroppableTargets() {
-            this.sidebar.find('.wpmn_folder_button').each((i, el) => {
-                const btn = $(el), slug = btn.data('folder-slug');
-                if (btn.hasClass('ui-droppable')) btn.droppable('destroy');
-                if (!slug || (slug !== 'uncategorized' && !slug.startsWith('term-'))) return;
-
-                btn.droppable({
-                    accept: '.attachments .attachment',
-                    hoverClass: 'is-drop-hover',
-                    tolerance: 'pointer',
-                    drop: (e, ui) => {
-                        const folderId = slug.startsWith('term-') ? parseInt(slug.replace('term-', ''), 10) : 0;
-                        let ids = $('.attachments .attachment.selected').map((i, el) => parseInt($(el).data('id'))).get();
-                        if (!ids.length && ui.draggable) ids = [parseInt(ui.draggable.data('id'))];
-                        if (!ids.length) return alert(this.getText('noSelection'));
-                        this.assignMediaToFolder(folderId, ids);
-                    }
-                });
-            });
-        }
-
-        assignMediaToFolder(folderId, ids) {
-            this.sidebar.find('.wpmn_tree_loader').prop('hidden', false);
-            this.apiCall('assign_media', { folder_id: folderId, attachment_ids: ids }).then(data => {
-                this.refreshState(data);
-                this.showToast(this.getText('itemMoved'));
-
-                // Remove items if moving out of current folder
-                const isCurrentFolder = (this.state.activeFolder === 'uncategorized' && folderId === 0) ||
-                    (this.state.activeFolder === 'term-' + folderId);
-
-                if (!isCurrentFolder && this.state.activeFolder !== 'all') {
-                    ids.forEach(id => $('.attachments .attachment[data-id="' + id + '"]').remove());
-                }
-            }).catch(alert).finally(() => this.sidebar.find('.wpmn_tree_loader').prop('hidden', true));
         }
 
         dragAndDropRefresh() {
@@ -544,30 +412,41 @@ jQuery(function ($) {
         }
 
         injectSidebarLayout() {
-            // Case 1: Standard Media Library Page
             const wrap = $('#wpbody-content .wrap');
+
+            // Media Library page
             if (this.sidebar.length && wrap.length && !wrap.hasClass('wpmn_media_layout') && !$('.media-modal').length) {
                 wrap.children().not(this.sidebar).wrapAll('<div class="wpmn_media_content"></div>');
                 wrap.prepend(this.sidebar).addClass('wpmn_media_layout');
-                if (this.getStorage('wpmnSidebarCollapsed') === '1') wrap.addClass('wpmn_media_layout_collapsed');
+
+                if (this.getStorage('wpmnSidebarCollapsed') === '1') {
+                    wrap.addClass('wpmn_media_layout_collapsed');
+                }
             }
 
-            // Case 2: Media Modal
+            // Media modal
             setInterval(() => {
-                const menu = $('.media-modal .media-frame-menu');
-                if (menu.length && !menu.find('.wpmn_custom_sidebar_container').length) {
-                    const container = $('<div class="wpmn_custom_sidebar_container"></div>');
-                    menu.append(container);
+                const modal = $('.media-modal:visible');
+                if (!modal.length) return;
 
-                    if (this.sidebar.length) {
-                        container.append(this.sidebar);
-                        this.sidebar.show();
-                    }
+                const menu = modal.find('.media-frame-menu');
+                const router = modal.find('.media-router');
+                const isUploadTab = router.find('.media-menu-item.active')
+                    .is('#menu-item-upload')
+                    || router.find('.media-menu-item.active').text().trim().includes('Upload files');
+
+                if (menu.length && !menu.find('.wpmn_custom_sidebar_container').length) {
+                    menu.append('<div class="wpmn_custom_sidebar_container"></div>')
+                        .find('.wpmn_custom_sidebar_container')
+                        .append(this.sidebar.show());
 
                     this.sidebar.addClass('in-modal');
                 }
+
+                this.sidebar.toggle(!isUploadTab);
             }, 1000);
         }
+
 
         toggleSidebar() {
             const wrap = $('#wpbody-content .wrap').toggleClass('wpmn_media_layout_collapsed');
@@ -590,65 +469,8 @@ jQuery(function ($) {
             if (e) e.preventDefault();
             this.showFolderId = !this.showFolderId;
             this.setStorage('wpmnShowFolderId', this.showFolderId ? '1' : '0');
-            this.updateFolderIdVisibility();
+            wpmn_admin_media.admin.updateFolderIdVisibility();
             this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
-        }
-
-        handleMediaModalTabChange(e) {
-            const target = $(e.target);
-            const isUploadTab = target.text().trim().includes('Upload files');
-
-            if (isUploadTab) {
-                $('.media-frame-menu .wpmn_custom_sidebar_container').hide();
-                $('.media-modal .media-frame-menu').css('width', 'auto');
-                setTimeout(() => this.injectUploadFolderSelect(), 100);
-            } else {
-                $('.media-frame-menu .wpmn_custom_sidebar_container').show();
-                $('.media-modal .media-frame-menu').css('width', '330px');
-            }
-        }
-
-        injectUploadFolderSelect() {
-            const container = $('.media-uploader-status .upload-ui, .uploader-inline-content .upload-ui');
-            if (container.length && !container.find('.wpmn-upload-folder-select').length) {
-
-                const wrapper = $('<div class="wpmn-upload-folder-select" style="margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;"></div>');
-                wrapper.append('<label>Choose folder:</label>');
-
-                const select = $('<select id="wpmn-upload-select" style="max-width: 200px;"></select>');
-                select.append(new Option('Uncategorized', '0'));
-
-                const addOptions = (nodes, depth = 0) => {
-                    nodes?.forEach(node => {
-                        select.append(new Option((depth > 0 ? '-'.repeat(depth) + ' ' : '') + node.name, node.id));
-                        addOptions(node.children, depth + 1);
-                    });
-                };
-                addOptions(this.state.folders);
-
-                // Pre-select active folder if applicable
-                const currentId = this.state.activeFolder.startsWith('term-') ? this.state.activeFolder.replace('term-', '') : 0;
-                select.val(currentId);
-
-                select.on('change', (e) => {
-                    const id = $(e.target).val();
-                    if (id == '0') {
-                        this.changeFolder('uncategorized');
-                    } else {
-                        this.changeFolder('term-' + id);
-                    }
-                });
-
-                wrapper.append(select);
-                container.append(wrapper);
-            }
-        }
-
-        updateFolderIdVisibility() {
-            this.sidebar.find('.wpmn_folder_button[data-folder-id]').each((i, el) => {
-                const btn = $(el), id = btn.data('folder-id'), name = btn.data('folder-name');
-                btn.find('.wpmn_folder_button__label').text((this.showFolderId ? `#${id} ` : '') + name);
-            });
         }
 
         updateCustomToolbar() {
@@ -657,20 +479,41 @@ jQuery(function ($) {
 
             const settings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
             let container = $('.wpmn_breadcrumb');
-            if ((settings.showBreadcrumb === false) || !wpmn_media_library.showBreadcrumb) return container.remove();
 
-            if (!container.length) container = $('<div class="wpmn_breadcrumb"></div>').insertAfter(toolbar);
-            container.empty().append($('<span class="dashicons dashicons-admin-home"></span>').on('click', () => this.changeFolder('all')));
+            if (settings.showBreadcrumb === false || !wpmn_media_library.showBreadcrumb) {
+                container.remove();
+                return;
+            }
 
-            const id = this.state.activeFolder.startsWith('term-') ? this.state.activeFolder.replace('term-', '') : null,
-                path = id ? this.getFolderPath(id, this.state.folders) : [];
+            if (!container.length) {
+                container = $('<div class="wpmn_breadcrumb"></div>').insertAfter(toolbar);
+            }
 
-            path?.forEach((folder, i) => {
+            container.empty()
+                .append(
+                    $('<span class="dashicons dashicons-admin-home"></span>')
+                        .on('click', () => this.changeFolder('all'))
+                );
+
+            const id = this.state.activeFolder.startsWith('term-')
+                ? this.state.activeFolder.replace('term-', '')
+                : null;
+
+            const path = id ? this.getFolderPath(id, this.state.folders) : [];
+
+            path.forEach((folder, i) => {
                 container.append('<span class="wpmn_breadcrumb_line">/</span>');
-                const isLast = i === path.length - 1,
-                    el = $('<span>').addClass(isLast ? 'wpmn_breadcrumb_folder' : 'wpmn_breadcrumb_folders').text(folder.name);
-                if (!isLast) el.on('click', () => this.changeFolder('term-' + folder.id));
-                container.append(el);
+
+                const isLast = i === path.length - 1;
+                const item = $('<span>')
+                    .addClass(isLast ? 'wpmn_breadcrumb_folder' : 'wpmn_breadcrumb_folders')
+                    .text(folder.name);
+
+                if (!isLast) {
+                    item.on('click', () => this.changeFolder(`term-${folder.id}`));
+                }
+
+                container.append(item);
             });
         }
 
@@ -726,15 +569,36 @@ jQuery(function ($) {
             });
         }
 
+        createForm(action) {
+            const form = $('<form>', {
+                method: 'POST',
+                action: wpmn_media_library.ajaxUrl
+            });
+
+            form.append($('<input>', { type: 'hidden', name: 'action', value: 'wpmn_ajax' }));
+            form.append($('<input>', { type: 'hidden', name: 'request_type', value: action }));
+            form.append($('<input>', { type: 'hidden', name: 'nonce', value: wpmn_media_library.nonce }));
+            return form;
+        }
+
         handleExport(e) {
             e.preventDefault();
-            const __this = $(e.currentTarget),
-                action = __this.data('action');
 
-            this.disableButton(__this);
-            const form = this.createForm(action);
-            form.appendTo('body').submit().remove();
-            this.enableButton(__this);
+            const __this = $(e.currentTarget),
+                action = __this.data('action'),
+                originalText = __this.text();
+
+            if (__this.prop('disabled')) return;
+
+            __this.prop('disabled', true).text('Exporting...')
+            try {
+                const form = this.createForm(action);
+                form.appendTo('body').submit().remove();
+            } finally {
+                setTimeout(() => {
+                    __this.prop('disabled', false).text(originalText);
+                }, 1000);
+            }
         }
 
         handleGenerateSize(e) {
@@ -745,36 +609,12 @@ jQuery(function ($) {
             if (__this.prop('disabled')) return;
 
             __this.prop('disabled', true).text('Generating...');
-
             this.apiCall(__this.data('action')).then(res => {
                 __this.prop('disabled', false).text(originalText);
                 this.showToast(res.message || 'Attachment sizes generated.');
             }).catch(err => {
                 __this.prop('disabled', false).text(originalText);
             });
-        }
-
-        disableButton(__this) {
-            __this.prop('disabled', true).text('Exporting...');
-        }
-
-        enableButton(__this) {
-            setTimeout(() => {
-                __this.prop('disabled', false);
-                __this.text('Export Now');
-            }, 1000);
-        }
-
-        createForm(action) {
-            const form = $('<form>', {
-                method: 'POST',
-                action: wpmn_media_library.ajaxUrl
-            });
-
-            form.append($('<input>', { type: 'hidden', name: 'action', value: 'wpmn_ajax' }));
-            form.append($('<input>', { type: 'hidden', name: 'request_type', value: action }));
-
-            return form;
         }
 
         handleGenerateApiKey(e) {
@@ -872,91 +712,66 @@ jQuery(function ($) {
 
             switch (action) {
                 case 'new_folder':
-                    this.handleContextNewFolder(folderId);
+                    wpmn_media_folder.folder.handleContextNewFolder(folderId);
                     break;
                 case 'rename':
-                    this.handleContextRename(folderId);
+                    wpmn_media_folder.folder.handleContextRename(folderId);
                     break;
                 case 'cut':
-                    this.handleContextCut(folderId);
+                    wpmn_media_folder.folder.handleContextCut(folderId);
                     break;
                 case 'paste':
-                    this.handleContextPaste(folderId);
+                    wpmn_media_folder.folder.handleContextPaste(folderId);
                     break;
                 case 'delete':
-                    this.handleContextDelete(folderId);
+                    wpmn_media_folder.folder.handleContextDelete(folderId);
                     break;
             }
         }
 
-        handleContextNewFolder(parentId) {
-            this.state.activeFolder = 'term-' + parentId;
-            this.highlightActive();
-            this.updateActionButtons();
-            this.toggleNewFolderForm(true);
-        }
+        handleAttachmentFolderChange(e) {
+            const __this = $(e.currentTarget),
+                folderId = __this.val(),
+                attachmentId = __this.attr('id').split('_').pop(),
+                loader = __this.next('.wpmn_folder_loader');
 
-        handleContextRename(folderId) {
-            this.state.activeFolder = 'term-' + folderId;
-            this.highlightActive();
-            this.updateActionButtons();
-            const folder = this.findFolderById(folderId, this.state.folders);
-            if (folder) this.startInlineRename(folder);
-        }
+            loader.addClass('is-active').css('visibility', 'visible');
+            __this.prop('disabled', true);
 
-        handleContextCut(folderId) {
-            this.clipboard = { action: 'cut', folderId: folderId };
-            this.sidebar.find('.wpmn_folder_button').removeClass('is-cut');
-            this.sidebar.find(`.wpmn_folder_button[data-folder-id="${folderId}"]`).addClass('is-cut');
-        }
+            this.apiCall('assign_media', {
+                folder_id: folderId,
+                attachment_ids: [attachmentId],
+            })
+                .then(res => {
+                    this.showToast(this.getText('itemMoved'));
+                    wpmn_media_folder.folder.refreshState(res);
 
-        handleContextPaste(targetFolderId) {
-            if (!this.clipboard.folderId || this.clipboard.action !== 'cut') {
-                return;
-            }
+                    const active = this.state.activeFolder;
+                    const inCurrentFolder =
+                        (active === 'uncategorized' && folderId == 0) ||
+                        active === `term-${folderId}`;
 
-            const sourceFolderId = this.clipboard.folderId;
-            if (sourceFolderId === targetFolderId) {
-                this.showToast(this.getText('moveSelf'));
-                return;
-            }
+                    if (active !== 'all' && !inCurrentFolder) {
+                        $(`.attachments .attachment[data-id="${attachmentId}"]`).remove();
 
-            if (this.isChildFolder(targetFolderId, sourceFolderId)) {
-                this.showToast(this.getText('moveSubfolder'));
-                return;
-            }
-            this.moveFolderToParent(sourceFolderId, targetFolderId);
-        }
-
-        handleContextDelete(folderId) {
-            this.state.activeFolder = 'term-' + folderId;
-            const folder = this.findFolderById(folderId, this.state.folders);
-            if (folder) this.openDeleteDialog(folder);
-        }
-
-        isChildFolder(childId, parentId, nodes = null) {
-            if (nodes === null) nodes = this.state.folders;
-
-            const parent = this.findFolderById(parentId, nodes);
-            if (!parent || !parent.children) return false;
-
-            for (const child of parent.children) {
-                if (child.id == childId) return true;
-                if (this.isChildFolder(childId, child.id, [child])) return true;
-            }
-            return false;
-        }
-
-        moveFolderToParent(folderId, newParentId) {
-            this.apiCall('move_folder', { folder_id: folderId, new_parent: newParentId })
-                .then(data => {
-                    this.refreshState(data);
-                    this.clipboard = { action: null, folderId: null };
-                    this.sidebar.find('.wpmn_folder_button').removeClass('is-cut');
-                    this.showToast(this.getText('folderMoved'));
+                        try {
+                            const library = wp?.media?.frame?.state()?.get('library');
+                            const model = library?.get(attachmentId);
+                            if (model) library.remove(model);
+                        } catch (e) { }
+                    }
                 })
-                .catch(alert);
+                .catch(msg => this.showToast(this.getText('errorPrefix') + msg))
+                .finally(() => {
+                    loader.removeClass('is-active').css('visibility', 'hidden');
+                    __this.prop('disabled', false);
+                });
         }
     }
-    new WPMN_Media_Admin();
+
+    if (!window.wpmn_admin_media) {
+        window.wpmn_admin_media = {};
+    }
+
+    window.wpmn_admin_media.admin = new WPMN_Admin();
 });

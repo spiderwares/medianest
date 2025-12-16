@@ -144,7 +144,7 @@ var medianestGallery = {
         e.preventDefault ? e.preventDefault() : (e.returnValue = false);
 
         var eTarget = e.target || e.srcElement;
-        var clickedListItem = eTarget.closest(".blocks-gallery-item");
+        var clickedListItem = eTarget.closest(".wpmn_block_gallery_item");
         if (!clickedListItem) {
             return;
         }
@@ -180,5 +180,5 @@ var medianestGallery = {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
-    medianestGallery.createGallery(".medianest-block-medianest-gallery.is-lightbox");
+    medianestGallery.createGallery(".wpmn_block_gallery.is-lightbox");
 });

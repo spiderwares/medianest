@@ -56,3 +56,381 @@
     padding: 3px 10px;
     border-radius: 2px;
 }
+
+/*--------------------------- File Size Field ---------------------------*/
+
+#wpmn_filesize {
+    width: 10%;
+}
+
+/*--------------------------- Upload Folder ---------------------------*/
+
+#wpmn_select_upload_folder {
+    width: 130px;
+}
+
+/*--------------------------- Bulk Select ---------------------------*/
+
+.wpmn_folder_checkbox {
+    border: 1px solid #787c82 !important;
+    border-radius: 3px !important;
+    background-color: #fff;
+    position: relative;
+    outline: none;
+    margin: 0 !important;
+    display: none !important;
+    flex-shrink: 0;
+    transition: all 0.1s ease-in-out;
+}
+
+.wpmn_folder_checkbox:hover {
+    border-color: #2271b1;
+}
+
+.wpmn_folder_checkbox:checked {
+    background-color: #007cba;
+    border-color: #007cba;
+}
+
+.wpmn_folder_checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_folder_checkbox {
+    display: block !important;
+    pointer-events: auto;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_folder_node .wpmn_folder_button {
+    pointer-events: none;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_folder_button {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_folder_button:hover {
+    background: transparent;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger {
+    color: #2271b1 !important;
+    border-color: #2271b1 !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger .wpmn_delete_icon {
+    filter: invert(33%) sepia(50%) saturate(1764%) hue-rotate(182deg) brightness(92%) contrast(93%);
+
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover {
+    background: #2271b1 !important;
+    color: #fff !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover .wpmn_delete_icon {
+    filter: brightness(0) invert(1);
+}
+
+
+button.wpmn_delete_trigger:disabled,
+button.wpmn_delete_trigger.disabled,
+.wpmn_media_sidebar.is-bulk-select button.wpmn_delete_trigger:disabled {
+    background: #f6f7f7 !important;
+    border-color: #dcdcde !important;
+    box-shadow: none !important;
+    color: #a7aaad !important;
+    cursor: default !important;
+    transform: none !important;
+    pointer-events: none;
+}
+
+button.wpmn_delete_trigger:disabled .wpmn_delete_icon,
+button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
+.wpmn_media_sidebar.is-bulk-select button.wpmn_delete_trigger:disabled .wpmn_delete_icon {
+    filter: grayscale(100%) opacity(0.4);
+}
+
+.wpmn_bulk_cancel_btn {
+    display: none !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_bulk_cancel_btn {
+    display: flex !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_media_sidebar_action_rename,
+.wpmn_media_sidebar.is-bulk-select .wpmn_action_wrapper {
+    display: none !important;
+}
+
+.wpmn_media_sidebar.is-bulk-select .wpmn_media_sidebar_action_delete {
+    display: flex !important;
+}
+
+/*--------------------------- PRO Feature ---------------------------*/
+
+.wpmn_sort_menu_item_header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wpmn_pro_badge {
+    background-color: #46b450;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    line-height: normal;
+    text-transform: uppercase;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.wpmn_sort_menu_item.wpmn_pro_feature {
+    cursor: default;
+    color: #8c8f94;
+}
+
+.wpmn_sort_menu_item.wpmn_pro_feature:hover {
+    background: none;
+}
+
+.wpmn_sort_menu_item.wpmn_pro_feature .dashicons {
+    color: #c3c4c7;
+}
+
+.wpmn_pro_feature_item {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    color: #8c8f94 !important;
+    cursor: default !important;
+}
+
+.wpmn_pro_feature_item:hover {
+    background: none !important;
+}
+
+.wpmn_pro_badge_small {
+    background-color: #46b450;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 8px;
+    margin-left: 4px;
+    vertical-align: top;
+    text-transform: uppercase;
+}
+
+.wpmn_pro_theme {
+    opacity: 0.7;
+    cursor: default !important;
+    background: #f0f0f1 !important;
+    border-color: #dcdcde !important;
+    color: #a7aaad !important;
+}
+
+.wpmn_pro_theme:hover {
+    border-color: #dcdcde !important;
+    color: #a7aaad !important;
+}
+
+/*--------------------------- Breadcrumb ---------------------------*/
+
+.wpmn_breadcrumb {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.wpmn_breadcrumb .dashicons {
+    margin-right: 4px;
+    color: #646970;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.wpmn_breadcrumb_line {
+    color: #646970;
+    margin: 0 4px;
+}
+
+.wpmn_breadcrumb_folder {
+    color: #3c434a;
+    font-weight: 500;
+}
+
+.wpmn_breadcrumb_folders {
+    color: #2271b1;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/*--------------------------- Loader ---------------------------*/
+
+.wpmn_tree_loader {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.wpmn_tree_loader[hidden] {
+    display: none;
+}
+
+.wpmn_spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2271b1;
+    border-radius: 50%;
+    animation: wpmn_spin 1s linear infinite;
+}
+
+@keyframes wpmn_spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.wpmn_media_sidebar_folders {
+    position: relative;
+    min-height: 200px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.wpmn_folder_tree {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+.wpmn_folder_loader {
+    float: none;
+    margin-left: 5px;
+}
+
+/*--------------------------- Drag & Drop ---------------------------*/
+
+.wpmn_drag_helper_pill {
+    background: #444;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 200000;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/*--------------------------- Clear Data Button ---------------------------*/
+
+.wpmn_clear_data_btn.button {
+    background: #fbeaea;
+    color: #b32d2e;
+    border-color: #fbeaea;
+    margin-top: 15px;
+    width: 100px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.wpmn_clear_data_btn.button:hover {
+    background-color: rgb(250, 102, 102);
+    border-color: rgb(250, 102, 102);
+    color: #fff;
+    transition: all 0.3s;
+}
+
+/*--------------------------- Import & Export Button ---------------------------*/
+
+.wpmn_export_btn,
+.wpmn_generate_size_btn,
+.wpmn_import_btn,
+.wpmn_generate_api_btn {
+    background: #8044f0 !important;
+    border-color: #8044f0 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 3px 10px !important;
+    margin-top: 15px !important;
+    width: 100px;
+}
+
+.wpmn_export_btn:hover,
+.wpmn_generate_size_btn:hover,
+.wpmn_import_btn:hover,
+.wpmn_generate_api_btn:hover {
+    background: #570FDC !important;
+    border-color: #570FDC !important;
+    transition: all 0.3s;
+}
+
+.wpmn_import_btn:focus {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.wpmn_import_input {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.wpmn_import_btn {
+    margin-top: 5px;
+    display: inline-block;
+}
+
+/*--------------------------- API Key Button ---------------------------*/
+
+.wpmn_api_key_wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 100px;
+}
+
+.wpmn_api_key_wrapper input {
+    margin-top: 10px;
+    background: #f0f0f1;
+    color: #666;
+}

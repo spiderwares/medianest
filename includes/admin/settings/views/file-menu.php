@@ -37,7 +37,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     <!-- Content area for the active settings tab -->
     <div class="wpmn_settings_page_content">
         <?php
-        // Load the content for the currently active tab dynamically.
         require_once WPMN_PATH . 'includes/admin/settings/views/' . $active_tab . '.php';
         ?>
     </div>

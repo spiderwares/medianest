@@ -1,4 +1,4 @@
-=== Medianest - WordPress Media Library Folders & File Manager ===
+=== Medianest ===
 Contributors: cosmicinfosoftware
 Requires at least: 5.2
 Tested up to: 6.9
@@ -7,7 +7,7 @@ Stable tag: 1.0.0
 Version: 1.0.0
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Tags: media library, folders, file manager, organize media, media categories, image gallery, media organizer
+Tags: media library, media folders, file manager, organize media, image gallery
 
 Organize your WordPress media library with unlimited folders, drag & drop interface, and advanced file management features.
 

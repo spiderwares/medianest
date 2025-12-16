@@ -97,16 +97,17 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	</div>
 
 	<div class="wpmn_media_sidebar_folders">
+		<?php $wpmn_labels = WPMN_Helper::wpmn_get_folder_labels(); ?>
 		<div class="wpmn_media_sidebar_section">
 			<button type="button" class="wpmn_folder_button" data-folder-slug="all">
 				<img src="<?php echo esc_url( WPMN_URL . 'assets/img/all-files.svg'); ?>" alt="" class="wpmn_all_files_icon" />
-				<span><?php echo esc_html__( 'All Files', 'medianest' ); ?></span>
+				<span><?php echo esc_html__( $wpmn_labels['all'], 'medianest' ); ?></span>
 				<span class="wpmn_count wpmn_count_all" data-count="all">0</span>
 			</button>
 
 			<button type="button" class="wpmn_folder_button" data-folder-slug="uncategorized">
 				<img src="<?php echo esc_url( WPMN_URL . 'assets/img/uncategorized.svg'); ?>" alt="" class="wpmn_uncategorized_icon" />
-				<span><?php echo esc_html__( 'Uncategorized', 'medianest' ); ?></span>
+				<span><?php echo esc_html__( $wpmn_labels['uncategorized'], 'medianest' ); ?></span>
 				<span class="wpmn_count wpmn_count_uncategorized" data-count="uncategorized">0</span>
 			</button>
 		</div>

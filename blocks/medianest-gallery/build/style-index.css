@@ -1,10 +1,10 @@
-ul.medianest-block-medianest-gallery {
+ul.wpmn_block_gallery {
     margin: auto !important;
     padding: 0 !important;
     width: 100%
 }
 
-ul.medianest-block-medianest-gallery.layout-grid {
+ul.wpmn_block_gallery.layout-grid {
     display: grid;
     grid-gap: 20px;
     align-items: stretch;
@@ -12,7 +12,7 @@ ul.medianest-block-medianest-gallery.layout-grid {
     justify-items: stretch
 }
 
-ul.medianest-block-medianest-gallery.layout-grid li img {
+ul.wpmn_block_gallery.layout-grid li img {
     border: 1px solid #ccc;
     box-shadow: 2px 2px 6px 0 rgba(0, 0, 0, .3);
     height: 100%;
@@ -22,7 +22,7 @@ ul.medianest-block-medianest-gallery.layout-grid li img {
     width: 100%
 }
 
-ul.medianest-block-medianest-gallery.layout-masonry {
+ul.wpmn_block_gallery.layout-masonry {
     -moz-column-count: var(--columns);
     -moz-column-gap: var(--space);
     column-gap: var(--space);
@@ -32,15 +32,15 @@ ul.medianest-block-medianest-gallery.layout-masonry {
     overflow: auto
 }
 
-ul.medianest-block-medianest-gallery.layout-masonry li {
+ul.wpmn_block_gallery.layout-masonry li {
     margin-bottom: var(--space)
 }
 
-ul.medianest-block-medianest-gallery li {
+ul.wpmn_block_gallery li {
     list-style: none
 }
 
-ul.medianest-block-medianest-gallery li figure {
+ul.wpmn_block_gallery li figure {
     height: 100%;
     margin: 0;
     padding: 0;
@@ -49,7 +49,7 @@ ul.medianest-block-medianest-gallery li figure {
 }
 
 /* Carousel Layout */
-ul.medianest-block-medianest-gallery.layout-carousel {
+ul.wpmn_block_gallery.layout-carousel {
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -58,56 +58,19 @@ ul.medianest-block-medianest-gallery.layout-carousel {
     padding-bottom: 20px !important;
 }
 
-ul.medianest-block-medianest-gallery.layout-carousel li {
+ul.wpmn_block_gallery.layout-carousel li {
     flex: 0 0 auto;
     width: calc(100% / var(--columns));
     min-width: 250px;
 }
 
-ul.medianest-block-medianest-gallery.layout-carousel li img {
+ul.wpmn_block_gallery.layout-carousel li img {
     width: 100%;
     height: 300px;
     object-fit: cover;
 }
 
-/* List Layout */
-ul.medianest-block-medianest-gallery.layout-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-ul.medianest-block-medianest-gallery.layout-list li {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
-}
-
-ul.medianest-block-medianest-gallery.layout-list li figure {
-    width: 200px;
-    flex-shrink: 0;
-}
-
-ul.medianest-block-medianest-gallery.layout-list li img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-}
-
-/* Ensure caption displays nicely in list view if user wants to add more metadata later */
-ul.medianest-block-medianest-gallery.layout-list li figure figcaption {
-    position: static;
-    background: none;
-    color: #333;
-    text-align: left;
-    padding: 10px 0 0;
-}
-
-ul.medianest-block-medianest-gallery li figure figcaption {
+ul.wpmn_block_gallery li figure figcaption {
     background: linear-gradient(0deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .3) 70%, transparent);
     bottom: 0;
     box-sizing: border-box;
@@ -123,6 +86,6 @@ ul.medianest-block-medianest-gallery li figure figcaption {
     z-index: 2
 }
 
-ul.medianest-block-medianest-gallery li figure figcaption a {
+ul.wpmn_block_gallery li figure figcaption a {
     color: inherit
 }
