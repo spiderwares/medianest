@@ -1,25 +1,25 @@
 /*--------------------------- Radio Field ---------------------------*/
 
-.wpmn-radio-field {
+.wpmn_radio_field {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     margin: 10px 0;
 }
 
-.wpmn-radio-field .wpmn-image-control {
+.wpmn_radio_field .wpmn_image_control {
     display: inline-block;
     position: relative;
 }
 
-.wpmn-radio-field .wpmn-image-control input[type="radio"] {
+.wpmn_radio_field .wpmn_image_control input[type="radio"] {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.wpmn-radio-field .wpmn-image-control label {
+.wpmn_radio_field .wpmn_image_control label {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -37,12 +37,12 @@
     font-size: smaller;
 }
 
-.wpmn-radio-field .wpmn-image-control input[type="radio"]:checked+label {
+.wpmn_radio_field .wpmn_image_control input[type="radio"]:checked+label {
     border-color: #570FDC;
     background: linear-gradient(to bottom, #ffffff, #f8f5ff);
 }
 
-.wpmn-radio-field .wpmn-image-control.wpmn-disabled-option label {
+.wpmn_radio_field .wpmn_image_control.wpmn_disabled_option label {
     opacity: 0.6;
     cursor: not-allowed;
     background: #f5f5f5;
@@ -50,7 +50,7 @@
 
 /*--------------------------- Select Field ---------------------------*/
 
-.wpmn_settings_page .wpmn_settings_page_content table .wpmn-select select,
+.wpmn_settings_page .wpmn_settings_page_content table .wpmn_select select,
 .wpmn_settings_page .wpmn_settings_page_content table .wpmn_api_key_wrapper input[type="text"] {
     min-width: 350px;
     padding: 3px 10px;
@@ -107,6 +107,7 @@
 .wpmn_media_sidebar.is-bulk-select .wpmn_folder_checkbox {
     display: block !important;
     pointer-events: auto;
+    border-radius: 3px !important;
 }
 
 .wpmn_media_sidebar.is-bulk-select .wpmn_folder_node .wpmn_folder_button {
@@ -175,77 +176,6 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
 
 .wpmn_media_sidebar.is-bulk-select .wpmn_media_sidebar_action_delete {
     display: flex !important;
-}
-
-/*--------------------------- PRO Feature ---------------------------*/
-
-.wpmn_sort_menu_item_header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.wpmn_pro_badge {
-    background-color: #46b450;
-    color: #fff;
-    font-size: 9px;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 10px;
-    line-height: normal;
-    text-transform: uppercase;
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.wpmn_sort_menu_item.wpmn_pro_feature {
-    cursor: default;
-    color: #8c8f94;
-}
-
-.wpmn_sort_menu_item.wpmn_pro_feature:hover {
-    background: none;
-}
-
-.wpmn_sort_menu_item.wpmn_pro_feature .dashicons {
-    color: #c3c4c7;
-}
-
-.wpmn_pro_feature_item {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    color: #8c8f94 !important;
-    cursor: default !important;
-}
-
-.wpmn_pro_feature_item:hover {
-    background: none !important;
-}
-
-.wpmn_pro_badge_small {
-    background-color: #46b450;
-    color: #fff;
-    font-size: 8px;
-    font-weight: 600;
-    padding: 1px 4px;
-    border-radius: 8px;
-    margin-left: 4px;
-    vertical-align: top;
-    text-transform: uppercase;
-}
-
-.wpmn_pro_theme {
-    opacity: 0.7;
-    cursor: default !important;
-    background: #f0f0f1 !important;
-    border-color: #dcdcde !important;
-    color: #a7aaad !important;
-}
-
-.wpmn_pro_theme:hover {
-    border-color: #dcdcde !important;
-    color: #a7aaad !important;
 }
 
 /*--------------------------- Breadcrumb ---------------------------*/

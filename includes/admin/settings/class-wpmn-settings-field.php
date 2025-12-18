@@ -86,13 +86,13 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                     'name'          => 'wpmn_settings[theme_design]',
                     'disabled_options' => array('windows (Pro)', 'dropbox (Pro)' ),
                 ),
-
             );
 
             return apply_filters( 'wpmn_settings_fields', $fields );
         }
 
         public static function tools_field() {
+
             $fields = array(
 
                 'rest_api_key' => array(
@@ -123,12 +123,13 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                     'action'      => 'wpmn_clear_all_data',
                     'btn_class'   => 'wpmn_clear_data_btn', 
                 ),
-
             );
+
             return apply_filters( 'wpmn_tools_fields', $fields );
         }
 
         public static function import_export_field() {
+
             $fields = array(
 
                 'export_csv' => array(
@@ -147,9 +148,9 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                     'action'        => 'wpmn_import_folders',
                 ),
             );
+
             return apply_filters( 'wpmn_import_export_fields', $fields );
         }
-
 
     }
 

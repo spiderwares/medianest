@@ -31,7 +31,6 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 		public function events_handler() {
 			add_action( 'admin_footer-upload.php', array( $this, 'wpmn_render_sidebar' ) );
 			add_action( 'admin_footer-post.php', array( $this, 'wpmn_render_sidebar' ) );
-			add_action( 'admin_footer-post-new.php', array( $this, 'wpmn_render_sidebar' ) );
             add_action( 'attachment_fields_to_edit', array( $this, 'add_folder_field' ), 10, 2 );
             add_filter( 'ajax_query_attachments_args', array( $this, 'wpmn_filter_attachments' ) );
             add_filter( 'manage_media_columns', array( $this, 'add_file_size_column' ) );
@@ -94,11 +93,10 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
         }
 
         public function add_folder_field( $form_fields, $post ) {
-            $terms = wp_get_object_terms( $post->ID, 'wpmn_media_folder' );
+            $terms  = wp_get_object_terms( $post->ID, 'wpmn_media_folder' );
             $labels = WPMN_Helper::wpmn_get_folder_labels();
-
-            // Allow moving via dropdown
-            $dropdown_args = array(
+            
+            $select_html = wp_dropdown_categories(array(
                 'taxonomy'          => 'wpmn_media_folder',
                 'hide_empty'        => false,
                 'name'              => 'wpmn_media_folder_select',
@@ -106,23 +104,20 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                 'class'             => 'wpmn-folder-dropdown',
                 'show_option_none'  => $labels['uncategorized'],
                 'option_none_value' => '0',
-                'selected'          => isset($terms[0]) ? $terms[0]->term_id : 0,
+                'selected'          => $terms[0]->term_id ?? 0,
                 'echo'              => 0,
                 'hierarchical'      => true,
-            );
-            
-            $select_html = wp_dropdown_categories( $dropdown_args );
-            
-            $all_files_option = '<option value="all">' . esc_html( $labels['all'] ) . '</option>';
-            $select_html = preg_replace( '/(<select[^>]*>)/', '$1' . $all_files_option, $select_html );
+            ) );
 
-            $loader_html = '<span class="spinner wpmn_folder_loader"></span>';
+            $select_html = str_replace('&nbsp;&nbsp;&nbsp;', '- ', $select_html);
 
-            $form_fields['wpmn_media_folder'] = array(
-                'label'   => esc_html__( 'MediaNest Folder', 'medianest' ),
-                'input'   => 'html',
-                'html'    => $select_html . $loader_html,
-            );
+            $form_fields['wpmn_media_folder'] = [
+                'label' => esc_html__( 'MediaNest Folder', 'medianest' ),
+                'helps' => esc_html__( 'Click the folder name to move this file to a different folder', 'medianest' ),
+                'input' => 'html',
+                'html'  => $select_html . '<span class="spinner wpmn_folder_loader"></span>',
+            ];
+
             return $form_fields;
         }
 

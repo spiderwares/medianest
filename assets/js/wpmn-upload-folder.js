@@ -9,91 +9,198 @@ jQuery(function ($) {
         }
 
         init() {
-            this.select = $('#wpmn_select_upload_folder');
-            this.wrapper = $('#wpmn_upload_folder_selector');
-            this.ajaxUrl = wpmn_media_library.ajaxUrl;
-            this.nonce = wpmn_media_library.nonce;
-            this.loadFolders();
+            this.folders = [];
             this.bindEvents();
-        }
-
-        bindEvents() {
-            $(document.body).on('change', '#wpmn_select_upload_folder', (e) => {
-                const folderId = this.select.val();
-                localStorage.setItem('wpmn_selected_upload_folder', folderId);
-                this.updateUploaderParams(folderId);
-            });
+            this.observeDOM();
+            this.loadFolders();
             this.bindUploader();
         }
 
-        bindUploader() {
-            if (typeof uploader !== 'undefined') {
-                this.updateUploaderParams(this.select.val());
-
-                uploader.bind('BeforeUpload', (up, file) => {
-                    this.updateUploaderParams(this.select.val());
-                });
-            } else {
-                if (!this._pollCount) this._pollCount = 0;
-                if (this._pollCount < 10) {
-                    this._pollCount++;
-                    setTimeout(() => this.bindUploader(), 500);
-                }
-            }
+        /* ========================
+         * Event Bindings
+         * ======================== */
+        bindEvents() {
+            $(document.body).on('change', '.wpmn_select_upload_folder', this.handleFolderChange.bind(this));
         }
 
-        updateUploaderParams(folderId) {
-            if (typeof uploader !== 'undefined') {
-                uploader.settings.multipart_params = uploader.settings.multipart_params || {};
-                uploader.settings.multipart_params.wpmn_upload_folder = folderId;
-            }
+        handleFolderChange(e) {
+            const folderId = $(e.currentTarget).val();
+
+            $('.wpmn_select_upload_folder').val(folderId);
+            localStorage.setItem('wpmn_selected_upload_folder', folderId);
+
+            this.updateUploaderParams(folderId);
+            this.updateBrowserUploader(folderId);
         }
 
-        loadFolders() {
-            $.post(
-                this.ajaxUrl,
-                {
-                    action: 'wpmn_get_folders_for_upload',
-                    nonce: this.nonce
-                },
-                (response) => {
-                    if (response?.success && response.data?.folders) {
-                        this.populateDropdown(response.data.folders);
+        /* ========================
+         * DOM Observer
+         * ======================== */
+        observeDOM() {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach(({ addedNodes }) => {
+                    if (!addedNodes.length) return;
+
+                    const dropdowns = $(addedNodes).find('.wpmn_select_upload_folder');
+                    if (dropdowns.length) {
+                        this.populateDropdowns(dropdowns);
                         this.restoreSelection();
-                        this.wrapper.show();
+                    }
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        /* ========================
+         * AJAX
+         * ======================== */
+        loadFolders(callback) {
+
+            $.ajax({
+                type: 'POST',
+                url: wpmn_media_library.ajaxUrl,
+                data: {
+                    action: 'wpmn_get_folders_for_upload',
+                    nonce: wpmn_media_library.nonce
+                },
+                success: (response) => {
+                    if (response?.success && response.data?.folders) {
+
+                        this.folders = response.data.folders;
+
+                        this.populateDropdowns($('.wpmn_select_upload_folder'));
+                        this.restoreSelection();
+                        $('.wpmn_upload_folder_selector').show();
+
+                        if (typeof callback === 'function') {
+                            callback(true, response.data.folders);
+                        }
+
+                    } else {
+                        if (typeof callback === 'function') {
+                            callback(false, []);
+                        }
                     }
                 }
-            );
-        }
-
-        populateDropdown(folders) {
-            folders.forEach((folder) => {
-                this.select.append(this.optionHTML(folder.id, folder.name));
-                this.addChildFolders(folder.children, '-');
             });
         }
 
-        addChildFolders(children, indent) {
-            if (!children?.length) return;
 
-            children.forEach((child) => {
-                this.select.append(this.optionHTML(child.id, indent + child.name));
-                if (child.children?.length) {
-                    this.addChildFolders(child.children, indent + '-');
+        /* ========================
+         * Dropdown Handling
+         * ======================== */
+        populateDropdowns(elements) {
+            if (!this.folders.length) return;
+
+            const optionsHtml = this.buildOptionsHtml(this.folders);
+
+            elements.each((_, el) => {
+                const select = $(el);
+                if (select.find('option').length <= 2) {
+                    select.append(optionsHtml);
                 }
             });
         }
 
-        optionHTML(id, name) {
-            return `<option value="${id}">${name}</option>`;
+        buildOptionsHtml(items, indent = '') {
+            let html = '';
+
+            items.forEach(item => {
+                html += `<option value="${item.id}">${indent}${item.name}</option>`;
+                if (item.children?.length) {
+                    html += this.buildOptionsHtml(item.children, indent + '-');
+                }
+            });
+
+            return html;
         }
 
         restoreSelection() {
             const saved = localStorage.getItem('wpmn_selected_upload_folder');
             if (saved) {
-                this.select.val(saved);
+                $('.wpmn_select_upload_folder').val(saved);
+                this.updateBrowserUploader(saved);
             }
         }
+
+        bindUploader() {
+
+            const bindParams = (up) => {
+                if (up._wpmnBound) return;
+                up._wpmnBound = true;
+
+                const setParams = (uploader) => {
+                    const folderId = $('.wpmn_select_upload_folder:visible').val() || localStorage.getItem('wpmn_selected_upload_folder');
+
+                    if (folderId) {
+                        uploader.settings.multipart_params = uploader.settings.multipart_params || {};
+                        uploader.settings.multipart_params.wpmn_upload_folder = folderId;
+                    }
+                };
+
+                up.bind('FilesAdded', setParams);
+                up.bind('BeforeUpload', setParams);
+            };
+
+            // Plupload
+            if (window.plupload?.Uploader) {
+                const originalInit = plupload.Uploader.prototype.init;
+                plupload.Uploader.prototype.init = function () {
+                    originalInit.apply(this, arguments);
+                    bindParams(this);
+                };
+            }
+
+            // WP Uploader
+            if (window.wp?.Uploader) {
+                const originalInit = wp.Uploader.prototype.init;
+                wp.Uploader.prototype.init = function () {
+                    originalInit.apply(this, arguments);
+                    if (this.uploader) {
+                        bindParams(this.uploader);
+                    }
+                };
+
+                if (wp.Uploader.queue) {
+                    wp.Uploader.queue.each((uploaderWrapper) => {
+                        const up = uploaderWrapper.uploader || uploaderWrapper;
+                        bindParams(up);
+                    });
+                }
+            }
+
+            if (window.uploader) {
+                bindParams(window.uploader);
+            }
+        }
+
+        updateUploaderParams(folderId) {
+            if (window.uploader) {
+                uploader.settings.multipart_params =
+                    uploader.settings.multipart_params || {};
+                uploader.settings.multipart_params.wpmn_upload_folder = folderId;
+            }
+        }
+
+        updateBrowserUploader(folderId) {
+            const form = $('#file_form, form.media-upload-form');
+
+            if (!form.length) return;
+            let input = form.find('input[name="wpmn_upload_folder"]');
+            if (!input.length) {
+                input = $('<input>', {
+                    type: 'hidden',
+                    name: 'wpmn_upload_folder'
+                }).prependTo(form);
+            }
+
+            input.val(folderId);
+        }
+
     }
 
     new WPMN_Upload_Folder();

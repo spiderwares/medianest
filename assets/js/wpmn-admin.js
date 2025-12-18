@@ -5,6 +5,7 @@ jQuery(function ($) {
     class WPMN_Admin {
 
         constructor() {
+            window.wpmn_admin_media.admin = this;
             this.init();
         }
 
@@ -124,15 +125,15 @@ jQuery(function ($) {
         }
 
         handleToggleClick(e) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             e.stopPropagation();
             const li = $(e.currentTarget).closest('.wpmn_folder_node');
             li.attr('aria-expanded', li.attr('aria-expanded') !== 'true');
-            li.children('ul').slideToggle(200);
+            li.children('ul').slideToggle(300);
         }
 
         handleMenuToggle(e, menuClass) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             e.stopPropagation();
             const menus = {
                 '.wpmn_sort_menu': '.wpmn_more_menu',
@@ -157,7 +158,7 @@ jQuery(function ($) {
             this.isBulkSelect = false;
             this.sidebar.removeClass('is-bulk-select').find('.wpmn_media_sidebar_action_rename, .wpmn_action_wrapper').prop('hidden', false);
             this.sidebar.find('.wpmn_bulk_cancel_btn, .wpmn_folder_checkbox:checked').prop('hidden', true).prop('checked', false); // Hide cancel and uncheck
-            this.sidebar.find('.wpmn_bulk_cancel_btn').prop('hidden', true); // Fix: ensure hidden
+            this.sidebar.find('.wpmn_bulk_cancel_btn').prop('hidden', true);
             wpmn_media_folder.folder.updateActionButtons();
         }
 
@@ -191,7 +192,7 @@ jQuery(function ($) {
         }
 
         openSettingsDialog(e) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
             const settings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
             const select = $('#wpmn_default_folder').empty();
@@ -206,7 +207,6 @@ jQuery(function ($) {
             addOptions(this.state.folders);
 
             select.val(settings.defaultFolder || 'all');
-            $('#wpmn_show_breadcrumb').prop('checked', settings.showBreadcrumb ?? true);
             $('.wpmn_theme_btn').removeClass('wpmn_theme_btn--active').filter(`[data-theme="${settings.theme || 'default'}"]`).addClass('wpmn_theme_btn--active');
 
             $('.wpmn_dialog_backdrop:not([data-delete-dialog])').prop('hidden', false).addClass('is-visible');
@@ -219,7 +219,6 @@ jQuery(function ($) {
         saveSettings() {
             const settings = {
                 defaultFolder: $('#wpmn_default_folder').val(),
-                showBreadcrumb: $('#wpmn_show_breadcrumb').is(':checked'),
                 theme: $('.wpmn_theme_btn--active').data('theme') || 'default'
             };
             this.setStorage('wpmnSettings', JSON.stringify(settings));
@@ -292,7 +291,7 @@ jQuery(function ($) {
         		</div>
         	</div>`).data('originalButton', __this);
 
-            __this.hide().parent().prepend(form);
+            __this.hide().before(form);
             setTimeout(() => form.find('input').focus().select(), 10);
         }
 
@@ -330,13 +329,10 @@ jQuery(function ($) {
         openDeleteDialog(folder, bulkCount = 0) {
             this.pendingDeleteId = folder?.id || null;
             this.isBulkDeleteAction = !folder;
-            const dialog = this.sidebar.find('[data-delete-dialog]'), msg = dialog.find('.wpmn_dialog_message');
+            const dialog = this.sidebar.find('[data-delete-dialog]'),
+                msg = dialog.find('.wpmn_dialog_message');
 
-            msg.text(folder
-                ? (this.getText('deleteConfirm', 'Are you sure you want to delete %s?').replace('%s', folder.name))
-                : `Are you sure you want to delete ${bulkCount} folder(s)?`
-            );
-
+            msg.text(this.getText('deleteConfirm'));
             dialog.prop('hidden', false).addClass('is-visible');
         }
 
@@ -393,7 +389,9 @@ jQuery(function ($) {
             wpmn_media_folder.folder.highlightActive();
             wpmn_media_folder.folder.setupDroppableTargets();
             wpmn_media_folder.folder.updateFolderIdVisibility();
+            wpmn_media_folder.folder.updateActionButtons();
             this.updateCustomToolbar();
+            this.updateFolderIdMenuText();
         }
 
         dragAndDropRefresh() {
@@ -466,11 +464,26 @@ jQuery(function ($) {
         }
 
         toggleFolderId(e) {
-            if (e) e.preventDefault();
+            e.preventDefault();
             this.showFolderId = !this.showFolderId;
             this.setStorage('wpmnShowFolderId', this.showFolderId ? '1' : '0');
-            wpmn_admin_media.admin.updateFolderIdVisibility();
+            wpmn_media_folder.folder.updateFolderIdVisibility();
+            this.updateFolderIdMenuText();
             this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
+        }
+
+        updateFolderIdMenuText() {
+            const item = this.sidebar.find('.wpmn_more_menu_item[data-action="hide-folder-id"]');
+            const icon = item.find('.dashicons');
+            const label = item.find('span:not(.dashicons)');
+
+            if (this.showFolderId) {
+                label.text(item.data('text-hide'));
+                icon.removeClass(item.data('icon-show')).addClass(item.data('icon-hide'));
+            } else {
+                label.text(item.data('text-show'));
+                icon.removeClass(item.data('icon-hide')).addClass(item.data('icon-show'));
+            }
         }
 
         updateCustomToolbar() {
@@ -700,11 +713,6 @@ jQuery(function ($) {
             e.stopPropagation();
 
             const item = $(e.currentTarget);
-            if (item.hasClass('disabled') || item.hasClass('wpmn_pro_feature')) {
-                this.hideContextMenu();
-                return;
-            }
-
             const action = item.data('action'),
                 menu = item.closest('.wpmn_folder_context_menu'),
                 folderId = menu.data('folder-id');

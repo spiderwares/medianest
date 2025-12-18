@@ -34,6 +34,11 @@ if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
 		}
 
 		public function wpmn_render_folder() {
+			
+            if ( get_current_screen() && 'upload' === get_current_screen()->id ) {
+                return;
+            }
+
 			wpmn_get_template(
 				'media/upload-folder.php',
 				array(),

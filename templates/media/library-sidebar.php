@@ -22,39 +22,26 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	</div>
 
 	<div class="wpmn_media_sidebar_actions">
-		<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_rename">
+		<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_rename" disabled>
 			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/rename.svg'); ?>" alt="" class="wpmn_rename_icon" />
 			<?php echo esc_html__( 'Rename', 'medianest' ); ?>
 		</button>
-		<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_delete wpmn_delete_trigger">
+		<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_delete wpmn_delete_trigger" disabled>
 			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/delete.svg'); ?>" alt="" class="wpmn_delete_icon" />
 			<?php echo esc_html__( 'Delete', 'medianest' ); ?>
 		</button>
 		
-		<!-- Bulk Actions (Hidden by default) -->
+		<!-- Bulk Actions -->
 		<button type="button" class="button button-secondary wpmn_bulk_cancel_btn" hidden>
 			<?php echo esc_html__( 'Cancel', 'medianest' ); ?>
 		</button>
-		<div class="wpmn_action_wrapper" style="position: relative;">
+		<div class="wpmn_action_wrapper">
 			<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_sort">
 				<img src="<?php echo esc_url( WPMN_URL . 'assets/img/sort.svg'); ?>" alt="" class="wpmn_sort_icon" />
 			</button>
 			<div class="wpmn_sort_menu" hidden>
 				<ul class="wpmn_sort_menu_list">
-					<li class="wpmn_sort_menu_item wpmn_pro_feature">
-						<div class="wpmn_sort_menu_item_header">
-							<span><?php echo esc_html__( 'Sort Folders', 'medianest' ); ?></span>
-							<span class="wpmn_pro_badge"><?php echo esc_html__('PRO', 'medianest'); ?></span>
-						</div>
-						<span class="dashicons dashicons-arrow-right-alt2"></span>
-					</li>
-					<li class="wpmn_sort_menu_item wpmn_pro_feature">
-						<div class="wpmn_sort_menu_item_header">
-							<span><?php echo esc_html__( 'Sort Files', 'medianest' ); ?></span>
-							<span class="wpmn_pro_badge"><?php echo esc_html__('PRO', 'medianest'); ?></span>
-						</div>
-						<span class="dashicons dashicons-arrow-right-alt2"></span>
-					</li>
+					<?php echo wp_kses_post( apply_filters( 'wpmn_sort_menu_item', '', array() ) ); ?>
 					<li class="wpmn_sort_menu_item has-submenu">
 						<span><?php echo esc_html__( 'Count', 'medianest' ); ?></span>
 						<span class="dashicons dashicons-arrow-right-alt2"></span>
@@ -63,15 +50,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 								<span class="dashicons dashicons-yes wpmn_check_icon"></span>
 								<?php echo esc_html__( 'Count files in each folder', 'medianest' ); ?>
 							</li>
-							<li class="wpmn_count_mode_item wpmn_pro_feature_item">
-								<span><?php echo esc_html__( 'Count files in both parent folder and subfolders', 'medianest' ); ?></span>
-								<span class="wpmn_pro_badge"><?php echo esc_html__('PRO', 'medianest'); ?></span>
-							</li>
+							<?php echo wp_kses_post( apply_filters( 'wpmn_sort_sub_menu_item', '', array() ) ); ?>
 						</ul>
 					</li>
 				</ul>
 			</div>
 		</div>
+
 		<div class="wpmn_action_wrapper">
 			<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action--more">
 				<img src="<?php echo esc_url( WPMN_URL . 'assets/img/others.svg'); ?>" alt="" class="wpmn_more_icon" />
@@ -82,9 +67,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 						<span class="dashicons dashicons-yes-alt"></span>
 						<span><?php echo esc_html__( 'Bulk Select', 'medianest' ); ?></span>
 					</li>
-					<li class="wpmn_more_menu_item" data-action="hide-folder-id">
-						<span class="dashicons dashicons-hidden"></span>
-						<span><?php echo esc_html__( 'Hide folder ID', 'medianest' ); ?></span>
+					<li class="wpmn_more_menu_item" data-action="hide-folder-id"
+						data-text-hide="<?php echo esc_attr__( 'Hide folder ID', 'medianest' ); ?>"
+						data-text-show="<?php echo esc_attr__( 'Show Folder ID', 'medianest' ); ?>"
+						data-icon-hide="dashicons-hidden"
+						data-icon-show="dashicons-visibility">
+						<span class="dashicons dashicons-visibility"></span>
+						<span><?php echo esc_html__( 'Show Folder ID', 'medianest' ); ?></span>
 					</li>
 					<hr>
 					<li class="wpmn_more_menu_item" data-action="settings">
@@ -101,13 +90,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		<div class="wpmn_media_sidebar_section">
 			<button type="button" class="wpmn_folder_button" data-folder-slug="all">
 				<img src="<?php echo esc_url( WPMN_URL . 'assets/img/all-files.svg'); ?>" alt="" class="wpmn_all_files_icon" />
-				<span><?php echo esc_html__( $wpmn_labels['all'], 'medianest' ); ?></span>
+				<span><?php echo esc_html( $wpmn_labels['all'], 'medianest' ); ?></span>
 				<span class="wpmn_count wpmn_count_all" data-count="all">0</span>
 			</button>
 
 			<button type="button" class="wpmn_folder_button" data-folder-slug="uncategorized">
 				<img src="<?php echo esc_url( WPMN_URL . 'assets/img/uncategorized.svg'); ?>" alt="" class="wpmn_uncategorized_icon" />
-				<span><?php echo esc_html__( $wpmn_labels['uncategorized'], 'medianest' ); ?></span>
+				<span><?php echo esc_html( $wpmn_labels['uncategorized'], 'medianest' ); ?></span>
 				<span class="wpmn_count wpmn_count_uncategorized" data-count="uncategorized">0</span>
 			</button>
 		</div>
@@ -145,9 +134,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<h3 id="wpmn_delete_title" class="wpmn_dialog_title">
 				<?php echo esc_html__( 'Delete Folder', 'medianest' ); ?>
 			</h3>
-			<p class="wpmn_dialog_message">
-				<?php echo esc_html__( 'Are you sure you want to delete this folder? The files will be moved to Uncategorized.', 'medianest' ); ?>
-			</p>
+			<p class="wpmn_dialog_message"></p>
 			<div class="wpmn_dialog_actions">
 				<button type="button" class="button button-primary wpmn_delete_confirm">
 					<?php echo esc_html__( 'Delete', 'medianest' ); ?>
@@ -183,22 +170,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 						<button type="button" class="wpmn_theme_btn" data-theme="default">
 							<?php echo esc_html__( 'Default', 'medianest' ); ?>
 						</button>
-						<button type="button" class="wpmn_theme_btn wpmn_pro_theme" disabled>
-							<?php echo esc_html__( 'Windows', 'medianest' ); ?>
-							<span class="wpmn_pro_badge_small"><?php echo esc_html__( 'PRO', 'medianest' ); ?></span>
-						</button>
-						<button type="button" class="wpmn_theme_btn wpmn_pro_theme" disabled>
-							<?php echo esc_html__( 'Dropbox', 'medianest' ); ?>
-							<span class="wpmn_pro_badge_small"><?php echo esc_html__( 'PRO', 'medianest' ); ?></span>
-						</button>
+						<?php echo wp_kses_post( apply_filters( 'wpmn_theme_buttons', '', array() ) ); ?>
 					</div>
-				</div>
-
-				<div class="wpmn_settings_field">
-					<label class="wpmn_settings_checkbox">
-						<input type="checkbox" id="wpmn_show_breadcrumb">
-						<span><?php echo esc_html__( 'Show breadcrumb', 'medianest' ); ?></span>
-					</label>
 				</div>
 			</div>
 			<div class="wpmn_settings_dialog_footer">
@@ -234,16 +207,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/delete.svg'); ?>" alt="" class="wpmn_folder_content_delete" />
 			<span><?php echo esc_html__( 'Delete', 'medianest' ); ?></span>
 		</div>
-		<div class="wpmn_context_menu_item wpmn_pro_feature" data-action="change_color">
-			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/color.svg'); ?>" alt="" class="wpmn_folder_content_color" />
-			<span><?php echo esc_html__( 'Modify Color', 'medianest' ); ?></span>
-			<span class="wpmn_pro_badge"><?php echo esc_html__( 'PRO', 'medianest' ); ?></span>
-		</div>
-		<div class="wpmn_context_menu_item wpmn_pro_feature" data-action="download">
-			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/download.svg'); ?>" alt="" class="wpmn_folder_content_download" />
-			<span><?php echo esc_html__( 'Download', 'medianest' ); ?></span>
-			<span class="wpmn_pro_badge"><?php echo esc_html__( 'PRO', 'medianest' ); ?></span>
-		</div>
+		<?php echo wp_kses_post( apply_filters( 'wpmn_folder_context_menu', '', array() ) ); ?>
 	</div>
 </div>
 

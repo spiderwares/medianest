@@ -6,9 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 <td>
     <?php if ( isset( $field['options'] ) ) : ?>
-        <div class="wpmn-radio-field" <?php echo isset( $field['data_hide'] ) ? 'data-hide="' . esc_attr( $field['data_hide'] ) . '"' : ''; ?>>
+        <div class="wpmn_radio_field" <?php echo isset( $field['data_hide'] ) ? 'data-hide="' . esc_attr( $field['data_hide'] ) . '"' : ''; ?>>
             <?php foreach ( $field['options'] as $wpmn_optionKey => $wpmn_optionImg ) : ?>
-                <p class="wpmn-image-control <?php echo in_array( $wpmn_optionKey, $field['disabled_options'] ?? array() ) ? 'wpmn-disabled-option' : ''; ?>">
+                <p class="wpmn_image_control <?php echo in_array( $wpmn_optionKey, $field['disabled_options'] ?? array() ) ? 'wpmn_disabled_option' : ''; ?>">
                     <input 
                         type="radio" 
                         name="<?php echo esc_attr( $field['name'] ); ?>"

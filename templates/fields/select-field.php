@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 
 <td>
-    <div class="wpmn-select">   
+    <div class="wpmn_select">   
         <select id="<?php echo esc_attr( $field['name'] ); ?>" 
             name="<?php echo isset( $field['name'] ) ? esc_attr( $field['name'] ) : ''; ?>"
             <?php if (!empty($field['data_hide'])) : ?>

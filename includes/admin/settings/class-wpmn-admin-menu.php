@@ -152,7 +152,6 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 				true
 			);
 
-            // Enqueue on all admin pages to support Media Modal in Gutenberg/Classic Editor
             wp_enqueue_script(
                 'wpmn-upload-folder',
                 WPMN_URL . 'assets/js/wpmn-upload-folder.js',
@@ -160,7 +159,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
                 WPMN_VERSION,
                 true
             );
-
+            
             // Get saved theme design from settings
             $saved_theme     = isset( $this->settings['theme_design'] ) ? sanitize_key( $this->settings['theme_design'] ) : 'default';
             $show_breadcrumb = isset( $this->settings['breadcrumb_navigation'] ) ? $this->settings['breadcrumb_navigation'] : 'yes';
@@ -188,8 +187,8 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 						'emptyTitle'         => esc_html__( 'Create your first folder', 'medianest' ),
 						'emptyDescription'   => esc_html__( 'There are no folders available. Please add a folder to better manage your files.', 'medianest' ),
 						'emptyButton'        => esc_html__( 'Add Folder', 'medianest' ),
-						'deleteConfirm'      => esc_html__( 'Are you sure you want to delete this folder? The files it contains will be automatically moved to the “Uncategorized” folder.', 'medianest' ),
-						'confirmClearData'   => esc_html__( 'Are you sure you want to delete all Medianest data?', 'medianest' ),
+						'deleteConfirm'      => esc_html__( 'Are you sure you want to remove this folder? The files will be moved to Uncategorized.', 'medianest' ),
+					    'confirmClearData'   => esc_html__( 'Are you sure you want to delete all Medianest data?', 'medianest' ),
 						'settingsSaved'      => esc_html__( 'Settings saved successfully!', 'medianest' ),
 						'itemMoved'          => esc_html__( 'Item moved successfully.', 'medianest' ),
 						'allDataCleared'     => esc_html__( 'All data cleared.', 'medianest' ),

@@ -216,6 +216,5 @@ jQuery(function ($) {
         window.wpmn_media_folder = {};
     }
 
-    // Attach folder instance to global namespace
     window.wpmn_media_folder.folder = new WPMN_Media_Folder();
 });
