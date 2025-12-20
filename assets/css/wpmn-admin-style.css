@@ -89,7 +89,7 @@
 
 .wpmn_folder_checkbox:checked {
     background-color: #007cba;
-    border-color: #007cba;
+    border-color: #007cba !important;
 }
 
 .wpmn_folder_checkbox:checked::after {
@@ -289,6 +289,40 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     pointer-events: none;
     white-space: nowrap;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/*--------------------------- List View Drag Icon ---------------------------*/
+
+.wpmn_media_layout #the-list tr.wpmn_draggable {
+    position: relative;
+}
+
+.wpmn_media_layout #the-list tr.wpmn_draggable .check-column {
+    position: relative;
+}
+
+.wpmn_media_layout #the-list tr.wpmn_draggable:hover .check-column::before {
+    content: '\f545';
+    font-family: dashicons;
+    position: absolute;
+    top: 55%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #50575e;
+    cursor: move;
+    z-index: 1;
+    pointer-events: none;
+    background: none;
+    margin-left: 5px;
+}
+
+.wpmn_media_layout #the-list tr.wpmn_draggable:hover {
+    background-color: #f6f7f7;
+}
+
+.wpmn_media_layout #the-list tr.ui-draggable-dragging {
+    opacity: 0.6;
+    background-color: #e8f4f8;
 }
 
 /*--------------------------- Clear Data Button ---------------------------*/

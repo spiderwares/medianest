@@ -33,9 +33,9 @@ endif;
                     </a>
                 <?php else : ?>
                     <img src="<?php echo esc_attr( $wpmn_img['src'] ); ?>" alt="<?php echo esc_attr( $wpmn_img['alt'] ); ?>" class="<?php echo esc_attr( $wpmn_img['class'] ); ?>"/>
-                <?php endif; ?>
+                <?php endif;
                 
-                <?php if ( ! empty( $wpmn_img['caption'] ) ) : ?>
+                if ( ! empty( $wpmn_img['caption'] ) ) : ?>
                     <figcaption class="wpmn_block_gallery_item__caption"><?php echo wp_kses_post( $wpmn_img['caption'] ); ?></figcaption>
                 <?php endif; ?>
             </figure>

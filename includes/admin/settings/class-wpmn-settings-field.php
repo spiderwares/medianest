@@ -62,7 +62,7 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                     'name'       => 'wpmn_settings[folder_count_mode]',
                     'options'    => array(
                         'folder_only'  => esc_html__( 'Count only files in this folder', 'medianest' ),
-                        'all_files'    => esc_html__( 'Count all files in this folder and its subfolders (Pro)', 'medianest' ),
+                        'all_files'    => esc_html__( 'Count files in parent and subfolders (Pro)', 'medianest' ),
                     ),
                     'disabled_options' => array('all_files' ),
                 ),

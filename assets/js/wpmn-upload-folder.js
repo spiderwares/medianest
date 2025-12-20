@@ -16,9 +16,6 @@ jQuery(function ($) {
             this.bindUploader();
         }
 
-        /* ========================
-         * Event Bindings
-         * ======================== */
         bindEvents() {
             $(document.body).on('change', '.wpmn_select_upload_folder', this.handleFolderChange.bind(this));
         }
@@ -33,9 +30,6 @@ jQuery(function ($) {
             this.updateBrowserUploader(folderId);
         }
 
-        /* ========================
-         * DOM Observer
-         * ======================== */
         observeDOM() {
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach(({ addedNodes }) => {
@@ -55,9 +49,6 @@ jQuery(function ($) {
             });
         }
 
-        /* ========================
-         * AJAX
-         * ======================== */
         loadFolders(callback) {
 
             $.ajax({
@@ -89,10 +80,6 @@ jQuery(function ($) {
             });
         }
 
-
-        /* ========================
-         * Dropdown Handling
-         * ======================== */
         populateDropdowns(elements) {
             if (!this.folders.length) return;
 

@@ -163,14 +163,13 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             // Get saved theme design from settings
             $saved_theme     = isset( $this->settings['theme_design'] ) ? sanitize_key( $this->settings['theme_design'] ) : 'default';
             $show_breadcrumb = isset( $this->settings['breadcrumb_navigation'] ) ? $this->settings['breadcrumb_navigation'] : 'yes';
-            
+
 			wp_localize_script( 'wpmn-admin',
 				'wpmn_media_library', array(
 					'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 					'baseUrl'        => WPMN_URL,
 					'nonce'          => wp_create_nonce( 'wpmn_media_nonce' ),
                     'restUrl'        => esc_url_raw( rest_url( 'medianest/v1/' ) ),
-                    'restNonce'      => wp_create_nonce( 'wp_rest' ),
 					'theme'          => $saved_theme,
                     'showBreadcrumb' => $show_breadcrumb === 'yes',
 					'wpmn_folder'    => array(
@@ -189,8 +188,8 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 						'emptyButton'        => esc_html__( 'Add Folder', 'medianest' ),
 						'deleteConfirm'      => esc_html__( 'Are you sure you want to remove this folder? The files will be moved to Uncategorized.', 'medianest' ),
 					    'confirmClearData'   => esc_html__( 'Are you sure you want to delete all Medianest data?', 'medianest' ),
-						'settingsSaved'      => esc_html__( 'Settings saved successfully!', 'medianest' ),
-						'itemMoved'          => esc_html__( 'Item moved successfully.', 'medianest' ),
+						'settingsSaved'      => esc_html__( 'Settings saved successfully', 'medianest' ),
+						'itemMoved'          => esc_html__( 'Item moved successfully', 'medianest' ),
 						'allDataCleared'     => esc_html__( 'All data cleared.', 'medianest' ),
 						'errorPrefix'        => esc_html__( 'Error: ', 'medianest' ),
 						'moveSelf'           => esc_html__( 'Cannot move folder into itself', 'medianest' ),

@@ -15,9 +15,6 @@ jQuery(function ($) {
             this.bindEvents();
             this.fetchFolders();
             this.dragAndDropRefresh();
-            if (this.state.activeFolder !== 'all') {
-                setTimeout(() => this.triggerMediaFilter(this.state.activeFolder), 500);
-            }
             this.updateCustomToolbar();
         }
 
@@ -62,8 +59,15 @@ jQuery(function ($) {
         defaultSettings() {
             this.settings = window.wpmn_media_library || {};
             const savedSettings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
+
+            let activeFolderFromUrl = null;
+            // if (window.location.pathname.includes('upload.php')) {
+            //     const urlParams = new URLSearchParams(window.location.search);
+            //     activeFolderFromUrl = urlParams.get('wpmn_folder');
+            // }
+
             this.state = {
-                activeFolder: savedSettings.defaultFolder || 'all',
+                activeFolder: activeFolderFromUrl || savedSettings.defaultFolder || 'all',
                 folders: [],
                 counts: { all: 0, uncategorized: 0 },
                 searchTerm: '',
@@ -75,6 +79,13 @@ jQuery(function ($) {
             this.toastTimeout = null;
             this.isBulkSelect = false;
             this.clipboard = { action: null, folderId: null };
+            // const uploadPage = window.location.pathname.includes('upload.php');
+            // const listView = uploadPage &&
+            //     (window.location.search.includes('mode=list') || !window.location.search.includes('mode=grid'));
+
+            // if (this.state.activeFolder !== 'all' && uploadPage && !listView) {
+            //     setTimeout(() => this.triggerMediaFilter(this.state.activeFolder), 500);
+            // }
         }
 
         bindEvents() {
@@ -128,8 +139,26 @@ jQuery(function ($) {
             if (e) e.preventDefault();
             e.stopPropagation();
             const li = $(e.currentTarget).closest('.wpmn_folder_node');
-            li.attr('aria-expanded', li.attr('aria-expanded') !== 'true');
-            li.children('ul').slideToggle(300);
+            const isExpanded = li.attr('aria-expanded') === 'true';
+
+            li.attr('aria-expanded', !isExpanded);
+
+            if (isExpanded) {
+                li.children('ul').slideUp(300);
+            } else {
+                li.children('ul').slideDown(300);
+            }
+
+            const folderId = li.find('.wpmn_folder_button').first().data('folder-id');
+            if (folderId) {
+                const expanded = JSON.parse(this.getStorage('wpmnExpandedFolders', '{}'));
+                if (!isExpanded) {
+                    expanded[folderId] = true;
+                } else {
+                    delete expanded[folderId];
+                }
+                this.setStorage('wpmnExpandedFolders', JSON.stringify(expanded));
+            }
         }
 
         handleMenuToggle(e, menuClass) {
@@ -235,9 +264,11 @@ jQuery(function ($) {
         }
 
         handleFolderClick(e) {
-            if (this.isBulkSelect && !$(e.target).hasClass('wpmn_folder_checkbox')) {
-                const check = $(e.currentTarget).find('.wpmn_folder_checkbox');
-                check.prop('checked', !check.prop('checked')).trigger('change');
+            if (this.isBulkSelect) {
+                if (!$(e.target).hasClass('wpmn_folder_checkbox')) {
+                    const check = $(e.currentTarget).find('.wpmn_folder_checkbox');
+                    check.prop('checked', !check.prop('checked')).trigger('change');
+                }
                 return;
             }
             const slug = $(e.currentTarget).data('folder-slug');
@@ -251,6 +282,15 @@ jQuery(function ($) {
             wpmn_media_folder.folder.setupDroppableTargets();
             wpmn_media_folder.folder.updateActionButtons();
             this.updateCustomToolbar();
+
+            // Remove wpmn_folder from URL in grid mode
+            const mediaFrame = wp?.media?.frame?.state;
+            if (mediaFrame && window.location.search.includes('wpmn_folder')) {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('wpmn_folder');
+                window.history.replaceState({}, '', url.toString());
+            }
+
             this.triggerMediaFilter(slug);
         }
 
@@ -391,28 +431,47 @@ jQuery(function ($) {
             wpmn_media_folder.folder.updateFolderIdVisibility();
             wpmn_media_folder.folder.updateActionButtons();
             this.updateCustomToolbar();
-            this.updateFolderIdMenuText();
+            wpmn_media_folder.folder.updateFolderIdMenuText();
         }
 
         dragAndDropRefresh() {
-            if (!this._dragTimer) this._dragTimer = setInterval(() => {
-                const attachments = $('.attachments .attachment').not('.wpmn_draggable');
-                if (attachments.length) {
-                    attachments.addClass('wpmn_draggable').draggable({
-                        helper: function () {
-                            const count = $(this).hasClass('selected') ? $('.attachments .attachment.selected').length : 1;
-                            return $('<div class="wpmn_drag_helper_pill"></div>').text(count === 1 ? 'Move 1 item' : `Move ${count} items`);
-                        },
-                        cursor: 'move', cursorAt: { left: 20, top: 20 }, appendTo: 'body', zIndex: 200000, revert: 'invalid'
-                    });
-                }
+            if (this._dragTimer) return;
+
+            const getHelper = (count) =>
+                $('<div class="wpmn_drag_helper_pill"></div>')
+                    .text(count === 1 ? 'Move 1 item' : `Move ${count} items`);
+
+            const draggableOptions = (getCount) => ({
+                helper: () => getHelper(getCount()),
+                cursor: 'move',
+                cursorAt: { left: 20, top: 20 },
+                appendTo: 'body',
+                zIndex: 200000,
+                revert: 'invalid',
+                start() { $(this).css('opacity', 0.5); },
+                stop() { $(this).css('opacity', 1); }
+            });
+
+            this._dragTimer = setInterval(() => {
+
+                // Grid view
+                $('.attachments .attachment').not('.wpmn_draggable').addClass('wpmn_draggable')
+                    .draggable(draggableOptions(() =>
+                        $(this).hasClass('selected') ? $('.attachments .attachment.selected').length : 1
+                    ));
+
+                // List view
+                $('.wpmn_media_layout #the-list tr').not('.wpmn_draggable').addClass('wpmn_draggable')
+                    .draggable(draggableOptions(() =>
+                        $(this).find('input[type="checkbox"]').is(':checked') ? $('#the-list input[type="checkbox"]:checked').length : 1
+                    ));
+
             }, 500);
         }
 
         injectSidebarLayout() {
             const wrap = $('#wpbody-content .wrap');
 
-            // Media Library page
             if (this.sidebar.length && wrap.length && !wrap.hasClass('wpmn_media_layout') && !$('.media-modal').length) {
                 wrap.children().not(this.sidebar).wrapAll('<div class="wpmn_media_content"></div>');
                 wrap.prepend(this.sidebar).addClass('wpmn_media_layout');
@@ -422,7 +481,6 @@ jQuery(function ($) {
                 }
             }
 
-            // Media modal
             setInterval(() => {
                 const modal = $('.media-modal:visible');
                 if (!modal.length) return;
@@ -468,27 +526,20 @@ jQuery(function ($) {
             this.showFolderId = !this.showFolderId;
             this.setStorage('wpmnShowFolderId', this.showFolderId ? '1' : '0');
             wpmn_media_folder.folder.updateFolderIdVisibility();
-            this.updateFolderIdMenuText();
+            wpmn_media_folder.folder.updateFolderIdMenuText();
             this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
         }
 
-        updateFolderIdMenuText() {
-            const item = this.sidebar.find('.wpmn_more_menu_item[data-action="hide-folder-id"]');
-            const icon = item.find('.dashicons');
-            const label = item.find('span:not(.dashicons)');
-
-            if (this.showFolderId) {
-                label.text(item.data('text-hide'));
-                icon.removeClass(item.data('icon-show')).addClass(item.data('icon-hide'));
-            } else {
-                label.text(item.data('text-show'));
-                icon.removeClass(item.data('icon-hide')).addClass(item.data('icon-show'));
-            }
-        }
-
         updateCustomToolbar() {
-            const toolbar = $('.media-toolbar.wp-filter');
-            if (!toolbar.length) return;
+            let target = $('.media-toolbar.wp-filter');
+
+            if (!target.length) {
+                if ($('.wp-filter').length) {
+                    target = $('.wp-filter');
+                }
+            }
+
+            if (!target.length) return;
 
             const settings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
             let container = $('.wpmn_breadcrumb');
@@ -499,28 +550,18 @@ jQuery(function ($) {
             }
 
             if (!container.length) {
-                container = $('<div class="wpmn_breadcrumb"></div>').insertAfter(toolbar);
+                container = $('<div class="wpmn_breadcrumb"></div>');
+                container.insertAfter(target);
             }
 
-            container.empty()
-                .append(
-                    $('<span class="dashicons dashicons-admin-home"></span>')
-                        .on('click', () => this.changeFolder('all'))
-                );
-
-            const id = this.state.activeFolder.startsWith('term-')
-                ? this.state.activeFolder.replace('term-', '')
-                : null;
-
+            container.empty().append($('<span class="dashicons dashicons-admin-home"></span>').on('click', () => this.changeFolder('all')));
+            const id = this.state.activeFolder.startsWith('term-') ? this.state.activeFolder.replace('term-', '') : null;
             const path = id ? this.getFolderPath(id, this.state.folders) : [];
 
             path.forEach((folder, i) => {
                 container.append('<span class="wpmn_breadcrumb_line">/</span>');
-
                 const isLast = i === path.length - 1;
-                const item = $('<span>')
-                    .addClass(isLast ? 'wpmn_breadcrumb_folder' : 'wpmn_breadcrumb_folders')
-                    .text(folder.name);
+                const item = $('<span>').addClass(isLast ? 'wpmn_breadcrumb_folder' : 'wpmn_breadcrumb_folders').text(folder.name);
 
                 if (!isLast) {
                     item.on('click', () => this.changeFolder(`term-${folder.id}`));
@@ -542,7 +583,15 @@ jQuery(function ($) {
         }
 
         triggerMediaFilter(slug) {
-            wp?.media?.frame?.state().get('library')?.props.set('wpmn_folder', slug);
+            const mediaFrame = wp?.media?.frame?.state;
+
+            if (mediaFrame) {
+                wp.media.frame.state().get('library')?.props.set('wpmn_folder', slug);
+            } else {
+                const url = new URL(window.location.href);
+                url.searchParams.set('wpmn_folder', slug);
+                window.location.href = url.toString();
+            }
         }
 
         handleClearData(e) {
@@ -656,7 +705,6 @@ jQuery(function ($) {
                 folderId = __this.data('folder-id'),
                 folderName = __this.data('folder-name');
 
-            // Don't show context menu on special folders
             if (['all', 'uncategorized'].includes(folderSlug)) {
                 return;
             }

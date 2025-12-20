@@ -309,11 +309,12 @@ button.wpmn_media_sidebar_action--more {
 }
 
 .wpmn_sort_menu_submenu .wpmn_check_icon {
-	margin-right: 6px;
-	font-size: 28px;
-	width: 28px;
-	height: 28px;
+	font-size: 25px;
+	width: 25px;
+	height: 25px;
 	color: #2271b1;
+	margin-left: -10px;
+	margin-top: -3px;
 }
 
 .wpmn_sort_menu_submenu {
@@ -378,7 +379,8 @@ button.wpmn_media_sidebar_action--more {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
-	margin-bottom: 12px;
+	margin-bottom: 10px;
+	margin-left: 4px;
 }
 
 .wpmn_folder_button {
@@ -841,6 +843,10 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 	transform: scale(1);
 }
 
+.wpmn_context_menu_item:hover {
+	background: #3c434a1a;
+}
+
 .wpmn_context_menu_item {
 	display: flex;
 	align-items: center;
@@ -912,7 +918,7 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 	transform: rotate(-45deg);
 	margin-left: -2px;
 	margin-top: 0;
-	transition: transform 0.50s;
+	transition: transform 0.25s;
 }
 
 .wpmn_folder_node[aria-expanded='true']>.wpmn_folder_row>.wpmn_toggle_arrow::before {

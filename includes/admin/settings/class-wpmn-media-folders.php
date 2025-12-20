@@ -141,25 +141,30 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 				$group[$t->parent][] = $t;
 			endforeach;
 
-			return self::build_tree(0, $group);
+            $settings = get_option( 'wpmn_settings' );
+            $count_mode = isset( $settings['folder_count_mode'] ) ? $settings['folder_count_mode'] : 'folder_only';
+
+			return self::build_tree(0, $group, $count_mode);
 		}
 
-		public static function build_tree($parent, $group) {
+		public static function build_tree($parent, $group, $count_mode = 'folder_only') {
 
 			if (empty($group[$parent])) return [];
 			$list = [];
 
 			foreach ($group[$parent] as $term) :
-				$children = self::build_tree($term->term_id, $group);
+				$children = self::build_tree($term->term_id, $group, $count_mode);
 				$total = $term->count_with_children;
 				foreach ($children as $c) :
 					$total += $c['total'];
 				endforeach;
 
+                $count = ($count_mode === 'all_files') ? $total : $term->count_with_children;
+
 				$list[] = array(	
 					'id'       => $term->term_id,
 					'name'     => $term->name,
-					'count'    => $term->count_with_children,
+					'count'    => $count,
 					'total'    => $total,
 					'children' => $children,
 				);

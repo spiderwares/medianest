@@ -33,6 +33,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 			add_action( 'admin_footer-post.php', array( $this, 'wpmn_render_sidebar' ) );
             add_action( 'attachment_fields_to_edit', array( $this, 'add_folder_field' ), 10, 2 );
             add_filter( 'ajax_query_attachments_args', array( $this, 'wpmn_filter_attachments' ) );
+            add_action( 'pre_get_posts', array( $this, 'wpmn_filter_list_view' ) );
             add_filter( 'manage_media_columns', array( $this, 'add_file_size_column' ) );
             add_action( 'manage_media_custom_column', array( $this, 'display_file_size_column' ), 10, 2 );
             add_filter( 'manage_upload_sortable_columns', array( $this, 'register_file_size_sortable' ) );
@@ -88,8 +89,52 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                     );
                 endif;
             endif;
-
             return $query;
+        }
+
+        public function wpmn_filter_list_view( $query ) {
+            if ( ! is_admin() || ! $query->is_main_query() ) return;
+
+            $screen = get_current_screen();
+            if ( ! $screen || $screen->id !== 'upload' ) return;
+
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $folder = ! empty( $_GET['wpmn_folder'] ) ? sanitize_text_field( wp_unslash( $_GET['wpmn_folder'] ) ) : '';
+            if ( ! $folder || $folder === 'all' ) return;
+
+            if ( $folder === 'uncategorized' ) :
+                $terms = get_terms( array(
+                    'taxonomy'   => 'wpmn_media_folder',
+                    'fields'     => 'ids',
+                    'hide_empty' => false,
+                ) );
+
+                if ( $terms ) :
+                    $query->set( 'tax_query', array(
+                        array(
+                            'taxonomy' => 'wpmn_media_folder',
+                            'field'    => 'term_id',
+                            'terms'    => $terms,
+                            'operator' => 'NOT IN',
+                        )
+                    ) );
+                endif;
+                return;
+            endif;
+
+            if ( str_starts_with( $folder, 'term-' ) ) :
+                $term_id = absint( str_replace( 'term-', '', $folder ) );
+                if ( $term_id ) :
+                    $query->set( 'tax_query', array(
+                        array(
+                            'taxonomy'         => 'wpmn_media_folder',
+                            'field'            => 'term_id',
+                            'terms'            => $term_id,
+                            'include_children' => false,
+                        )
+                    ) );
+                endif;
+            endif;
         }
 
         public function add_folder_field( $form_fields, $post ) {

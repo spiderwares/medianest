@@ -36,70 +36,183 @@ jQuery(function ($) {
                 }
             }
             wpmn_admin_media.admin.renderSidebar();
+
+            // Trigger hook for Pro version
+            if (typeof wp !== 'undefined' && wp.hooks) {
+                wp.hooks.doAction('wpmnFoldersLoaded');
+            }
         }
 
         buildTreeList(nodes) {
+            const expanded = JSON.parse(
+                wpmn_admin_media.admin.getStorage('wpmnExpandedFolders', '{}')
+            );
+
             const ul = $('<ul role="group"></ul>');
+
             nodes.forEach(node => {
-                const slug = 'term-' + node.id;
-                const li = $('<li class="wpmn_folder_node" role="treeitem"></li>').attr('aria-expanded', !!node.children?.length);
-                const row = $('<div class="wpmn_folder_row"></div>');
-                const arrow = $('<span class="wpmn_toggle_arrow"></span>').toggleClass('has-children', !!node.children?.length);
+                const isExpanded = !!expanded[node.id];
+                const hasChildren = !!node.children?.length;
 
-                const btn = $(`<button type="button" class="wpmn_folder_button" data-folder-slug="${slug}" data-folder-id="${node.id}" data-folder-name="${node.name}">
-					<input type="checkbox" class="wpmn_folder_checkbox" value="${node.id}">
-					<img src="${wpmn_media_library.baseUrl || ''}assets/img/folder.svg" class="wpmn_folder_icon" aria-hidden="true">
-					<span class="wpmn_folder_button__label"></span>
-					<span class="wpmn_count">${node.count || 0}</span>
-				</button>`);
+                const li = $('<li>', {
+                    class: 'wpmn_folder_node',
+                    role: 'treeitem',
+                    'aria-expanded': isExpanded
+                });
 
-                // Set text safely
-                const labelText = (wpmn_admin_media.admin.showFolderId ? `#${node.id} ` : '') + node.name;
-                btn.find('.wpmn_folder_button__label').text(labelText);
+                const arrow = $('<span class="wpmn_toggle_arrow">')
+                    .toggleClass('has-children', hasChildren);
 
-                row.append(arrow, btn);
-                li.append(row);
-                if (node.children?.length) li.append(this.buildTreeList(node.children));
+                const btn = $(`
+                    <button type="button" class="wpmn_folder_button"
+                        data-folder-slug="term-${node.id}"
+                        data-folder-id="${node.id}"
+                        data-folder-name="${node.name}">
+                        <input type="checkbox" class="wpmn_folder_checkbox" value="${node.id}">
+                        <img src="${wpmn_media_library.baseUrl || ''}assets/img/folder.svg"
+                            class="wpmn_folder_icon" aria-hidden="true">
+                        <span class="wpmn_folder_button__label"></span>
+                        <span class="wpmn_count">${node.count || 0}</span>
+                    </button>
+                `);
+
+                btn.find('.wpmn_folder_button__label').text(
+                    (wpmn_admin_media.admin.showFolderId ? `#${node.id} ` : '') + node.name
+                );
+
+                li.append(
+                    $('<div class="wpmn_folder_row"></div>').append(arrow, btn)
+                );
+
+                if (hasChildren) {
+                    const children = this.buildTreeList(node.children);
+                    if (!isExpanded) children.hide();
+                    li.append(children);
+                }
+
                 ul.append(li);
             });
+
             return ul;
         }
 
+        updateFolderIdMenuText() {
+            const item = wpmn_admin_media.admin.sidebar.find('.wpmn_more_menu_item[data-action="hide-folder-id"]');
+            const icon = item.find('.dashicons');
+            const label = item.find('span:not(.dashicons)');
+
+            if (wpmn_admin_media.admin.showFolderId) {
+                label.text(item.data('text-hide'));
+                icon.removeClass(item.data('icon-show')).addClass(item.data('icon-hide'));
+            } else {
+                label.text(item.data('text-show'));
+                icon.removeClass(item.data('icon-hide')).addClass(item.data('icon-show'));
+            }
+        }
+
         setupDroppableTargets() {
-            wpmn_admin_media.admin.sidebar.find('.wpmn_folder_button').each((i, el) => {
-                const btn = $(el), slug = btn.data('folder-slug');
-                if (btn.hasClass('ui-droppable')) btn.droppable('destroy');
-                if (!slug || (slug !== 'uncategorized' && !slug.startsWith('term-'))) return;
+            const sidebar = wpmn_admin_media.admin.sidebar;
+
+            sidebar.find('.wpmn_folder_button').each((_, el) => {
+                const btn = $(el);
+                const slug = btn.data('folder-slug');
+
+                if (btn.hasClass('ui-droppable')) {
+                    btn.droppable('destroy');
+                }
+
+                if (!slug || (slug !== 'uncategorized' && !slug.startsWith('term-'))) {
+                    return;
+                }
 
                 btn.droppable({
-                    accept: '.attachments .attachment',
+                    accept: '.attachments .attachment, .wpmn_media_layout #the-list tr.wpmn_draggable',
                     hoverClass: 'is-drop-hover',
                     tolerance: 'pointer',
-                    drop: (e, ui) => {
-                        const folderId = slug.startsWith('term-') ? parseInt(slug.replace('term-', ''), 10) : 0;
-                        let ids = $('.attachments .attachment.selected').map((i, el) => parseInt($(el).data('id'))).get();
-                        if (!ids.length && ui.draggable) ids = [parseInt(ui.draggable.data('id'))];
-                        if (!ids.length) return alert(wpmn_admin_media.admin.getText('noSelection'));
+                    drop: (_, ui) => {
+                        const folderId = slug.startsWith('term-')
+                            ? parseInt(slug.replace('term-', ''), 10)
+                            : 0;
+
+                        const ids = this.getDraggedMediaIds(ui);
+
+                        if (!ids.length) {
+                            return alert(wpmn_admin_media.admin.getText('noSelection'));
+                        }
+
                         this.assignMediaToFolder(folderId, ids);
                     }
                 });
             });
         }
 
-        assignMediaToFolder(folderId, ids) {
-            wpmn_admin_media.admin.sidebar.find('.wpmn_tree_loader').prop('hidden', false);
-            wpmn_admin_media.admin.apiCall('assign_media', { folder_id: folderId, attachment_ids: ids }).then(data => {
-                this.refreshState(data);
-                wpmn_admin_media.admin.showToast(wpmn_admin_media.admin.getText('itemMoved'));
+        getDraggedMediaIds(ui) {
+            // Grid view
+            if (ui.draggable.hasClass('attachment')) {
+                const selected = $('.attachments .attachment.selected')
+                    .map((_, el) => parseInt($(el).data('id')))
+                    .get();
 
-                // Remove items if moving out of current folder
-                const isCurrentFolder = (wpmn_admin_media.admin.state.activeFolder === 'uncategorized' && folderId === 0) ||
-                    (wpmn_admin_media.admin.state.activeFolder === 'term-' + folderId);
+                return selected.length
+                    ? selected
+                    : [parseInt(ui.draggable.data('id'))];
+            }
 
-                if (!isCurrentFolder && wpmn_admin_media.admin.state.activeFolder !== 'all') {
-                    ids.forEach(id => $('.attachments .attachment[data-id="' + id + '"]').remove());
+            // List view
+            if (ui.draggable.is('tr')) {
+                const checked = $('#the-list input[type="checkbox"]:checked');
+
+                if (checked.length) {
+                    return checked.map((_, el) =>
+                        parseInt($(el).closest('tr').attr('id').replace('post-', ''))
+                    ).get();
                 }
-            }).catch(alert).finally(() => wpmn_admin_media.admin.sidebar.find('.wpmn_tree_loader').prop('hidden', true));
+
+                return [parseInt(ui.draggable.attr('id').replace('post-', ''))];
+            }
+
+            return [];
+        }
+
+        assignMediaToFolder(folderId, ids) {
+            const admin = wpmn_admin_media.admin;
+            const sidebar = admin.sidebar;
+
+            sidebar.find('.wpmn_tree_loader').prop('hidden', false);
+
+            admin.apiCall('assign_media', {
+                folder_id: folderId,
+                attachment_ids: ids
+            })
+                .then(data => {
+                    this.refreshState(data);
+                    admin.showToast(admin.getText('itemMoved'));
+
+                    const active = admin.state.activeFolder;
+                    const isCurrent =
+                        (active === 'uncategorized' && folderId === 0) ||
+                        (active === 'term-' + folderId);
+
+                    if (isCurrent || active === 'all') return;
+
+                    ids.forEach(id => {
+                        $(`.attachments .attachment[data-id="${id}"]`).remove();
+
+                        $(`#the-list tr#post-${id}`).fadeOut(300, function () {
+                            $(this).remove();
+
+                            if (!$('#the-list tr').length) {
+                                $('#the-list').html(
+                                    '<tr class="no-items"><td colspan="7">No items found.</td></tr>'
+                                );
+                            }
+                        });
+                    });
+                })
+                .catch(alert)
+                .finally(() => {
+                    sidebar.find('.wpmn_tree_loader').prop('hidden', true);
+                });
         }
 
         getFilteredTree() {
@@ -123,10 +236,9 @@ jQuery(function ($) {
             $.ajax({
                 url: url,
                 method: 'GET',
-                data: { search: term },
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader('X-WP-Nonce', wpmn_media_library.restNonce);
-                    wpmn_admin_media.admin.sidebar.find('.wpmn_folder_tree').addClass('wpmn_loading');
+                data: {
+                    search: term,
+                    nonce: wpmn_media_library.nonce
                 },
                 success: (res) => {
                     if (res && res.success && res.data && res.data.folders) {
@@ -134,10 +246,6 @@ jQuery(function ($) {
                         wpmn_admin_media.admin.renderSidebar();
                     }
                 },
-                error: (err) => console.error('Search failed', err),
-                complete: () => {
-                    wpmn_admin_media.admin.sidebar.find('.wpmn_folder_tree').removeClass('wpmn_loading');
-                }
             });
         }
 
