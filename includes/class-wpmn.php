@@ -43,13 +43,6 @@ if ( ! class_exists( 'WPMN' ) ) :
         }
 
         /**
-         * Register Gutenberg Blocks
-         */
-        public function register_blocks() {
-            register_block_type( WPMN_PATH . 'blocks/medianest-gallery' );
-        }
-
-        /**
          * Main WPMN Instance.
          *
          * Ensures only one instance of WPMN is loaded or can be loaded.
@@ -115,7 +108,7 @@ if ( ! class_exists( 'WPMN' ) ) :
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-media-library.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-upload-folder.php';
         }
-        
+
         /**
          * Include Public required files.
          */

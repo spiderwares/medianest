@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		<h2><?php echo esc_html__( 'Medianest', 'medianest' ); ?></h2>
 		<button type="button" class="button button-primary wpmn_media_sidebar_new_folder">
 			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/new-folder.svg'); ?>" alt="" class="wpmn_new_folder_icon" />
+			<span class="dashicons dashicons-plus wpmn_new_folders_icon"></span>
 			<?php echo esc_html__( 'New Folder', 'medianest' ); ?>
 		</button>
 	</div>
@@ -24,10 +25,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	<div class="wpmn_media_sidebar_actions">
 		<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_rename" disabled>
 			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/rename.svg'); ?>" alt="" class="wpmn_rename_icon" />
+            <span class="dashicons dashicons-edit wpmn_rename_dashicon"></span>
 			<?php echo esc_html__( 'Rename', 'medianest' ); ?>
 		</button>
 		<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_delete wpmn_delete_trigger" disabled>
 			<img src="<?php echo esc_url( WPMN_URL . 'assets/img/delete.svg'); ?>" alt="" class="wpmn_delete_icon" />
+            <span class="dashicons dashicons-trash wpmn_delete_dashicon"></span>
 			<?php echo esc_html__( 'Delete', 'medianest' ); ?>
 		</button>
 		
@@ -46,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 						<span><?php echo esc_html__( 'Count', 'medianest' ); ?></span>
 						<span class="dashicons dashicons-arrow-right-alt2"></span>
 						<ul class="wpmn_sort_menu_submenu">
-							<li class="wpmn_count_mode_item is-active" data-mode="strict">
+							<li class="wpmn_count_mode_item is-active" data-mode="folder_only">
 								<span class="dashicons dashicons-yes wpmn_check_icon"></span>
 								<?php echo esc_html__( 'Count files in each folder', 'medianest' ); ?>
 							</li>
@@ -58,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		</div>
 
 		<div class="wpmn_action_wrapper">
-			<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action--more">
+			<button type="button" class="button wpmn_media_sidebar_action wpmn_media_sidebar_action_more">
 				<img src="<?php echo esc_url( WPMN_URL . 'assets/img/others.svg'); ?>" alt="" class="wpmn_more_icon" />
 			</button>
 			<div class="wpmn_more_menu" hidden>
@@ -164,6 +167,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 						<option value="uncategorized"><?php echo esc_html__( 'Uncategorized', 'medianest' ); ?></option>
 					</select>
 				</div>
+				<?php
+				$wpmn_allowed = wp_kses_allowed_html( 'post' );
+				$wpmn_allowed['label']  = array( 'for' => true );
+				$wpmn_allowed['select'] = array( 'id' => true, 'class' => true );
+				$wpmn_allowed['option'] = array( 'value' => true, 'selected' => true );
+				echo wp_kses( apply_filters( 'wpmn_default_folder', '', array() ), $wpmn_allowed );
+				?>
 				<div class="wpmn_settings_field">
 					<label><?php echo esc_html__( 'Choose Theme', 'medianest' ); ?></label>
 					<div class="wpmn_settings_theme_buttons">

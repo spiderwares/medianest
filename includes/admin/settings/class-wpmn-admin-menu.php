@@ -161,7 +161,6 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             );
             
             // Get saved theme design from settings
-            $saved_theme     = isset( $this->settings['theme_design'] ) ? sanitize_key( $this->settings['theme_design'] ) : 'default';
             $show_breadcrumb = isset( $this->settings['breadcrumb_navigation'] ) ? $this->settings['breadcrumb_navigation'] : 'yes';
 
 			wp_localize_script( 'wpmn-admin',
@@ -170,7 +169,6 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 					'baseUrl'        => WPMN_URL,
 					'nonce'          => wp_create_nonce( 'wpmn_media_nonce' ),
                     'restUrl'        => esc_url_raw( rest_url( 'medianest/v1/' ) ),
-					'theme'          => $saved_theme,
                     'showBreadcrumb' => $show_breadcrumb === 'yes',
 					'wpmn_folder'    => array(
 						'newFolderPrompt'    => esc_html__( 'Enter folder name', 'medianest' ),
@@ -197,7 +195,9 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 						'folderMoved'        => esc_html__( 'Folder moved successfully', 'medianest' ),
 						'selectCsvFile'      => esc_html__( 'Please select a CSV file.', 'medianest' ),
                         'foldersImported'    => esc_html__( 'Folders imported successfully.', 'medianest' ),
+                        'generatingZip'      => esc_html__( 'Generating ZIP file', 'medianest' ),
 					),
+
 				)
 			);
         }

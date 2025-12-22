@@ -74,8 +74,7 @@
 
                     return el('div', { key: node.id, style: { marginLeft: (depth * 20) + 'px' } },
                         el('div', {
-                            className: 'wpmn-tree-item',
-                            style: { display: 'flex', alignItems: 'center', cursor: 'pointer', padding: '4px 0' },
+                            className: 'wpmn_tree_item',
                             onClick: function () {
                                 var newSelected;
                                 if (isChecked) {
@@ -89,10 +88,9 @@
                             el('input', {
                                 type: 'checkbox',
                                 checked: isChecked,
-                                readOnly: true,
-                                style: { marginRight: '8px' }
+                                readOnly: true
                             }),
-                            el('span', { className: 'dashicons dashicons-category', style: { color: '#007cba', marginRight: '4px', fontSize: '18px' } }),
+                            el('span', { className: 'dashicons dashicons-category' }),
                             el('span', null, node.text)
                         ),
                         node.children && node.children.length > 0 && el(FolderTree, { nodes: node.children, depth: depth + 1 })
@@ -107,34 +105,21 @@
                         // Custom Tree Select Trigger
                         el('label', { className: 'components-base-control__label' }, __('Folders', 'medianest')),
                         el('div', {
-                            className: 'components-base-control__field',
-                            style: { position: 'relative', marginBottom: '16px' }
+                            className: 'components-base-control__field wpmn_select_container'
                         },
                             el('div', {
-                                className: 'wpmn-select-trigger',
-                                style: {
-                                    border: '1px solid #757575',
-                                    borderRadius: '5px',
-                                    minHeight: '32px',
-                                    padding: '5px 8px',
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    gap: '4px',
-                                    cursor: 'pointer',
-                                    backgroundColor: '#fff',
-                                },
+                                className: 'wpmn_select_trigger',
                                 onClick: function () { setIsOpen(!isOpen); }
                             },
-                                attributes.selectedFolder.length === 0 && el('span', { style: { color: '#757575', padding: '0 4px', lineHeight: '24px' } }, __('Select folders...', 'medianest')),
+                                attributes.selectedFolder.length === 0 && el('span', { className: 'wpmn-placeholder' }, __('Select folder', 'medianest')),
                                 attributes.selectedFolder.map(function (id) {
                                     return el('div', {
                                         key: id,
-                                        style: { background: '#f0f0f0', borderRadius: '4px', padding: '0 4px 0 8px', display: 'flex', alignItems: 'center', fontSize: '12px', height: '24px' }
+                                        className: 'wpmn_selected_tag'
                                     },
                                         el('span', null, getFolderName(id, rawFolders)),
                                         el('span', {
                                             className: 'dashicons dashicons-dismiss',
-                                            style: { fontSize: '14px', cursor: 'pointer', marginLeft: '4px', color: '#555', display: 'flex', alignItems: 'center' },
                                             onClick: function (e) {
                                                 e.stopPropagation();
                                                 setAttributes({ selectedFolder: attributes.selectedFolder.filter(function (i) { return i !== id; }) });
@@ -143,29 +128,14 @@
                                     );
                                 }),
                                 el('span', {
-                                    className: 'dashicons ' + (isOpen ? 'dashicons-arrow-up-alt2' : 'dashicons-arrow-down-alt2'),
-                                    style: { marginLeft: 'auto', alignSelf: 'center', fontSize: '14px', color: '#555', marginTop: '5px', padding: '2px 4px' }
+                                    className: 'dashicons ' + (isOpen ? 'dashicons-arrow-up-alt2' : 'dashicons-arrow-down-alt2') + ' wpmn_arrow'
                                 })
                             ),
                             // Dropdown Content
                             isOpen && el('div', {
-                                className: 'wpmn-select-dropdown',
-                                style: {
-                                    position: 'absolute',
-                                    top: '100%',
-                                    left: 0,
-                                    right: 0,
-                                    background: '#fff',
-                                    border: '1px solid #757575',
-                                    borderTop: 'none',
-                                    zIndex: 100,
-                                    maxHeight: '200px',
-                                    overflowY: 'auto',
-                                    padding: '8px',
-                                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                                }
+                                className: 'wpmn_select_dropdown'
                             },
-                                isLoading ? el(Spinner) : el(FolderTree, { nodes: rawFolders })
+                                isLoading ? el(Spinner) : (rawFolders.length > 0 ? el(FolderTree, { nodes: rawFolders }) : el('div', { className: 'wpmn_no_folders' }, __('No folders found', 'medianest')))
                             )
                         ),
 
@@ -251,7 +221,7 @@
                             el('div', { className: 'components-placeholder__instructions' }, __('Please select folders from the block settings.', 'medianest'))
                         ) :
                         el('div', {
-                            style: { pointerEvents: 'none' },
+                            className: 'wpmn_editor_preview',
                             onClick: function (event) {
                                 event.preventDefault();
                             }

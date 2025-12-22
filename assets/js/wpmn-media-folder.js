@@ -5,8 +5,11 @@ jQuery(function ($) {
     class WPMN_Media_Folder {
 
         highlightActive() {
-            wpmn_admin_media.admin.sidebar.find('.is-active').removeClass('is-active');
-            const btn = wpmn_admin_media.admin.sidebar.find(`.wpmn_folder_button[data-folder-slug="${wpmn_admin_media.admin.state.activeFolder}"]`).addClass('is-active');
+            const sidebar = wpmn_admin_media.admin.sidebar;
+            sidebar.find('.wpmn_folder_button.is-active').removeClass('is-active');
+            sidebar.find('.wpmn_folder_icon.is-active, .wpmn_all_files_icon.is-active, .wpmn_uncategorized_icon.is-active').removeClass('is-active');
+
+            const btn = sidebar.find(`.wpmn_folder_button[data-folder-slug="${wpmn_admin_media.admin.state.activeFolder}"]`).addClass('is-active');
             btn.find('.wpmn_folder_icon, .wpmn_all_files_icon, .wpmn_uncategorized_icon').addClass('is-active');
         }
 

@@ -156,12 +156,12 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
             $select_html = str_replace('&nbsp;&nbsp;&nbsp;', '- ', $select_html);
 
-            $form_fields['wpmn_media_folder'] = [
+            $form_fields['wpmn_media_folder'] = array(
                 'label' => esc_html__( 'MediaNest Folder', 'medianest' ),
                 'helps' => esc_html__( 'Click the folder name to move this file to a different folder', 'medianest' ),
                 'input' => 'html',
                 'html'  => $select_html . '<span class="spinner wpmn_folder_loader"></span>',
-            ];
+            );
 
             return $form_fields;
         }

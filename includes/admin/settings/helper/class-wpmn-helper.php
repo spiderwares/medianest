@@ -20,7 +20,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 
 		public static function create_folder( $name, $parent ) {
 			$result = wp_insert_term( $name, 'wpmn_media_folder', array( 'parent' => $parent ) );
-			if ( is_wp_error( $result ) && $result->get_error_code() === 'term_exists' ) {
+			if ( is_wp_error( $result ) && $result->get_error_code() === 'term_exists' ) :
 
 				$counter = 1;
 				while ( $counter <= 100 ) :
@@ -34,7 +34,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 					endif;
 					$counter++;
 				endwhile;
-			}
+			endif;
 			return $result;
 		}
 
@@ -243,6 +243,21 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                 'key'     => $key,
                 'message' => esc_html__( 'API Key generated successfully.', 'medianest' )
             ));
+        }
+
+        public static function save_settings_request() {
+            if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+
+            $settings = get_option( 'wpmn_settings', [] );
+            
+            if ( isset( $_POST['folder_count_mode'] ) ) {
+                $settings['folder_count_mode'] = sanitize_text_field( wp_unslash( $_POST['folder_count_mode'] ) );
+            }
+
+            update_option( 'wpmn_settings', $settings );
+            wp_send_json_success();
         }
 	}
 

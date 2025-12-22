@@ -68,7 +68,8 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 			switch ($type) :
 				case 'get_folders':
-					wp_send_json_success(self::payload());
+					$count_mode = isset($_POST['folder_count_mode']) ? sanitize_text_field( wp_unslash( $_POST['folder_count_mode'] ) ) : null;
+					wp_send_json_success(self::payload($count_mode));
 					break;
 
 				case 'create_folder':
@@ -107,6 +108,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 					WPMN_Helper::move_folder_request();
 					break;
 
+                case 'save_settings':
+                    WPMN_Helper::save_settings_request();
+                    break;
+
                 case 'wpmn_generate_attachment_size':
                     WPMN_Helper::generate_attachment_size_request();
                     break;
@@ -114,17 +119,21 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                 case 'wpmn_generate_api_key':
                     WPMN_Helper::generate_api_key_request();
                     break;
+                default:
+                    do_action( 'wpmn_ajax_' . $type );
+                    break;
 			endswitch;
 		}
 
-		public static function payload() {
+
+		public static function payload($count_mode = null) {
 			return array(
-				'folders' => self::folder_tree(),
+				'folders' => self::folder_tree($count_mode),
 				'counts'  => self::special_counts(),
 			);
 		}
 
-		public static function folder_tree() {
+		public static function folder_tree($count_mode = null) {
 
 			$terms = get_terms(array(
 				'taxonomy'   => 'wpmn_media_folder',
@@ -136,13 +145,15 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			if (is_wp_error($terms)) return [];
 			$group = [];
 
-			foreach ($terms as $t) :
-				$t->count_with_children = self::folder_count($t->term_id);
-				$group[$t->parent][] = $t;
+			foreach ($terms as $term) :
+				$term->count_with_children = self::folder_count($term->term_id);
+				$group[$term->parent][] = $term;
 			endforeach;
 
-            $settings = get_option( 'wpmn_settings' );
-            $count_mode = isset( $settings['folder_count_mode'] ) ? $settings['folder_count_mode'] : 'folder_only';
+            if ( empty( $count_mode ) ) {
+                $settings = get_option( 'wpmn_settings' );
+                $count_mode = isset( $settings['folder_count_mode'] ) ? $settings['folder_count_mode'] : 'folder_only';
+            }
 
 			return self::build_tree(0, $group, $count_mode);
 		}

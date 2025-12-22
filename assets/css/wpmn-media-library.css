@@ -116,7 +116,7 @@
 	display: block;
 }
 
-.wpmn_media_sidebar.in-modal .wpmn_media_sidebar_actions {
+/* .wpmn_media_sidebar.in-modal .wpmn_media_sidebar_actions {
 	display: flex;
 	gap: 8px;
 	flex-wrap: wrap;
@@ -125,7 +125,7 @@
 	padding: 10px;
 	border: 1px solid #c1c5cc;
 	border-radius: 7px;
-}
+} */
 
 .wpmn_media_sidebar.in-modal .wpmn_folder_button {
 	width: 96%;
@@ -176,7 +176,6 @@ button.wpmn_media_sidebar_new_folder {
 	display: flex !important;
 	align-items: center !important;
 	gap: 6px !important;
-	font-weight: 500;
 }
 
 .wpmn_media_sidebar_action_rename,
@@ -226,8 +225,18 @@ button.wpmn_media_sidebar_action_menu span {
 button.wpmn_media_sidebar_action_rename:disabled .wpmn_rename_icon,
 button.wpmn_media_sidebar_action_rename.disabled .wpmn_rename_icon,
 button.wpmn_media_sidebar_action_delete:disabled .wpmn_delete_icon,
-button.wpmn_media_sidebar_action_delete.disabled .wpmn_delete_icon {
+button.wpmn_media_sidebar_action_delete.disabled .wpmn_delete_icon,
+button.wpmn_media_sidebar_action_rename:disabled .wpmn_rename_dashicon,
+button.wpmn_media_sidebar_action_rename.disabled .wpmn_rename_dashicon,
+button.wpmn_media_sidebar_action_delete:disabled .wpmn_delete_dashicon,
+button.wpmn_media_sidebar_action_delete.disabled .wpmn_delete_dashicon {
 	filter: grayscale(100%) opacity(0.5);
+}
+
+.wpmn_new_folders_icon,
+.wpmn_rename_dashicon,
+.wpmn_delete_dashicon {
+	display: none;
 }
 
 .wpmn_sort_icon,
@@ -241,8 +250,8 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_delete_icon {
 
 .wpmn_media_sidebar_action_sort,
 button.wpmn_media_sidebar_action_sort,
-.wpmn_media_sidebar_action--more,
-button.wpmn_media_sidebar_action--more {
+.wpmn_media_sidebar_action_more,
+button.wpmn_media_sidebar_action_more {
 	padding: 5px !important;
 	border: none !important;
 	min-width: 32px;
@@ -308,7 +317,8 @@ button.wpmn_media_sidebar_action--more {
 	background: #f0f0f1;
 }
 
-.wpmn_sort_menu_submenu .wpmn_check_icon {
+.wpmn_sort_menu_submenu .wpmn_check_icon,
+.wpmn_sort_menu_item .wpmn_sort_menu_subitem .wpmn_sort_menu_nested .wpmn_check_icon {
 	font-size: 25px;
 	width: 25px;
 	height: 25px;

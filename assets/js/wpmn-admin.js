@@ -16,6 +16,13 @@ jQuery(function ($) {
             this.fetchFolders();
             this.dragAndDropRefresh();
             this.updateCustomToolbar();
+
+            setTimeout(() => {
+                const settings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
+                if (settings.defaultSort) {
+                    this.applySortFromSettings(settings.defaultSort);
+                }
+            }, 1000);
         }
 
         getStorage(key, defCode) {
@@ -61,10 +68,10 @@ jQuery(function ($) {
             const savedSettings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
 
             let activeFolderFromUrl = null;
-            // if (window.location.pathname.includes('upload.php')) {
-            //     const urlParams = new URLSearchParams(window.location.search);
-            //     activeFolderFromUrl = urlParams.get('wpmn_folder');
-            // }
+            if (window.location.pathname.includes('upload.php')) {
+                const urlParams = new URLSearchParams(window.location.search);
+                activeFolderFromUrl = urlParams.get('wpmn_folder');
+            }
 
             this.state = {
                 activeFolder: activeFolderFromUrl || savedSettings.defaultFolder || 'all',
@@ -79,13 +86,13 @@ jQuery(function ($) {
             this.toastTimeout = null;
             this.isBulkSelect = false;
             this.clipboard = { action: null, folderId: null };
-            // const uploadPage = window.location.pathname.includes('upload.php');
-            // const listView = uploadPage &&
-            //     (window.location.search.includes('mode=list') || !window.location.search.includes('mode=grid'));
+            const uploadPage = window.location.pathname.includes('upload.php');
+            const listView = uploadPage &&
+                (window.location.search.includes('mode=list') || !window.location.search.includes('mode=grid'));
 
-            // if (this.state.activeFolder !== 'all' && uploadPage && !listView) {
-            //     setTimeout(() => this.triggerMediaFilter(this.state.activeFolder), 500);
-            // }
+            if (this.state.activeFolder !== 'all' && uploadPage && !listView) {
+                setTimeout(() => this.triggerMediaFilter(this.state.activeFolder), 500);
+            }
         }
 
         bindEvents() {
@@ -110,7 +117,7 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_media_sidebar_toggle', (e) => { e.preventDefault(); this.toggleSidebar(); });
             $(document.body).on('click', '.wpmn_toggle_arrow', this.handleToggleClick.bind(this));
             $(document.body).on('click', '.wpmn_media_sidebar_action_sort', (e) => this.handleMenuToggle(e, '.wpmn_sort_menu'));
-            $(document.body).on('click', '.wpmn_media_sidebar_action--more', (e) => this.handleMenuToggle(e, '.wpmn_more_menu'));
+            $(document.body).on('click', '.wpmn_media_sidebar_action_more', (e) => this.handleMenuToggle(e, '.wpmn_more_menu'));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="settings"]', this.openSettingsDialog.bind(this));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="hide-folder-id"]', this.toggleFolderId.bind(this));
             $(document.body).on('click', '.wpmn_settings_dialog__close, .wpmn_settings_dialog__cancel', this.closeSettingsDialog.bind(this));
@@ -124,7 +131,7 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_generate_size_btn', this.handleGenerateSize.bind(this));
             $(document.body).on('click', (e) => {
                 if (!$(e.target).closest('.wpmn_media_sidebar_action_sort, .wpmn_sort_menu').length) this.sidebar.find('.wpmn_sort_menu').prop('hidden', true);
-                if (!$(e.target).closest('.wpmn_media_sidebar_action--more, .wpmn_more_menu').length) this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
+                if (!$(e.target).closest('.wpmn_media_sidebar_action_more, .wpmn_more_menu').length) this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
                 if (!$(e.target).closest('.wpmn_folder_context_menu').length) this.hideContextMenu();
             });
             $(document.body).on('click', '.wpmn_import_btn', this.handleImport.bind(this));
@@ -133,7 +140,14 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_context_menu_item', this.handleContextMenuClick.bind(this));
             $(document.body).on('click', '.wpmn_generate_api_btn', this.handleGenerateApiKey.bind(this));
             $(document.body).on('change', '.wpmn-folder-dropdown', this.handleAttachmentFolderChange.bind(this));
+
+            // Trigger hook for Pro scripts to initialize
+            // if (typeof wp !== 'undefined' && wp.hooks) {
+            //     wp.hooks.doAction('wpmnAdminInitialized', this);
+            // }
         }
+
+
 
         handleToggleClick(e) {
             if (e) e.preventDefault();
@@ -236,6 +250,7 @@ jQuery(function ($) {
             addOptions(this.state.folders);
 
             select.val(settings.defaultFolder || 'all');
+            $('#wpmn_default_sort').val(settings.defaultSort || 'default');
             $('.wpmn_theme_btn').removeClass('wpmn_theme_btn--active').filter(`[data-theme="${settings.theme || 'default'}"]`).addClass('wpmn_theme_btn--active');
 
             $('.wpmn_dialog_backdrop:not([data-delete-dialog])').prop('hidden', false).addClass('is-visible');
@@ -248,17 +263,24 @@ jQuery(function ($) {
         saveSettings() {
             const settings = {
                 defaultFolder: $('#wpmn_default_folder').val(),
+                defaultSort: $('#wpmn_default_sort').val() || 'default',
                 theme: $('.wpmn_theme_btn--active').data('theme') || 'default'
             };
             this.setStorage('wpmnSettings', JSON.stringify(settings));
             this.closeSettingsDialog();
             this.renderSidebar();
+            this.applySortFromSettings(settings.defaultSort);
             this.showToast(this.getText('settingsSaved'));
+        }
+
+        applySortFromSettings(sortValue) {
+            if (typeof wp !== 'undefined' && wp.hooks) {
+                wp.hooks.doAction('wpmnSortFolders', sortValue);
+            }
         }
 
         handleThemeClick(e) {
             const __this = $(e.currentTarget);
-            if (__this.data('theme') !== 'default') return;
             $('.wpmn_theme_btn').removeClass('wpmn_theme_btn--active');
             __this.addClass('wpmn_theme_btn--active');
         }
@@ -292,6 +314,11 @@ jQuery(function ($) {
             }
 
             this.triggerMediaFilter(slug);
+
+            // Trigger hook for Pro version to re-apply sorts
+            if (typeof wp !== 'undefined' && wp.hooks) {
+                wp.hooks.doAction('wpmnFolderChanged', slug);
+            }
         }
 
         toggleNewFolderForm(show) {
@@ -403,6 +430,13 @@ jQuery(function ($) {
         }
 
         renderSidebar() {
+            const settings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
+            const theme = settings.theme || 'default';
+            this.sidebar.removeClass('wpmn_theme_windows wpmn_theme_dropbox');
+            if (theme !== 'default') {
+                this.sidebar.addClass('wpmn_theme_' + theme);
+            }
+
             this.sidebar.find('.wpmn_count_all').text(this.state.counts.all || 0);
             this.sidebar.find('.wpmn_count_uncategorized').text(this.state.counts.uncategorized || 0);
 
@@ -556,7 +590,7 @@ jQuery(function ($) {
 
             container.empty().append($('<span class="dashicons dashicons-admin-home"></span>').on('click', () => this.changeFolder('all')));
             const id = this.state.activeFolder.startsWith('term-') ? this.state.activeFolder.replace('term-', '') : null;
-            const path = id ? this.getFolderPath(id, this.state.folders) : [];
+            const path = (id ? this.getFolderPath(id, this.state.folders) : []) || [];
 
             path.forEach((folder, i) => {
                 container.append('<span class="wpmn_breadcrumb_line">/</span>');
@@ -782,8 +816,14 @@ jQuery(function ($) {
                 case 'delete':
                     wpmn_media_folder.folder.handleContextDelete(folderId);
                     break;
+                case 'download':
+                    if (typeof wp !== 'undefined' && wp.hooks) {
+                        wp.hooks.doAction('wpmnFolderDownload', folderId);
+                    }
+                    break;
             }
         }
+
 
         handleAttachmentFolderChange(e) {
             const __this = $(e.currentTarget),
