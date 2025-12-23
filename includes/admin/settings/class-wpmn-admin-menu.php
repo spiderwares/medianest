@@ -159,7 +159,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
                 WPMN_VERSION,
                 true
             );
-            
+
             // Get saved theme design from settings
             $show_breadcrumb = isset( $this->settings['breadcrumb_navigation'] ) ? $this->settings['breadcrumb_navigation'] : 'yes';
 
@@ -196,6 +196,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 						'selectCsvFile'      => esc_html__( 'Please select a CSV file.', 'medianest' ),
                         'foldersImported'    => esc_html__( 'Folders imported successfully.', 'medianest' ),
                         'generatingZip'      => esc_html__( 'Generating ZIP file', 'medianest' ),
+                        'colorUpdated'       => esc_html__( 'Successfully updated.', 'medianest' ),
 					),
 
 				)

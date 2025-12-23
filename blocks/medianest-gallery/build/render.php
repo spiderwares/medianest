@@ -15,7 +15,9 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
          *
          */
         public static function render_gallery( $attributes ) {
-            if ( empty( $attributes['selectedFolder'] ) ) return '';
+            if ( empty( $attributes['selectedFolder'] ) ) {
+                return '';
+            }
 
             $attributes = wp_parse_args( $attributes, array(
                 'sortBy'           => 'date',
@@ -31,7 +33,9 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
             ) );
 
             $ids = array_map( 'intval', (array) $attributes['selectedFolder'] );
-            if ( empty( $ids ) ) return '';
+            if ( empty( $ids ) ) {
+                return '';
+            }
 
             // Query Params
             $args = array(
@@ -48,31 +52,31 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
                 'post_status'    => 'inherit',
             );
 
-            if ( 'file_name' !== $attributes['sortBy'] ) :
+            if ( 'file_name' !== $attributes['sortBy'] ) {
                 $args['orderby'] = sanitize_text_field( $attributes['sortBy'] );
                 $args['order']   = sanitize_text_field( $attributes['sortType'] );
-            endif;
+            }
 
             $query = new \WP_Query( $args );
             $posts = $query->get_posts();
         
 
-            if ( 'file_name' === $attributes['sortBy'] ) :
+            if ( 'file_name' === $attributes['sortBy'] ) {
                 usort( $posts, function( $img1, $img2 ) use ( $attributes ) {
                     $val1 = basename( $img1->guid );
                     $val2 = basename( $img2->guid );
                     return ( $attributes['sortType'] === 'ASC' ) ? strcmp( $val1, $val2 ) : strcmp( $val2, $val1 );
                 } );
-            endif;
+            }
 
 
-            $ulClass = 'wpmn_block_gallery';
-            switch ( $attributes['layout'] ) :
+            $ulClass = 'wpmn_block_media_gallery';
+            switch ( $attributes['layout'] ) {
                 case 'flex':     $ulClass .= ' wp-block-gallery blocks-gallery-grid'; break;
-                case 'grid':     $ulClass .= ' layout_grid'; break;
-                case 'masonry':  $ulClass .= ' layout_masonry'; break;
-                case 'carousel': $ulClass .= ' layout_carousel'; break;
-            endswitch;
+                case 'grid':     $ulClass .= ' layout-grid'; break;
+                case 'masonry':  $ulClass .= ' layout-masonry'; break;
+                case 'carousel': $ulClass .= ' layout-carousel'; break;
+            }
 
             $ulClass .= ! empty( $attributes['className'] ) ? ' ' . esc_attr( $attributes['className'] ) : '';
             $ulClass .= ' columns-' . esc_attr( $attributes['columns'] );
@@ -84,7 +88,7 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
             $styles .= '--min-width: ' . esc_attr( $attributes['imgMinWidth'] ) . 'px;';
 
             $images = [];
-            foreach ( $posts as $post ) :
+            foreach ( $posts as $post ) {
                 if ( ! wp_attachment_is_image( $post ) ) continue;
                 
                 $srcKey = ( 'masonry' === $attributes['layout'] || 'list' === $attributes['layout'] ) ? 'full' : 'large';
@@ -93,10 +97,10 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
                 if ( ! $imageSrc ) continue;
 
                 $href = '';
-                switch ( $attributes['linkTo'] ) :
+                switch ( $attributes['linkTo'] ) {
                     case 'media':      $href = $imageSrc[0]; break;
                     case 'attachment': $href = get_attachment_link( $post->ID ); break;
-                endswitch;
+                }
 
                 $alt = get_post_meta( $post->ID, '_wp_attachment_image_alt', true );
                 $alt = empty( $alt ) ? $post->post_title : $alt;
@@ -113,10 +117,10 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
                     'class'   => "wp-image-{$post->ID}"
                 );
 
-                if ( $attributes['hasLightbox'] && empty( $images[ count($images) - 1 ]['link'] ) ) :
+                if ( $attributes['hasLightbox'] && empty( $images[ count($images) - 1 ]['link'] ) ) {
                      $images[ count($images) - 1 ]['link'] = $imageSrc[0];
-                endif;
-            endforeach;
+                }
+            }
 
             ob_start();
             include WPMN_PATH . 'templates/blocks/medianest-gallery.php';
@@ -126,8 +130,9 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
     }
 }
 
-if ( isset( $attributes ) && class_exists( 'WPMN_Gallery_Render' ) ) :
+// Output content if loaded directly by block renderer
+if ( isset( $attributes ) && class_exists( 'WPMN_Gallery_Render' ) ) {
     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     echo WPMN_Gallery_Render::render_gallery( $attributes );
-endif;
+}
 

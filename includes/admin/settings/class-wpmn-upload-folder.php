@@ -30,14 +30,15 @@ if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
 		public function events_handler(){
 			add_action( 'pre-upload-ui', [ $this, 'wpmn_render_folder' ] );
 			add_action( 'wp_ajax_wpmn_get_folders_for_upload', [ $this, 'wpmn_get_folders' ] );
+			add_action( 'wp_ajax_nopriv_wpmn_get_folders_for_upload', [ $this, 'wpmn_get_folders' ] );
             add_action( 'add_attachment', [ $this, 'wpmn_auto_upload' ] );
 		}
 
 		public function wpmn_render_folder() {
 			
-            if ( get_current_screen() && 'upload' === get_current_screen()->id ) {
-                return;
-            }
+            // if ( get_current_screen() && 'upload' === get_current_screen()->id ) {
+            //     return;
+            // }
 
 			wpmn_get_template(
 				'media/upload-folder.php',

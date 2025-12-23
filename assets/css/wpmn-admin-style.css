@@ -398,3 +398,7 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     background: #f0f0f1;
     color: #666;
 }
+
+.wpmn_media_layout #posts-filter {
+    width: 85rem;
+}

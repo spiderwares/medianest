@@ -70,7 +70,8 @@ jQuery(function ($) {
                     <button type="button" class="wpmn_folder_button"
                         data-folder-slug="term-${node.id}"
                         data-folder-id="${node.id}"
-                        data-folder-name="${node.name}">
+                        data-folder-name="${node.name}"
+                        data-color="${node.color || ''}">
                         <input type="checkbox" class="wpmn_folder_checkbox" value="${node.id}">
                         <img src="${wpmn_media_library.baseUrl || ''}assets/img/folder.svg"
                             class="wpmn_folder_icon" aria-hidden="true">
@@ -78,6 +79,9 @@ jQuery(function ($) {
                         <span class="wpmn_count">${node.count || 0}</span>
                     </button>
                 `);
+
+                const icon = btn.find('.wpmn_folder_icon');
+                this.applyIconColor(icon, node.color || '');
 
                 btn.find('.wpmn_folder_button__label').text(
                     (wpmn_admin_media.admin.showFolderId ? `#${node.id} ` : '') + node.name
@@ -319,6 +323,43 @@ jQuery(function ($) {
                     wpmn_admin_media.admin.showToast(wpmn_admin_media.admin.getText('folderMoved'));
                 })
                 .catch(alert);
+        }
+
+        applyIconColor(icon, hex) {
+            if (!icon || !icon.length) return;
+
+            if (!hex) {
+                icon.each(function () {
+                    $(this)[0].style.setProperty('filter', '', '');
+                });
+                return;
+            }
+
+            const filters = {
+                '#f44336': 'invert(37%) sepia(94%) saturate(4522%) hue-rotate(346deg) brightness(97%) contrast(92%)',
+                '#ff5722': 'invert(46%) sepia(99%) saturate(2256%) hue-rotate(345deg) brightness(101%) contrast(101%)',
+                '#ff9800': 'invert(62%) sepia(98%) saturate(1455%) hue-rotate(3deg) brightness(106%) contrast(102%)',
+                '#ffc107': 'invert(84%) sepia(21%) saturate(6926%) hue-rotate(360deg) brightness(105%) contrast(103%)',
+                '#ffeb3b': 'invert(91%) sepia(45%) saturate(1113%) hue-rotate(3deg) brightness(107%) contrast(101%)',
+                '#cddc39': 'invert(87%) sepia(19%) saturate(2321%) hue-rotate(34deg) brightness(103%) contrast(87%)',
+                '#2196f3': 'invert(52%) sepia(61%) saturate(3015%) hue-rotate(185deg) brightness(97%) contrast(96%)',
+                '#03a9f4': 'invert(53%) sepia(94%) saturate(2035%) hue-rotate(169deg) brightness(101%) contrast(101%)',
+                '#e3f2fd': 'invert(96%) sepia(10%) saturate(676%) hue-rotate(186deg) brightness(105%) contrast(101%)',
+                '#4caf50': 'invert(62%) sepia(8%) saturate(2506%) hue-rotate(71deg) brightness(98%) contrast(85%)',
+                '#8bc34a': 'invert(75%) sepia(20%) saturate(1212%) hue-rotate(44deg) brightness(98%) contrast(83%)',
+                '#aed581': 'invert(87%) sepia(16%) saturate(666%) hue-rotate(43deg) brightness(101%) contrast(84%)',
+                '#673ab7': 'invert(22%) sepia(87%) saturate(3226%) hue-rotate(256deg) brightness(84%) contrast(91%)',
+                '#9c27b0': 'invert(21%) sepia(87%) saturate(4422%) hue-rotate(279deg) brightness(86%) contrast(95%)',
+                '#b39ddb': 'invert(74%) sepia(16%) saturate(1001%) hue-rotate(218deg) brightness(94%) contrast(86%)',
+                '#e91e63': 'invert(22%) sepia(99%) saturate(4051%) hue-rotate(329deg) brightness(93%) contrast(98%)',
+                '#f06292': 'invert(69%) sepia(48%) saturate(3665%) hue-rotate(303deg) brightness(99%) contrast(93%)',
+                '#9e9e9e': 'invert(67%) sepia(0%) saturate(103%) hue-rotate(187deg) brightness(95%) contrast(88%)'
+            };
+
+            const filter = filters[hex.toLowerCase()] || '';
+            icon.each(function () {
+                $(this)[0].style.setProperty('filter', filter, filter ? 'important' : '');
+            });
         }
 
     }

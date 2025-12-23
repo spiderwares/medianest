@@ -155,7 +155,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				<h3 id="wpmn_settings_title" class="wpmn_settings_dialog_title">
 					<?php echo esc_html__( 'Medianest Settings', 'medianest' ); ?>
 				</h3>
-				<button type="button" class="wpmn_settings_dialog__close">
+				<button type="button" class="wpmn_settings_dialog_close">
 					<span class="dashicons dashicons-no-alt"></span>
 				</button>
 			</div>

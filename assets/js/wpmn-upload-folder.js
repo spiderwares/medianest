@@ -167,8 +167,7 @@ jQuery(function ($) {
 
         updateUploaderParams(folderId) {
             if (window.uploader) {
-                uploader.settings.multipart_params =
-                    uploader.settings.multipart_params || {};
+                uploader.settings.multipart_params = uploader.settings.multipart_params || {};
                 uploader.settings.multipart_params.wpmn_upload_folder = folderId;
             }
         }

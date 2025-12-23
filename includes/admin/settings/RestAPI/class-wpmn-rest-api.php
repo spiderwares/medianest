@@ -17,14 +17,14 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
     class WPMN_REST_API {
 
         /**
-         * Constructor
+         * Constructor for the class.
          */
         public function __construct() {
             $this->events_handler();
         }
 
         /**
-         * Hook into actions and filters
+         * Initialize hooks and filters.
          */
         public function events_handler() {
             add_action( 'rest_api_init', [ $this, 'wpmn_register_routes' ] );
@@ -35,42 +35,42 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
          */
         public function wpmn_register_routes() {
 
-            // GET http://yoursite/media_nest/wp-json/medianest/v1/folders
+            // GET http://yoursite/wp-json/medianest/v1/folders
             register_rest_route( 'medianest/v1', '/folders', array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_folders' ],
                 'permission_callback' => '__return_true', 
             ));
 
-            // GET http://yoursite/media_nest/wp-json/medianest/v1/folder?folder_id
+            // GET http://yoursite/wp-json/medianest/v1/folder?folder_id
             register_rest_route( 'medianest/v1', '/folder', array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_folder_details' ],
                 'permission_callback' => '__return_true', 
             )); 
 
-            // POST http://yoursite/media_nest/wp-json/medianest/v1/folder/set-attachment
+            // POST http://yoursite/wp-json/medianest/v1/folder/set-attachment
             register_rest_route( 'medianest/v1', '/folder/set-attachment', array(
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'set_attachment' ],
                 'permission_callback' => '__return_true', 
             ));
 
-            // GET http://yoursite/media_nest/wp-json/medianest/v1/attachment-id
+            // GET http://yoursite/wp-json/medianest/v1/attachment-id
             register_rest_route( 'medianest/v1', '/attachment-id', array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_attachment_ids' ],
                 'permission_callback' => '__return_true', 
             ));
 
-            // GET http://yoursite/media_nest/wp-json/medianest/v1/attachment-count
+            // GET http://yoursite/wp-json/medianest/v1/attachment-count
             register_rest_route( 'medianest/v1', '/attachment-count', array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_attachment_count' ],
                 'permission_callback' => '__return_true', 
             ));
 
-            // POST http://yoursite/media_nest/wp-json/medianest/v1/folders
+            // POST http://yoursite/wp-json/medianest/v1/folders
             register_rest_route( 'medianest/v1', '/folders', array(
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'create_new_folder' ],
@@ -100,9 +100,10 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
 
             // If searching, return flat list of matches
             if ( ! empty( $search ) ) {
-                $folders = array_map( function( $term ) {
+                $folders = [];
+                foreach ( $terms as $index => $term ) {
                     $count = WPMN_Media_Folders::folder_count( $term->term_id );
-                    return array(
+                    $folders[] = array(
                         'id'         => (int) $term->term_id,
                         'key'        => (int) $term->term_id,
                         'children'   => array(),
@@ -111,12 +112,12 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                         'title'      => $term->name,
                         'data-id'    => $term->term_id,
                         'data-count' => (string) $count,
-                        'ord'        => '0',
-                        'color'      => '',
+                        'ord'        => (int) get_term_meta( $term->term_id, 'wpmn_order', true ) ?: $index,
+                        'color'      => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
                         'count'      => $count,
                         'name'       => $term->name
                     );
-                }, $terms );
+                }
 
                 return rest_ensure_response(array(
                     'success' => true,
@@ -139,8 +140,9 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
         public function build_tree($parent, $group) {
             if (empty($group[$parent])) return [];
 
-            return array_map(function($term) use ($group) {
-                return [
+            $list = array();
+            foreach ($group[$parent] as $index => $term) {
+                $list[] = array(
                     'id'         => (int) $term->term_id,
                     'key'        => (int) $term->term_id,
                     'children'   => $this->build_tree($term->term_id, $group),
@@ -149,11 +151,11 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                     'title'      => $term->name,
                     'data-id'    => $term->term_id,
                     'data-count' => (string) $term->count_with_children,
-                    'ord'        => '0',
-                    'color'      => '',
-                ];
-            }, 
-            $group[$parent]);
+                    'ord'        => (int) get_term_meta( $term->term_id, 'wpmn_order', true ) ?: $index,
+                    'color'      => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
+                );
+            }
+            return $list;
         }   
 
         public function get_folder_details($request) {
@@ -171,6 +173,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                     'name'   => $term->name,
                     'parent' => $term->parent,
                     'count'  => $term->count,
+                    'color'  => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
                 )
             ) );
         }

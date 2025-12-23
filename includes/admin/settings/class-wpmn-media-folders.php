@@ -31,6 +31,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 		public function events_handler() {
 			add_action( 'init', [ $this, 'register_taxonomy' ] );
 			add_action( 'wp_ajax_wpmn_ajax', [ $this, 'handle_request' ] );
+			add_action( 'wp_ajax_nopriv_wpmn_ajax', [ $this, 'handle_request' ] );
 		}
 
 		/**
@@ -119,12 +120,12 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                 case 'wpmn_generate_api_key':
                     WPMN_Helper::generate_api_key_request();
                     break;
-                default:
-                    do_action( 'wpmn_ajax_' . $type );
-                    break;
+
+				default:
+					do_action( 'wpmn_ajax_' . $type, $_POST );
+					break;
 			endswitch;
 		}
-
 
 		public static function payload($count_mode = null) {
 			return array(
@@ -178,6 +179,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 					'count'    => $count,
 					'total'    => $total,
 					'children' => $children,
+					'color'    => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
 				);
 			endforeach;
 			return $list;

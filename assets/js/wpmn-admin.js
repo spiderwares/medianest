@@ -120,7 +120,7 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_media_sidebar_action_more', (e) => this.handleMenuToggle(e, '.wpmn_more_menu'));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="settings"]', this.openSettingsDialog.bind(this));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="hide-folder-id"]', this.toggleFolderId.bind(this));
-            $(document.body).on('click', '.wpmn_settings_dialog__close, .wpmn_settings_dialog__cancel', this.closeSettingsDialog.bind(this));
+            $(document.body).on('click', '.wpmn_settings_dialog_close, .wpmn_settings_dialog__cancel', this.closeSettingsDialog.bind(this));
             $(document.body).on('click', '.wpmn_settings_dialog__save', this.saveSettings.bind(this));
             $(document.body).on('click', '.wpmn_theme_btn', this.handleThemeClick.bind(this));
             $(document.body).on('click', '.wpmn_clear_data_btn', this.handleClearData.bind(this));
@@ -140,14 +140,7 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_context_menu_item', this.handleContextMenuClick.bind(this));
             $(document.body).on('click', '.wpmn_generate_api_btn', this.handleGenerateApiKey.bind(this));
             $(document.body).on('change', '.wpmn-folder-dropdown', this.handleAttachmentFolderChange.bind(this));
-
-            // Trigger hook for Pro scripts to initialize
-            // if (typeof wp !== 'undefined' && wp.hooks) {
-            //     wp.hooks.doAction('wpmnAdminInitialized', this);
-            // }
         }
-
-
 
         handleToggleClick(e) {
             if (e) e.preventDefault();

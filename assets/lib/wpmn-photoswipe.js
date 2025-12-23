@@ -45,23 +45,18 @@ var medianestGallery = {
         medianestGallery.initPhotoSwipeFromDOM(gallerySelector);
     },
     parseThumbnailElements: function (el) {
-        var thumbElements = el.childNodes,
+        var thumbElements = el.querySelectorAll('.wpmn_block_gallery_item'),
             numNodes = thumbElements.length,
             items = [],
             figureEl,
             figcaptionEl,
-            liEl,
             linkEl,
             imgEl,
             size,
             item;
 
         for (var i = 0; i < numNodes; i++) {
-            liEl = thumbElements[i];
-
-            if (liEl.nodeType !== 1) {
-                continue;
-            }
+            var liEl = thumbElements[i];
 
             figureEl = liEl.querySelector("figure");
             if (!figureEl) continue;
@@ -180,5 +175,5 @@ var medianestGallery = {
 };
 
 document.addEventListener("DOMContentLoaded", function () {
-    medianestGallery.createGallery(".wpmn_block_gallery.is-lightbox");
+    medianestGallery.createGallery(".wpmn_block_media_gallery.is-lightbox");
 });
