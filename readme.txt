@@ -7,7 +7,7 @@ Stable tag: 1.0.0
 Version: 1.0.0
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Tags: media library, media folders, file manager, organize media, image gallery
+Tags: media library, media folders, file manager, image gallery
 
 Organize your WordPress media library with unlimited folders, drag & drop interface, and advanced file management features.
 
@@ -81,11 +81,11 @@ Medianest works with the native WordPress Media Library, so it is compatible wit
 == Changelog ==
 
 = 1.0.0 =
-*   Initial release.
-*   Drag and drop folder management.
-*   Virtual folder structure using custom taxonomy.
-*   Import/Export functionality.
-*   Gutenberg Gallery block.
+*  Initial release.
+*  Drag and drop folder management.
+*  Virtual folder structure using custom taxonomy.
+*  Import/Export functionality.
+*  Gutenberg Gallery block.
 
 == Upgrade Notice ==
 

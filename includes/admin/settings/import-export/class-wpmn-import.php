@@ -7,7 +7,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Import' ) ) :
-
+	
 	class WPMN_Import {
 
 		public static function import_folders_request() {

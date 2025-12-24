@@ -83,6 +83,11 @@ jQuery(function ($) {
             this.showFolderId = this.getStorage('wpmnShowFolderId') === '1';
             this.searchDebounce = null;
             this.sidebar = $('#wpmn_media_sidebar');
+            this.sidebarWidth = parseInt(this.getStorage('wpmnSidebarWidth', '300'));
+            if (this.sidebar.length && this.sidebarWidth !== 300) {
+                this.sidebar.css('width', this.sidebarWidth + 'px');
+                this.updateModalLayout();
+            }
             this.toastTimeout = null;
             this.isBulkSelect = false;
             this.clipboard = { action: null, folderId: null };
@@ -120,8 +125,8 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_media_sidebar_action_more', (e) => this.handleMenuToggle(e, '.wpmn_more_menu'));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="settings"]', this.openSettingsDialog.bind(this));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="hide-folder-id"]', this.toggleFolderId.bind(this));
-            $(document.body).on('click', '.wpmn_settings_dialog_close, .wpmn_settings_dialog__cancel', this.closeSettingsDialog.bind(this));
-            $(document.body).on('click', '.wpmn_settings_dialog__save', this.saveSettings.bind(this));
+            $(document.body).on('click', '.wpmn_settings_dialog_close, .wpmn_settings_dialog_cancel', this.closeSettingsDialog.bind(this));
+            $(document.body).on('click', '.wpmn_settings_dialog_save', this.saveSettings.bind(this));
             $(document.body).on('click', '.wpmn_theme_btn', this.handleThemeClick.bind(this));
             $(document.body).on('click', '.wpmn_clear_data_btn', this.handleClearData.bind(this));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="bulk-select"]', this.enableBulkSelect.bind(this));
@@ -139,7 +144,50 @@ jQuery(function ($) {
             $(document.body).on('contextmenu', '.wpmn_folder_button', this.handleFolderContextMenu.bind(this));
             $(document.body).on('click', '.wpmn_context_menu_item', this.handleContextMenuClick.bind(this));
             $(document.body).on('click', '.wpmn_generate_api_btn', this.handleGenerateApiKey.bind(this));
-            $(document.body).on('change', '.wpmn-folder-dropdown', this.handleAttachmentFolderChange.bind(this));
+            $(document.body).on('change', '.wpmn_folder_dropdown', this.handleAttachmentFolderChange.bind(this));
+            this.initResizer();
+        }
+
+        initResizer() {
+            let isResizing = false;
+            let startX, startWidth;
+
+            $(document.body).on('mousedown', '.wpmn_sidebar_resize_handle', (e) => {
+                isResizing = true;
+                startX = e.pageX;
+                startWidth = this.sidebar.outerWidth();
+                $(document.body).addClass('wpmn_sidebar_is_resizing');
+                e.preventDefault();
+            });
+
+            $(document).on('mousemove', (e) => {
+                if (!isResizing) return;
+
+                let newWidth = startWidth + (e.pageX - startX);
+                if (newWidth < 300) newWidth = 300;
+                if (newWidth > 630) newWidth = 630;
+
+                this.sidebarWidth = newWidth;
+                this.sidebar.css('width', newWidth + 'px');
+                this.updateModalLayout();
+                $(window).trigger('resize');
+            });
+
+            $(document).on('mouseup', () => {
+                if (!isResizing) return;
+                isResizing = false;
+                $(document.body).removeClass('wpmn_sidebar_is_resizing');
+                this.setStorage('wpmnSidebarWidth', this.sidebarWidth);
+            });
+        }
+
+        updateModalLayout() {
+            if (this.sidebar.hasClass('in-modal')) {
+                const width = this.sidebarWidth + 30; // 330 was original modal width vs 300 sidebar
+                $('.media-modal .media-frame-menu').css('width', width + 'px');
+                $('.media-modal .media-frame-content, .media-modal .media-frame-title, .media-modal .media-frame-router')
+                    .css('left', width + 'px');
+            }
         }
 
         handleToggleClick(e) {
@@ -469,7 +517,9 @@ jQuery(function ($) {
                     .text(count === 1 ? 'Move 1 item' : `Move ${count} items`);
 
             const draggableOptions = (getCount) => ({
-                helper: () => getHelper(getCount()),
+                helper: function () {
+                    return getHelper(getCount.call(this));
+                },
                 cursor: 'move',
                 cursorAt: { left: 20, top: 20 },
                 appendTo: 'body',
@@ -483,15 +533,15 @@ jQuery(function ($) {
 
                 // Grid view
                 $('.attachments .attachment').not('.wpmn_draggable').addClass('wpmn_draggable')
-                    .draggable(draggableOptions(() =>
-                        $(this).hasClass('selected') ? $('.attachments .attachment.selected').length : 1
-                    ));
+                    .draggable(draggableOptions(function () {
+                        return $(this).hasClass('selected') ? $('.attachments .attachment.selected').length : 1;
+                    }));
 
                 // List view
                 $('.wpmn_media_layout #the-list tr').not('.wpmn_draggable').addClass('wpmn_draggable')
-                    .draggable(draggableOptions(() =>
-                        $(this).find('input[type="checkbox"]').is(':checked') ? $('#the-list input[type="checkbox"]:checked').length : 1
-                    ));
+                    .draggable(draggableOptions(function () {
+                        return $(this).find('input[type="checkbox"]').is(':checked') ? $('#the-list input[type="checkbox"]:checked').length : 1;
+                    }));
 
             }, 500);
         }
@@ -518,22 +568,27 @@ jQuery(function ($) {
                     .is('#menu-item-upload')
                     || router.find('.media-menu-item.active').text().trim().includes('Upload files');
 
-                if (menu.length && !menu.find('.wpmn_custom_sidebar_container').length) {
-                    menu.append('<div class="wpmn_custom_sidebar_container"></div>')
-                        .find('.wpmn_custom_sidebar_container')
-                        .append(this.sidebar.show());
-
+                if (menu.length && !menu.find('.wpmn_sidebar_container').length) {
+                    menu.append('<div class="wpmn_sidebar_container"></div>').find('.wpmn_sidebar_container').append(this.sidebar.show());
                     this.sidebar.addClass('in-modal');
                 }
 
                 this.sidebar.toggle(!isUploadTab);
+
+                if (this.sidebar.hasClass('in-modal')) {
+                    this.updateModalLayout();
+                }
             }, 1000);
         }
-
 
         toggleSidebar() {
             const wrap = $('#wpbody-content .wrap').toggleClass('wpmn_media_layout_collapsed');
             this.setStorage('wpmnSidebarCollapsed', wrap.hasClass('wpmn_media_layout_collapsed') ? '1' : '0');
+
+            // Trigger resize to fix media grid layout
+            setTimeout(() => {
+                $(window).trigger('resize');
+            }, 100);
         }
 
         showToast(message) {
@@ -809,6 +864,11 @@ jQuery(function ($) {
                 case 'delete':
                     wpmn_media_folder.folder.handleContextDelete(folderId);
                     break;
+                case 'duplicate':
+                    if (typeof wp !== 'undefined' && wp.hooks) {
+                        wp.hooks.doAction('wpmnFolderDuplicate', folderId);
+                    }
+                    break;
                 case 'download':
                     if (typeof wp !== 'undefined' && wp.hooks) {
                         wp.hooks.doAction('wpmnFolderDownload', folderId);
@@ -816,7 +876,6 @@ jQuery(function ($) {
                     break;
             }
         }
-
 
         handleAttachmentFolderChange(e) {
             const __this = $(e.currentTarget),

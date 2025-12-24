@@ -277,12 +277,20 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
 }
 
 /*--------------------------- Drag & Drop ---------------------------*/
+.wpmn_media_sidebar img,
+.wpmn_media_sidebar .wpmn_folder_icon,
+.wpmn_media_sidebar .wpmn_all_files_icon,
+.wpmn_media_sidebar .wpmn_uncategorized_icon {
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
 
 .wpmn_drag_helper_pill {
     background: #444;
     color: #fff;
     padding: 6px 14px;
-    border-radius: 999px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 500;
     z-index: 200000;
@@ -397,8 +405,4 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     margin-top: 10px;
     background: #f0f0f1;
     color: #666;
-}
-
-.wpmn_media_layout #posts-filter {
-    width: 85rem;
 }

@@ -99,9 +99,9 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             endif;
 
             // If searching, return flat list of matches
-            if ( ! empty( $search ) ) {
+            if ( ! empty( $search ) ) :
                 $folders = [];
-                foreach ( $terms as $index => $term ) {
+                foreach ( $terms as $index => $term ) :
                     $count = WPMN_Media_Folders::folder_count( $term->term_id );
                     $folders[] = array(
                         'id'         => (int) $term->term_id,
@@ -117,13 +117,13 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                         'count'      => $count,
                         'name'       => $term->name
                     );
-                }
+                endforeach;
 
                 return rest_ensure_response(array(
                     'success' => true,
                     'data'    => ['folders' => $folders]
                 ) );
-            }
+            endif;
 
             $group = [];
             foreach ($terms as $term) :
@@ -267,7 +267,6 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 )
             ) );
         }
-
 
     }
 

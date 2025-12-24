@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	<button type="button" class="wpmn_media_sidebar_toggle">
 		<span class="dashicons dashicons-arrow-left-alt2"></span>
 	</button>
+	<div class="wpmn_sidebar_resize_handle"></div>
 
 	<div class="wpmn_media_sidebar_header">
 		<h2><?php echo esc_html__( 'Medianest', 'medianest' ); ?></h2>
@@ -185,10 +186,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				</div>
 			</div>
 			<div class="wpmn_settings_dialog_footer">
-				<button type="button" class="button wpmn_settings_dialog__cancel">
+				<button type="button" class="button wpmn_settings_dialog_cancel">
 					<?php echo esc_html__( 'Cancel', 'medianest' ); ?>
 				</button>
-				<button type="button" class="button button-primary wpmn_settings_dialog__save">
+				<button type="button" class="button button-primary wpmn_settings_dialog_save">
 					<?php echo esc_html__( 'Save', 'medianest' ); ?>
 				</button>
 			</div>

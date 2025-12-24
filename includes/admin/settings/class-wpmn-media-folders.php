@@ -151,10 +151,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 				$group[$term->parent][] = $term;
 			endforeach;
 
-            if ( empty( $count_mode ) ) {
+            if ( empty( $count_mode ) ) :
                 $settings = get_option( 'wpmn_settings' );
                 $count_mode = isset( $settings['folder_count_mode'] ) ? $settings['folder_count_mode'] : 'folder_only';
-            }
+            endif;
 
 			return self::build_tree(0, $group, $count_mode);
 		}

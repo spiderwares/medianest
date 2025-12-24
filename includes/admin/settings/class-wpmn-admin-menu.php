@@ -47,50 +47,6 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             add_filter( 'wp_handle_upload_prefilter', [ $this, 'wpmn_sanitize_svg_upload' ] );
         }
 
-        /**
-         * Enable SVG upload.
-         */
-        public function wpmn_enable_svg_upload( $mimes ) {
-            $svg_enabled = isset( $this->settings['secure_svg_upload'] ) ? $this->settings['secure_svg_upload'] : 'no';
-            
-            if ( $svg_enabled === 'yes' ) :
-                $mimes['svg']  = 'image/svg+xml';
-                $mimes['svgz'] = 'image/svg+xml';
-            endif;
-            
-            return $mimes;
-        }
-
-        public function wpmn_sanitize_svg_upload( $file ) {
-
-            $type = wp_check_filetype( $file['name'], null );
-            if ( $type['type'] !== 'image/svg+xml' ) :
-                return $file;
-            endif;
-
-            // Read SVG content
-            $svg = file_get_contents( $file['tmp_name'] );
-            if ( ! $svg ) :
-                return $file;
-            endif;
-
-            // Sanitize (if sanitizer exists)
-            if ( class_exists( 'Sanitizer' ) ) :
-                $sanitizer = new Sanitizer();
-                $clean_svg = $sanitizer->sanitize( $svg );
-            else :
-                $clean_svg = $svg; 
-            endif;
-
-            if ( $clean_svg ) :
-                file_put_contents( $file['tmp_name'], $clean_svg );
-            else :
-                $file['error'] = esc_html__( 'SVG sanitization failed.', 'medianest' );
-            endif;
-
-            return $file;
-        }
-
         /*
         * Main WPMN_Admin_Menu Instance..
         *
@@ -110,7 +66,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             add_settings_error(
                 'wpmn_settings',
                 'wpmn_settings_updated',
-                esc_html__( 'Settings saved successfully.', 'medianest' ),
+                esc_html__( 'Settings saved Successfully.', 'medianest' ),
                 'updated'
             );
             return $input;
@@ -175,9 +131,9 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 						'renamePrompt'       => esc_html__( 'Rename folder', 'medianest' ),
 						'selectFolderFirst'  => esc_html__( 'Please select a folder first.', 'medianest' ),
 						'noSelection'        => esc_html__( 'Select at least one media item.', 'medianest' ),
-						'created'            => esc_html__( 'Folder created.', 'medianest' ),
-						'renamed'            => esc_html__( 'Folder renamed.', 'medianest' ),
-						'deleted'            => esc_html__( 'Folder deleted.', 'medianest' ),
+						'created'            => esc_html__( 'Created Successfully', 'medianest' ),
+						'renamed'            => esc_html__( 'Renamed Successfully', 'medianest' ),
+						'deleted'            => esc_html__( 'Deleted Successfully', 'medianest' ),
 						'assigned'           => esc_html__( 'Media updated.', 'medianest' ),
 						'errorGeneric'       => esc_html__( 'Something went wrong. Please try again.', 'medianest' ),
 						'emptyTree'          => esc_html__( 'No folders available. Create a folder to start organizing.', 'medianest' ),
@@ -186,19 +142,19 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 						'emptyButton'        => esc_html__( 'Add Folder', 'medianest' ),
 						'deleteConfirm'      => esc_html__( 'Are you sure you want to remove this folder? The files will be moved to Uncategorized.', 'medianest' ),
 					    'confirmClearData'   => esc_html__( 'Are you sure you want to delete all Medianest data?', 'medianest' ),
-						'settingsSaved'      => esc_html__( 'Settings saved successfully', 'medianest' ),
-						'itemMoved'          => esc_html__( 'Item moved successfully', 'medianest' ),
+						'settingsSaved'      => esc_html__( 'Settings saved Successfully', 'medianest' ),
+						'itemMoved'          => esc_html__( 'Item moved Successfully', 'medianest' ),
 						'allDataCleared'     => esc_html__( 'All data cleared.', 'medianest' ),
 						'errorPrefix'        => esc_html__( 'Error: ', 'medianest' ),
 						'moveSelf'           => esc_html__( 'Cannot move folder into itself', 'medianest' ),
 						'moveSubfolder'      => esc_html__( 'Cannot move folder into its own subfolder', 'medianest' ),
-						'folderMoved'        => esc_html__( 'Folder moved successfully', 'medianest' ),
+						'folderMoved'        => esc_html__( 'Moved Successfully', 'medianest' ),
 						'selectCsvFile'      => esc_html__( 'Please select a CSV file.', 'medianest' ),
-                        'foldersImported'    => esc_html__( 'Folders imported successfully.', 'medianest' ),
+                        'foldersImported'    => esc_html__( 'Folders imported Successfully.', 'medianest' ),
                         'generatingZip'      => esc_html__( 'Generating ZIP file', 'medianest' ),
                         'colorUpdated'       => esc_html__( 'Successfully updated.', 'medianest' ),
+                        'duplicated'         => esc_html__( 'Folder duplicated.', 'medianest' ),
 					),
-
 				)
 			);
         }
@@ -227,6 +183,50 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Tab navigation parameter, not form processing.
             $active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'settings';
             require_once WPMN_PATH . 'includes/admin/settings/views/file-menu.php';
+        }
+
+        /**
+         * Enable SVG upload.
+         */
+        public function wpmn_enable_svg_upload( $mimes ) {
+            $svg_enabled = isset( $this->settings['secure_svg_upload'] ) ? $this->settings['secure_svg_upload'] : 'no';
+            
+            if ( $svg_enabled === 'yes' ) :
+                $mimes['svg']  = 'image/svg+xml';
+                $mimes['svgz'] = 'image/svg+xml';
+            endif;
+            
+            return $mimes;
+        }
+
+        public function wpmn_sanitize_svg_upload( $file ) {
+
+            $type = wp_check_filetype( $file['name'], null );
+            if ( $type['type'] !== 'image/svg+xml' ) :
+                return $file;
+            endif;
+
+            // Read SVG content
+            $svg = file_get_contents( $file['tmp_name'] );
+            if ( ! $svg ) :
+                return $file;
+            endif;
+
+            // Sanitize (if sanitizer exists)
+            if ( class_exists( 'Sanitizer' ) ) :
+                $sanitizer = new Sanitizer();
+                $clean_svg = $sanitizer->sanitize( $svg );
+            else :
+                $clean_svg = $svg; 
+            endif;
+
+            if ( $clean_svg ) :
+                file_put_contents( $file['tmp_name'], $clean_svg );
+            else :
+                $file['error'] = esc_html__( 'SVG sanitization failed.', 'medianest' );
+            endif;
+
+            return $file;
         }
     }
 

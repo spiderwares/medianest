@@ -36,9 +36,9 @@ if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
 
 		public function wpmn_render_folder() {
 			
-            // if ( get_current_screen() && 'upload' === get_current_screen()->id ) {
-            //     return;
-            // }
+            if ( get_current_screen() && 'upload' === get_current_screen()->id ) :
+                return;
+            endif;
 
 			wpmn_get_template(
 				'media/upload-folder.php',
@@ -53,11 +53,11 @@ if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
             endif;
             
             // Check if WPMN_Media_Folders class exists to avoid fatal error
-            if ( class_exists( 'WPMN_Media_Folders' ) ) {
+            if ( class_exists( 'WPMN_Media_Folders' ) ) :
 			    $folders = WPMN_Media_Folders::folder_tree();
-            } else {
+            else :
                 $folders = [];
-            }
+            endif;
 
 			wp_send_json_success( array( 
 				'folders' => $folders 

@@ -72,7 +72,6 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 				'name' => $name,
 				'slug' => sanitize_title($name)
 			) );
-
 			self::send_response($result);
 		}
 
@@ -88,8 +87,20 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 				wp_send_json_error(['message' => 'Invalid folder.']);
 			endif;
 
-			$result = wp_delete_term($id, 'wpmn_media_folder');
-			self::send_response($result);
+			self::delete_folder_recursively($id);
+			wp_send_json_success(WPMN_Media_Folders::payload());
+		}
+
+		public static function delete_folder_recursively($id) {
+
+			$children = get_term_children($id, 'wpmn_media_folder');
+			if (!is_wp_error($children) && !empty($children)) :
+				foreach ($children as $child_id) :
+					wp_delete_term($child_id, 'wpmn_media_folder');
+				endforeach;
+			endif;
+
+			return wp_delete_term($id, 'wpmn_media_folder');
 		}
 
 		public static function delete_folders_bulk_request() {
@@ -105,7 +116,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 			endif;
 
 			foreach ($ids as $id) :
-				wp_delete_term($id, 'wpmn_media_folder');
+				self::delete_folder_recursively($id);
 			endforeach;
 			wp_send_json_success(WPMN_Media_Folders::payload());
 		}
@@ -199,7 +210,6 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 			$result = wp_update_term($folder_id, 'wpmn_media_folder', array(
 				'parent' => $new_parent
 			) );
-
 			self::send_response($result);
 		}
 
@@ -252,9 +262,9 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 
             $settings = get_option( 'wpmn_settings', [] );
             
-            if ( isset( $_POST['folder_count_mode'] ) ) {
+            if ( isset( $_POST['folder_count_mode'] ) ) :
                 $settings['folder_count_mode'] = sanitize_text_field( wp_unslash( $_POST['folder_count_mode'] ) );
-            }
+			endif;
 
             update_option( 'wpmn_settings', $settings );
             wp_send_json_success();
