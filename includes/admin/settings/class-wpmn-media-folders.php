@@ -40,6 +40,11 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
          */
 		public function register_taxonomy() {
 
+            $settings   = get_option( 'wpmn_settings', [] );
+            $post_types = isset( $settings['post_types'] ) ? (array) $settings['post_types'] : [];
+            $post_types[] = 'attachment';
+            $post_types = array_unique( $post_types );
+
 			$labels = array(
 				'name'          => esc_html__('Media Folders', 'medianest'),
 				'singular_name' => esc_html__('Media Folder', 'medianest'),
@@ -47,7 +52,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 			register_taxonomy(
 				'wpmn_media_folder',
-				'attachment',
+				$post_types,
 				array(
 					'hierarchical' => true,
 					'labels'       => $labels,
@@ -70,7 +75,8 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			switch ($type) :
 				case 'get_folders':
 					$count_mode = isset($_POST['folder_count_mode']) ? sanitize_text_field( wp_unslash( $_POST['folder_count_mode'] ) ) : null;
-					wp_send_json_success(self::payload($count_mode));
+                    $post_type = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
+					wp_send_json_success(self::payload($count_mode, $post_type));
 					break;
 
 				case 'create_folder':
@@ -127,27 +133,45 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			endswitch;
 		}
 
-		public static function payload($count_mode = null) {
+		public static function payload($count_mode = null, $post_type = 'attachment') {
 			return array(
-				'folders' => self::folder_tree($count_mode),
-				'counts'  => self::special_counts(),
+				'folders' => self::folder_tree($count_mode, $post_type),
+				'counts'  => self::special_counts($post_type),
 			);
 		}
 
-		public static function folder_tree($count_mode = null) {
+		public static function folder_tree($count_mode = null, $post_type = 'attachment') {
 
-			$terms = get_terms(array(
+			$args = array(
 				'taxonomy'   => 'wpmn_media_folder',
 				'hide_empty' => false,
 				'orderby'    => 'term_id',
 				'order'      => 'ASC',
-			) );
+                'meta_query' => array(
+                    'relation' => 'OR',
+                    array(
+                        'key'     => 'wpmn_post_type',
+                        'value'   => $post_type,
+                        'compare' => '=',
+                    ),
+                ),
+			);
+
+            // For media (attachment), also show folders that have no post type set (legacy folders)
+            if ( $post_type === 'attachment' ) :
+                $args['meta_query'][] = array(
+                    'key'     => 'wpmn_post_type',
+                    'compare' => 'NOT EXISTS',
+                );
+            endif;
+
+            $terms = get_terms( $args );
 
 			if (is_wp_error($terms)) return [];
 			$group = [];
 
 			foreach ($terms as $term) :
-				$term->count_with_children = self::folder_count($term->term_id);
+				$term->count_with_children = self::folder_count($term->term_id, $post_type);
 				$group[$term->parent][] = $term;
 			endforeach;
 
@@ -185,7 +209,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			return $list;
 		}
 
-		public static function folder_count($id) {
+		public static function folder_count($id, $post_type = 'attachment') {
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -198,31 +222,37 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 				AND tt.term_id = %d
 				AND p.post_type = %s
 				AND p.post_status != %s",
-				'wpmn_media_folder', $id, 'attachment', 'trash'
+				'wpmn_media_folder', $id, $post_type, 'trash'
 			) );
 		}
 
-		public static function special_counts() {
+		public static function special_counts($post_type = 'attachment') {
 			global $wpdb;
 
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$total = (int) $wpdb->get_var(
-				"SELECT COUNT(ID) FROM {$wpdb->posts}
-				WHERE post_type='attachment' AND post_status!='trash'"
-			);
+            // Exclude these statuses to match WordPress main query counts
+            $exclude_statuses = array( 'trash', 'auto-draft', 'revision' );
+            $exclude_placeholders = implode( ',', array_fill( 0, count( $exclude_statuses ), '%s' ) );
 
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$uncat = (int) $wpdb->get_var($wpdb->prepare(
-				"SELECT COUNT(p.ID)
-				FROM {$wpdb->posts} p
-				LEFT JOIN {$wpdb->term_relationships} tr ON p.ID=tr.object_id
-				LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id=tt.term_taxonomy_id 
-					AND tt.taxonomy=%s
-				WHERE p.post_type='attachment'
-				AND p.post_status!='trash'
-				AND tt.term_taxonomy_id IS NULL",
-				'wpmn_media_folder'
-			) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			$total = (int) $wpdb->get_var($wpdb->prepare(
+				"SELECT COUNT(ID) FROM {$wpdb->posts}
+				WHERE post_type=%s AND post_status NOT IN ($exclude_placeholders)",
+                array_merge( array( $post_type ), $exclude_statuses )
+			));
+
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+            $uncat = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(ID) FROM {$wpdb->posts} p
+                WHERE p.post_type=%s
+                AND p.post_status NOT IN ($exclude_placeholders)
+                AND NOT EXISTS (
+                    SELECT 1 FROM {$wpdb->term_relationships} tr
+                    INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+                    WHERE tr.object_id = p.ID
+                    AND tt.taxonomy = %s
+                )",
+                array_merge( array( $post_type ), $exclude_statuses, array( 'wpmn_media_folder' ) )
+            ) );
 
 			return array(
 				'all'           => $total,

@@ -26,10 +26,11 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
                 'columns'          => 3,
                 'isCropped'        => true,
                 'className'        => '',
-                'spaceAroundImage' => 10,
-                'imgMinWidth'      => 200,
-                'hasCaption'       => false,
-                'linkTo'           => 'none'
+                'spaceAroundImage'    => 10,
+                'imgMinWidth'         => 200,
+                'hasCaption'          => false,
+                'linkTo'              => 'none',
+                'imageHoverAnimation' => 'none'
             ) );
 
             $ids = array_map( 'intval', (array) $attributes['selectedFolder'] );
@@ -47,6 +48,7 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
                         'field'    => 'term_id',
                         'terms'    => $ids,
                         'operator' => 'IN',
+                        'include_children' => false
                     ),
                 ),
                 'post_status'    => 'inherit',
@@ -82,6 +84,10 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
             $ulClass .= ' columns-' . esc_attr( $attributes['columns'] );
             $ulClass .= $attributes['isCropped'] ? ' is-cropped' : '';
             $ulClass .= $attributes['hasLightbox'] ? ' is-lightbox' : '';
+            
+            if ( ! empty( $attributes['imageHoverAnimation'] ) && 'none' !== $attributes['imageHoverAnimation'] ) {
+                $ulClass .= ' wpmn-block-hover-animation-' . esc_attr( $attributes['imageHoverAnimation'] );
+            }
 
             $styles  = '--columns: ' . esc_attr( $attributes['columns'] ) . ';';
             $styles .= '--space: ' . esc_attr( $attributes['spaceAroundImage'] ) . 'px;';

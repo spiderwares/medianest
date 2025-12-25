@@ -11,6 +11,7 @@
 	min-width: 0;
 	overflow-x: hidden;
 	position: relative;
+	margin-top: -10px;
 }
 
 .wpmn_media_sidebar {
@@ -970,6 +971,13 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 	transition: transform 0.25s;
 }
 
+
 .wpmn_folder_node[aria-expanded='true']>.wpmn_folder_row>.wpmn_toggle_arrow::before {
 	transform: rotate(45deg);
+}
+
+/*--------------------------- Admin Table Columns ---------------------------*/
+
+#wpmn_folder_col {
+	width: 150px;
 }

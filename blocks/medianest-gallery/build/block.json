@@ -3,7 +3,7 @@
     "apiVersion": 3,
     "name": "medianest/block-medianest-gallery",
     "version": "0.1.0",
-    "description": "Display images from folders in a rich, interactive gallery.",
+    "description": "Display images from folders in a interactive gallery.",
     "example": {},
     "supports": {
         "html": false,
@@ -61,6 +61,10 @@
         "layout": {
             "type": "string",
             "default": "flex"
+        },
+        "imageHoverAnimation": {
+            "type": "string",
+            "default": "none"
         },
         "spaceAroundImage": {
             "type": "integer",

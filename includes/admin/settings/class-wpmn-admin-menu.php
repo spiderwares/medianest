@@ -77,6 +77,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
          * 
          */
          public function enqueue_admin_styles( $hook ) {
+            $screen = get_current_screen();
 
             wp_enqueue_style( 
                 'wpmn-admin-style', 
@@ -126,6 +127,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 					'nonce'          => wp_create_nonce( 'wpmn_media_nonce' ),
                     'restUrl'        => esc_url_raw( rest_url( 'medianest/v1/' ) ),
                     'showBreadcrumb' => $show_breadcrumb === 'yes',
+                    'postType'       => $screen ? $screen->post_type : 'attachment',
 					'wpmn_folder'    => array(
 						'newFolderPrompt'    => esc_html__( 'Enter folder name', 'medianest' ),
 						'renamePrompt'       => esc_html__( 'Rename folder', 'medianest' ),

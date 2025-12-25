@@ -28,17 +28,19 @@
             linkTo: { type: 'string', default: 'none' },
             sortBy: { type: 'string', default: 'date' },
             sortType: { type: 'string', default: 'DESC' },
+            imageHoverAnimation: { type: 'string', default: 'none' },
         },
         edit: function (props) {
             var attributes = props.attributes,
                 setAttributes = props.setAttributes,
                 [rawFolders, setRawFolders] = useState([]),
                 [isLoading, setIsLoading] = useState(true),
-                [isOpen, setIsOpen] = useState(false);
+                [isOpen, setIsOpen] = useState(false),
+                [expandedFolders, setExpandedFolders] = useState([]);
 
             // Fetch raw folder tree
             useEffect(function () {
-                apiFetch({ path: '/medianest/v1/folders' })
+                apiFetch({ path: '/medianest/v1/folders?post_type=attachment' })
                     .then(function (response) {
                         if (response.success && response.data.folders) {
                             setRawFolders(response.data.folders);
@@ -69,32 +71,13 @@
 
             // Recursive Tree Renderer
             function FolderTree({ nodes, depth = 0 }) {
-                const filters = {
-                    '#f44336': 'invert(37%) sepia(94%) saturate(4522%) hue-rotate(346deg) brightness(97%) contrast(92%)',
-                    '#ff5722': 'invert(46%) sepia(99%) saturate(2256%) hue-rotate(345deg) brightness(101%) contrast(101%)',
-                    '#ff9800': 'invert(62%) sepia(98%) saturate(1455%) hue-rotate(3deg) brightness(106%) contrast(102%)',
-                    '#ffc107': 'invert(84%) sepia(21%) saturate(6926%) hue-rotate(360deg) brightness(105%) contrast(103%)',
-                    '#ffeb3b': 'invert(91%) sepia(45%) saturate(1113%) hue-rotate(3deg) brightness(107%) contrast(101%)',
-                    '#cddc39': 'invert(87%) sepia(19%) saturate(2321%) hue-rotate(34deg) brightness(103%) contrast(87%)',
-                    '#2196f3': 'invert(52%) sepia(61%) saturate(3015%) hue-rotate(185deg) brightness(97%) contrast(96%)',
-                    '#03a9f4': 'invert(53%) sepia(94%) saturate(2035%) hue-rotate(169deg) brightness(101%) contrast(101%)',
-                    '#e3f2fd': 'invert(96%) sepia(10%) saturate(676%) hue-rotate(186deg) brightness(105%) contrast(101%)',
-                    '#4caf50': 'invert(62%) sepia(8%) saturate(2506%) hue-rotate(71deg) brightness(98%) contrast(85%)',
-                    '#8bc34a': 'invert(75%) sepia(20%) saturate(1212%) hue-rotate(44deg) brightness(98%) contrast(83%)',
-                    '#aed581': 'invert(87%) sepia(16%) saturate(666%) hue-rotate(43deg) brightness(101%) contrast(84%)',
-                    '#673ab7': 'invert(22%) sepia(87%) saturate(3226%) hue-rotate(256deg) brightness(84%) contrast(91%)',
-                    '#9c27b0': 'invert(21%) sepia(87%) saturate(4422%) hue-rotate(279deg) brightness(86%) contrast(95%)',
-                    '#b39ddb': 'invert(74%) sepia(16%) saturate(1001%) hue-rotate(218deg) brightness(94%) contrast(86%)',
-                    '#e91e63': 'invert(22%) sepia(99%) saturate(4051%) hue-rotate(329deg) brightness(93%) contrast(98%)',
-                    '#f06292': 'invert(69%) sepia(48%) saturate(3665%) hue-rotate(303deg) brightness(99%) contrast(93%)',
-                    '#9e9e9e': 'invert(67%) sepia(0%) saturate(103%) hue-rotate(187deg) brightness(95%) contrast(88%)'
-                };
 
                 return nodes.map(function (node) {
                     var isChecked = attributes.selectedFolder.includes(node.id);
-                    var filter = node.color ? filters[node.color.toLowerCase()] : '';
+                    var hasChildren = node.children && node.children.length > 0;
+                    var isExpanded = expandedFolders.includes(node.id);
 
-                    return el('div', { key: node.id, style: { marginLeft: (depth * 20) + 'px' } },
+                    return el('div', { key: node.id, style: { marginLeft: (depth * 15) + 'px' } },
                         el('div', {
                             className: 'wpmn_tree_item',
                             onClick: function () {
@@ -107,6 +90,18 @@
                                 setAttributes({ selectedFolder: newSelected });
                             }
                         },
+                            hasChildren ? el('span', {
+                                className: 'dashicons ' + (isExpanded ? 'dashicons-arrow-down-alt2' : 'dashicons-arrow-right-alt2'),
+                                style: { cursor: 'pointer', fontSize: '14px', lineHeight: 'inherit', marginRight: '2px', color: '#666' },
+                                onClick: function (e) {
+                                    e.stopPropagation();
+                                    if (isExpanded) {
+                                        setExpandedFolders(expandedFolders.filter(function (id) { return id !== node.id; }));
+                                    } else {
+                                        setExpandedFolders([...expandedFolders, node.id]);
+                                    }
+                                }
+                            }) : el('span', { style: { width: '16px', display: 'inline-block', marginRight: '2px' } }),
                             el('input', {
                                 type: 'checkbox',
                                 checked: isChecked,
@@ -114,11 +109,10 @@
                             }),
                             el('span', {
                                 className: 'dashicons dashicons-category',
-                                style: filter ? { filter: filter } : {}
                             }),
                             el('span', null, node.text)
                         ),
-                        node.children && node.children.length > 0 && el(FolderTree, { nodes: node.children, depth: depth + 1 })
+                        hasChildren && isExpanded && el(FolderTree, { nodes: node.children, depth: depth + 1 })
                     );
                 });
             }
@@ -200,7 +194,22 @@
                                 { label: 'Masonry', value: 'masonry' },
                                 { label: 'Carousel', value: 'carousel' }
                             ],
+                            help: __('Select the display layout for media items.', 'medianest'),
                             onChange: function (val) { setAttributes({ layout: val }); }
+                        }),
+
+                        el(SelectControl, {
+                            label: __('Image Hover Animation', 'medianest'),
+                            value: attributes.imageHoverAnimation,
+                            options: [
+                                { label: 'None', value: 'none' },
+                                { label: 'Zoom In', value: 'zoomIn' },
+                                { label: 'Shine', value: 'shine' },
+                                { label: 'Opacity', value: 'opacity' },
+                                { label: 'Grayscale', value: 'grayscale' }
+                            ],
+                            help: __('Hover on images to see animations.', 'medianest'),
+                            onChange: function (val) { setAttributes({ imageHoverAnimation: val }); }
                         }),
 
                         el(SelectControl, {
@@ -211,6 +220,7 @@
                                 { label: 'Media File', value: 'media' },
                                 { label: 'Attachment Page', value: 'attachment' }
                             ],
+                            help: __('Choose where the media item should link when clicked.', 'medianest'),
                             onChange: function (val) { setAttributes({ linkTo: val }); }
                         }),
 
@@ -225,6 +235,7 @@
                                 { label: 'By Title', value: 'title' },
                                 { label: 'By File Name', value: 'file_name' }
                             ],
+                            help: __('Select the criteria used to order the media items.', 'medianest'),
                             onChange: function (val) { setAttributes({ sortBy: val }); }
                         }),
 
@@ -235,6 +246,7 @@
                                 { label: 'Ascending', value: 'ASC' },
                                 { label: 'Descending', value: 'DESC' }
                             ],
+                            help: __('Choose the sorting direction for the media items.', 'medianest'),
                             onChange: function (val) { setAttributes({ sortType: val }); }
                         })
                     )

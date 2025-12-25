@@ -29,15 +29,47 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
          * Initialize hooks and filters.
          */
 		public function events_handler() {
-			add_action( 'admin_footer-upload.php', array( $this, 'wpmn_render_sidebar' ) );
-			add_action( 'admin_footer-post.php', array( $this, 'wpmn_render_sidebar' ) );
+			add_action( 'admin_footer', array( $this, 'wpmn_maybe_render_sidebar' ) );
             add_action( 'attachment_fields_to_edit', array( $this, 'add_folder_field' ), 10, 2 );
             add_filter( 'ajax_query_attachments_args', array( $this, 'wpmn_filter_attachments' ) );
             add_action( 'pre_get_posts', array( $this, 'wpmn_filter_list_view' ) );
+            add_filter( 'manage_media_columns', array( $this, 'add_folder_column' ) );
             add_filter( 'manage_media_columns', array( $this, 'add_file_size_column' ) );
             add_action( 'manage_media_custom_column', array( $this, 'display_file_size_column' ), 10, 2 );
+            add_action( 'manage_media_custom_column', array( $this, 'display_folder_column' ), 10, 2 );
             add_filter( 'manage_upload_sortable_columns', array( $this, 'register_file_size_sortable' ) );
+            
+            // Add columns for other supported post types
+            $settings = get_option( 'wpmn_settings', [] );
+            $post_types = isset( $settings['post_types'] ) ? (array) $settings['post_types'] : [];
+            
+            foreach ( $post_types as $pt ) {
+            add_filter( "manage_edit-{$pt}_columns", array( $this, 'add_folder_column' ) );
+                add_filter( "manage_{$pt}_posts_columns", array( $this, 'add_folder_column' ) );
+                add_action( "manage_{$pt}_posts_custom_column", array( $this, 'display_folder_column_for_posts' ), 10, 2 );
+            }
+
+            // Pro version hooks
+            do_action( 'wpmn_media_library_init', $this );
 		}
+
+        public function wpmn_maybe_render_sidebar() {
+            $screen = get_current_screen();
+            if ( ! $screen ) return;
+
+            $settings = get_option( 'wpmn_settings', [] );
+            $enabled_post_types = isset( $settings['post_types'] ) ? (array) $settings['post_types'] : [];
+
+            $is_media = ( $screen->id === 'upload' );
+            $is_supported_post_type = in_array( $screen->post_type, $enabled_post_types );
+            
+            // Check if it's a list view (edit.php)
+            $is_list_view = ( $screen->base === 'edit' );
+
+            if ( $is_media || ( $is_supported_post_type && $is_list_view ) ) {
+                $this->wpmn_render_sidebar();
+            }
+        }
 
 		public function wpmn_render_sidebar() {
 			wpmn_get_template(
@@ -95,21 +127,45 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
         public function wpmn_filter_list_view( $query ) {
             if ( ! is_admin() || ! $query->is_main_query() ) return;
 
-            $screen = get_current_screen();
-            if ( ! $screen || $screen->id !== 'upload' ) return;
-
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             $folder = ! empty( $_GET['wpmn_folder'] ) ? sanitize_text_field( wp_unslash( $_GET['wpmn_folder'] ) ) : '';
             if ( ! $folder || $folder === 'all' ) return;
+
+            $screen = get_current_screen();
+            $post_type = '';
+
+            if ( $screen ) {
+                $post_type = $screen->post_type;
+            } elseif ( isset( $_GET['post_type'] ) ) {
+                $post_type = sanitize_text_field( wp_unslash( $_GET['post_type'] ) );
+            } else {
+                // Fallback for default post type
+                $post_type = 'post';
+            }
+
+            // Always allow attachment, otherwise check settings
+            if ( $post_type !== 'attachment' ) {
+                $settings = get_option( 'wpmn_settings', [] );
+                $enabled_post_types = isset( $settings['post_types'] ) ? (array) $settings['post_types'] : [];
+
+                if ( ! in_array( $post_type, $enabled_post_types ) ) return;
+            }
 
             if ( $folder === 'uncategorized' ) :
                 $terms = get_terms( array(
                     'taxonomy'   => 'wpmn_media_folder',
                     'fields'     => 'ids',
                     'hide_empty' => false,
+                    'meta_query' => array(
+                        array(
+                            'key'     => 'wpmn_post_type',
+                            'value'   => $post_type,
+                            'compare' => '=',
+                        ),
+                    ),
                 ) );
 
-                if ( $terms ) :
+                if ( ! empty( $terms ) ) :
                     $query->set( 'tax_query', array(
                         array(
                             'taxonomy' => 'wpmn_media_folder',
@@ -122,7 +178,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                 return;
             endif;
 
-            if ( str_starts_with( $folder, 'term-' ) ) :
+            if ( 0 === strpos( $folder, 'term-' ) ) :
                 $term_id = absint( str_replace( 'term-', '', $folder ) );
                 if ( $term_id ) :
                     $query->set( 'tax_query', array(
@@ -138,9 +194,41 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
         }
 
         public function add_folder_field( $form_fields, $post ) {
-            $terms  = wp_get_object_terms( $post->ID, 'wpmn_media_folder' );
-            $labels = WPMN_Helper::wpmn_get_folder_labels();
+            $terms       = wp_get_object_terms( $post->ID, 'wpmn_media_folder' );
+            $labels      = WPMN_Helper::wpmn_get_folder_labels();
+            $post_type   = get_post_type( $post->ID );
             
+            // Get only terms for this post type
+            $include_terms = get_terms( array(
+                'taxonomy'   => 'wpmn_media_folder',
+                'hide_empty' => false,
+                'fields'     => 'ids',
+                'meta_query' => array(
+                    'relation' => 'OR',
+                    array(
+                        'key'     => 'wpmn_post_type',
+                        'value'   => $post_type,
+                        'compare' => '=',
+                    ),
+                ),
+            ) );
+
+            // Include legacy folders for attachments
+            if ( $post_type === 'attachment' ) {
+                $legacy_terms = get_terms( array(
+                    'taxonomy'   => 'wpmn_media_folder',
+                    'hide_empty' => false,
+                    'fields'     => 'ids',
+                    'meta_query' => array(
+                        array(
+                            'key'     => 'wpmn_post_type',
+                            'compare' => 'NOT EXISTS',
+                        ),
+                    ),
+                ) );
+                $include_terms = array_merge( $include_terms, $legacy_terms );
+            }
+
             $select_html = wp_dropdown_categories(array(
                 'taxonomy'          => 'wpmn_media_folder',
                 'hide_empty'        => false,
@@ -151,10 +239,10 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                 'show_option_none'  => $labels['uncategorized'],
                 'option_none_value' => '0',
                 'selected'          => $terms[0]->term_id ?? 0,
+                'include'           => ! empty( $include_terms ) ? $include_terms : array( -1 ), // -1 to show nothing if empty
                 'echo'              => 0,
                 'hierarchical'      => true,
             ) );
-
             $select_html = str_replace('&nbsp;&nbsp;&nbsp;', '- ', $select_html);
 
             $form_fields['wpmn_media_folder'] = array(
@@ -165,6 +253,89 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             );
 
             return $form_fields;
+        }
+
+        public function add_folder_column( $columns ) {
+            $columns['wpmn_folder_col'] = esc_html__( 'MediaNest Folder', 'medianest' );
+            return $columns;
+        }
+
+        public function display_folder_column( $column_name, $id ) {
+            if ( 'wpmn_folder_col' !== $column_name ) return;
+
+            $terms = get_the_terms( $id, 'wpmn_media_folder' );
+            if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+                $folder_links = array();
+                foreach ( $terms as $term ) {
+                    // Create a link to filter by this folder
+                    $url = add_query_arg(
+                        array(
+                            'mode' => 'list',
+                            'wpmn_folder' => 'term-' . $term->term_id
+                        ),
+                        admin_url( 'upload.php' )
+                    );
+                    $folder_links[] = sprintf(
+                        '<a href="%s">%s</a>',
+                        esc_url( $url ),
+                        esc_html( $term->name )
+                    );
+                }
+                echo wp_kses_post( implode( ', ', $folder_links ) );
+            } else {
+                $url = add_query_arg(
+                    array(
+                        'mode' => 'list',
+                        'wpmn_folder' => 'uncategorized'
+                    ),
+                    admin_url( 'upload.php' )
+                );
+                echo sprintf(
+                    '<a href="%s">%s</a>',
+                    esc_url( $url ),
+                    esc_html__( 'Uncategorized', 'medianest' )
+                );
+            }
+        }
+
+        public function display_folder_column_for_posts( $column_name, $id ) {
+            if ( 'wpmn_folder_col' !== $column_name ) return;
+
+            $post_type = get_post_type( $id );
+            $terms = get_the_terms( $id, 'wpmn_media_folder' );
+
+            if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+                $folder_links = array();
+                foreach ( $terms as $term ) {
+                    // Create a link to filter by this folder
+                    $url = add_query_arg(
+                        array(
+                            'wpmn_folder' => 'term-' . $term->term_id,
+                            'post_type'   => $post_type
+                        ),
+                        admin_url( 'edit.php' )
+                    );
+                    $folder_links[] = sprintf(
+                        '<a href="%s">%s</a>',
+                        esc_url( $url ),
+                        esc_html( $term->name )
+                    );
+                }
+                echo wp_kses_post( implode( ', ', $folder_links ) );
+            } else {
+                $url = add_query_arg(
+                    array(
+                        'wpmn_folder' => 'uncategorized',
+                        'post_type'   => $post_type
+                    ),
+                    admin_url( 'edit.php' )
+                );
+                echo sprintf(
+                    '<a href="%s">%s</a>',
+                    esc_url( $url ),
+                    esc_html__( 'Uncategorized', 'medianest' )
+                );
+            }
         }
 
         public function add_file_size_column( $columns ) {
@@ -188,7 +359,6 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             $columns['wpmn_filesize'] = 'wpmn_filesize';
             return $columns;
         }
-
 	}
 
 	new WPMN_Media_Library();

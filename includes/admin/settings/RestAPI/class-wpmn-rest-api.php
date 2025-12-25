@@ -80,7 +80,9 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
 
         public function get_folders( $request ) {
             
-            $search = sanitize_text_field( $request->get_param( 'search' ) );
+            $search    = sanitize_text_field( $request->get_param( 'search' ) );
+            $post_type = sanitize_text_field( $request->get_param( 'post_type' ) );
+            
             $args   = array(
                 'taxonomy'   => 'wpmn_media_folder',
                 'hide_empty' => false,
@@ -90,6 +92,27 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
 
             if ( ! empty( $search ) ) {
                 $args['name__like'] = $search;
+            }
+
+            if ( ! empty( $post_type ) ) {
+                $meta_query = array(
+                    'relation' => 'OR',
+                    array(
+                        'key'     => 'wpmn_post_type',
+                        'value'   => $post_type,
+                        'compare' => '=',
+                    ),
+                );
+
+                // For attachments, include legacy folders (no meta)
+                if ( $post_type === 'attachment' ) {
+                    $meta_query[] = array(
+                        'key'     => 'wpmn_post_type',
+                        'compare' => 'NOT EXISTS',
+                    );
+                }
+                
+                $args['meta_query'] = $meta_query;
             }
 
             $terms = get_terms( $args );

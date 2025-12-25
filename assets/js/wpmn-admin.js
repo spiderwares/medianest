@@ -37,12 +37,24 @@ jQuery(function ($) {
             return wpmn_media_library.wpmn_folder?.[key] || def;
         }
 
+        getPostType() {
+            if (this.sidebar.hasClass('in-modal')) return 'attachment';
+            const urlParams = new URLSearchParams(window.location.search);
+            const pt = urlParams.get('post_type');
+            if (pt) return pt;
+            if (window.location.pathname.includes('upload.php')) return 'attachment';
+            return wpmn_media_library.postType || 'post';
+        }
+
         apiCall(request_type, data = {}) {
             const isFormData = data instanceof FormData;
+            const post_type = this.getPostType();
+
             if (isFormData) {
                 data.append('action', 'wpmn_ajax');
                 data.append('request_type', request_type);
                 data.append('nonce', wpmn_media_library.nonce);
+                if (!data.has('post_type')) data.append('post_type', post_type);
             }
 
             return new Promise((resolve, reject) => {
@@ -53,6 +65,7 @@ jQuery(function ($) {
                         action: 'wpmn_ajax',
                         request_type,
                         nonce: wpmn_media_library.nonce,
+                        post_type,
                         ...data
                     },
                     processData: !isFormData,
@@ -68,8 +81,8 @@ jQuery(function ($) {
             const savedSettings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
 
             let activeFolderFromUrl = null;
-            if (window.location.pathname.includes('upload.php')) {
-                const urlParams = new URLSearchParams(window.location.search);
+            const urlParams = new URLSearchParams(window.location.search);
+            if (window.location.pathname.includes('upload.php') || window.location.pathname.includes('edit.php')) {
                 activeFolderFromUrl = urlParams.get('wpmn_folder');
             }
 
@@ -80,9 +93,12 @@ jQuery(function ($) {
                 searchTerm: '',
                 searchResults: []
             };
-            this.showFolderId = this.getStorage('wpmnShowFolderId') === '1';
             this.searchDebounce = null;
             this.sidebar = $('#wpmn_media_sidebar');
+
+            const postType = this.getPostType();
+            this.showFolderId = this.getStorage('wpmnShowFolderId_' + postType) === '1';
+
             this.sidebarWidth = parseInt(this.getStorage('wpmnSidebarWidth', '300'));
             if (this.sidebar.length && this.sidebarWidth !== 300) {
                 this.sidebar.css('width', this.sidebarWidth + 'px');
@@ -91,12 +107,17 @@ jQuery(function ($) {
             this.toastTimeout = null;
             this.isBulkSelect = false;
             this.clipboard = { action: null, folderId: null };
-            const uploadPage = window.location.pathname.includes('upload.php');
-            const listView = uploadPage &&
-                (window.location.search.includes('mode=list') || !window.location.search.includes('mode=grid'));
 
-            if (this.state.activeFolder !== 'all' && uploadPage && !listView) {
-                setTimeout(() => this.triggerMediaFilter(this.state.activeFolder), 500);
+            const media = window.location.pathname.includes('upload.php');
+            const isList = window.location.pathname.includes('edit.php');
+            const gridMode = media && (window.location.search.includes('mode=grid') || !window.location.search.includes('mode=list'));
+
+            if (this.state.activeFolder !== 'all' && !activeFolderFromUrl) {
+                if (gridMode) {
+                    setTimeout(() => this.triggerMediaFilter(this.state.activeFolder), 1000);
+                } else if (isList || media) {
+                    this.triggerMediaFilter(this.state.activeFolder);
+                }
             }
         }
 
@@ -162,7 +183,6 @@ jQuery(function ($) {
 
             $(document).on('mousemove', (e) => {
                 if (!isResizing) return;
-
                 let newWidth = startWidth + (e.pageX - startX);
                 if (newWidth < 300) newWidth = 300;
                 if (newWidth > 630) newWidth = 630;
@@ -302,6 +322,9 @@ jQuery(function ($) {
         }
 
         saveSettings() {
+            const oldSettings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
+            const oldDefault = oldSettings.defaultFolder;
+
             const settings = {
                 defaultFolder: $('#wpmn_default_folder').val(),
                 defaultSort: $('#wpmn_default_sort').val() || 'default',
@@ -312,6 +335,10 @@ jQuery(function ($) {
             this.renderSidebar();
             this.applySortFromSettings(settings.defaultSort);
             this.showToast(this.getText('settingsSaved'));
+
+            if (settings.defaultFolder && settings.defaultFolder !== oldDefault) {
+                this.changeFolder(settings.defaultFolder);
+            }
         }
 
         applySortFromSettings(sortValue) {
@@ -467,7 +494,20 @@ jQuery(function ($) {
         }
 
         fetchFolders() {
-            this.apiCall('get_folders').then(data => wpmn_media_folder.folder.refreshState(data)).catch(console.error);
+            const postType = this.getPostType();
+            this.showFolderId = this.getStorage('wpmnShowFolderId_' + postType) === '1';
+
+            this.apiCall('get_folders', { post_type: postType })
+                .then(data => {
+                    wpmn_media_folder.folder.refreshState(data);
+                    this.updateSidebarLabels(postType);
+                })
+                .catch(console.error);
+        }
+
+        updateSidebarLabels(postType) {
+            this.sidebar.find('.wpmn_count_all').prev('span').text('All Files');
+            this.sidebar.find('.wpmn_count_uncategorized').prev('span').text('Uncategorized');
         }
 
         renderSidebar() {
@@ -553,6 +593,9 @@ jQuery(function ($) {
                 wrap.children().not(this.sidebar).wrapAll('<div class="wpmn_media_content"></div>');
                 wrap.prepend(this.sidebar).addClass('wpmn_media_layout');
 
+                // Move screen meta elements inside the content wrapper
+                $('#screen-meta, #screen-meta-links').prependTo(wrap.find('.wpmn_media_content'));
+
                 if (this.getStorage('wpmnSidebarCollapsed') === '1') {
                     wrap.addClass('wpmn_media_layout_collapsed');
                 }
@@ -560,7 +603,15 @@ jQuery(function ($) {
 
             setInterval(() => {
                 const modal = $('.media-modal:visible');
-                if (!modal.length) return;
+                const wasInModal = this.sidebar.hasClass('in-modal');
+
+                if (!modal.length) {
+                    if (wasInModal) {
+                        this.sidebar.removeClass('in-modal');
+                        this.fetchFolders();
+                    }
+                    return;
+                }
 
                 const menu = modal.find('.media-frame-menu');
                 const router = modal.find('.media-router');
@@ -571,6 +622,7 @@ jQuery(function ($) {
                 if (menu.length && !menu.find('.wpmn_sidebar_container').length) {
                     menu.append('<div class="wpmn_sidebar_container"></div>').find('.wpmn_sidebar_container').append(this.sidebar.show());
                     this.sidebar.addClass('in-modal');
+                    this.fetchFolders();
                 }
 
                 this.sidebar.toggle(!isUploadTab);
@@ -606,7 +658,8 @@ jQuery(function ($) {
         toggleFolderId(e) {
             e.preventDefault();
             this.showFolderId = !this.showFolderId;
-            this.setStorage('wpmnShowFolderId', this.showFolderId ? '1' : '0');
+            const postType = this.getPostType();
+            this.setStorage('wpmnShowFolderId_' + postType, this.showFolderId ? '1' : '0');
             wpmn_media_folder.folder.updateFolderIdVisibility();
             wpmn_media_folder.folder.updateFolderIdMenuText();
             this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
@@ -625,7 +678,6 @@ jQuery(function ($) {
 
             const settings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
             let container = $('.wpmn_breadcrumb');
-
             if (settings.showBreadcrumb === false || !wpmn_media_library.showBreadcrumb) {
                 container.remove();
                 return;
@@ -648,7 +700,6 @@ jQuery(function ($) {
                 if (!isLast) {
                     item.on('click', () => this.changeFolder(`term-${folder.id}`));
                 }
-
                 container.append(item);
             });
         }
@@ -667,12 +718,30 @@ jQuery(function ($) {
         triggerMediaFilter(slug) {
             const mediaFrame = wp?.media?.frame?.state;
 
-            if (mediaFrame) {
+            const media = window.location.pathname.includes('upload.php');
+            const listView = window.location.pathname.includes('edit.php');
+            const gridMode = media && (window.location.search.includes('mode=grid') || !window.location.search.includes('mode=list'));
+
+            if (mediaFrame && gridMode) {
                 wp.media.frame.state().get('library')?.props.set('wpmn_folder', slug);
             } else {
                 const url = new URL(window.location.href);
-                url.searchParams.set('wpmn_folder', slug);
-                window.location.href = url.toString();
+
+                if (!media && !listView) {
+                    const postType = this.getPostType();
+                    const adminUrl = wpmn_media_library.ajaxUrl.replace('admin-ajax.php', 'edit.php');
+                    const newUrl = new URL(adminUrl);
+                    newUrl.searchParams.set('post_type', postType);
+                    newUrl.searchParams.set('wpmn_folder', slug);
+                    window.location.href = newUrl.toString();
+                    return;
+                }
+
+                const currentFolder = url.searchParams.get('wpmn_folder');
+                if (currentFolder !== slug) {
+                    url.searchParams.set('wpmn_folder', slug);
+                    window.location.href = url.toString();
+                }
             }
         }
 
@@ -699,7 +768,6 @@ jQuery(function ($) {
             if (__this.prop('disabled')) return;
 
             __this.prop('disabled', true).text('Importing...');
-
             const formData = new FormData();
             formData.append('csv_file', file);
 
@@ -733,7 +801,6 @@ jQuery(function ($) {
                 originalText = __this.text();
 
             if (__this.prop('disabled')) return;
-
             __this.prop('disabled', true).text('Exporting...')
             try {
                 const form = this.createForm(action);
@@ -803,7 +870,6 @@ jQuery(function ($) {
                 return;
             }
 
-            // Update folder ID
             menu.data('folder-id', folderId).attr('data-folder-id', folderId);
 
             const pasteItem = menu.find('[data-action="paste"]');
@@ -822,7 +888,6 @@ jQuery(function ($) {
 
             let posX = x;
             let posY = y;
-
             if (x + menuWidth > windowWidth) {
                 posX = windowWidth - menuWidth - 10;
             }
