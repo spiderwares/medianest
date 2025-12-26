@@ -22,7 +22,7 @@ jQuery(function ($) {
         updateFolderIdVisibility() {
             wpmn_admin_media.admin.sidebar.find('.wpmn_folder_button[data-folder-id]').each((i, el) => {
                 const btn = $(el), id = btn.data('folder-id'), name = btn.data('folder-name');
-                btn.find('.wpmn_folder_button__label').text((wpmn_admin_media.admin.showFolderId ? `#${id} ` : '') + name);
+                btn.find('.wpmn_folder_button_label').text((wpmn_admin_media.admin.showFolderId ? `#${id} ` : '') + name);
             });
         }
 
@@ -74,8 +74,8 @@ jQuery(function ($) {
                         data-color="${node.color || ''}">
                         <input type="checkbox" class="wpmn_folder_checkbox" value="${node.id}">
                         <img src="${wpmn_media_library.baseUrl || ''}assets/img/folder.svg"
-                            class="wpmn_folder_icon" aria-hidden="true" draggable="false">
-                        <span class="wpmn_folder_button__label"></span>
+                            class="wpmn_folder_icon" aria-hidden="true">
+                        <span class="wpmn_folder_button_label"></span>
                         <span class="wpmn_count">${node.count || 0}</span>
                     </button>
                 `);
@@ -83,12 +83,19 @@ jQuery(function ($) {
                 const icon = btn.find('.wpmn_folder_icon');
                 this.applyIconColor(icon, node.color || '');
 
-                btn.find('.wpmn_folder_button__label').text(
+                btn.find('.wpmn_folder_button_label').text(
                     (wpmn_admin_media.admin.showFolderId ? `#${node.id} ` : '') + node.name
                 );
 
                 li.append(
-                    $('<div class="wpmn_folder_row"></div>').append(arrow, btn)
+                    $('<div class="wpmn_folder_row"></div>').append(
+                        arrow,
+                        $('<div class="wpmn_folder_btn_wrapper"></div>').append(
+                            $('<div class="wpmn_drop_indicator drop-top"></div>'),
+                            btn,
+                            $('<div class="wpmn_drop_indicator drop-bottom"></div>')
+                        )
+                    )
                 );
 
                 if (hasChildren) {
@@ -119,41 +126,141 @@ jQuery(function ($) {
 
         setupDroppableTargets() {
             const sidebar = wpmn_admin_media.admin.sidebar;
+            const folderButtons = sidebar.find('.wpmn_folder_button[data-folder-id]');
 
-            sidebar.find('.wpmn_folder_button').each((_, el) => {
-                const btn = $(el);
+            folderButtons.each((_, el) => {
+                const __this = $(el);
+                if (__this.hasClass('ui-draggable')) {
+                    __this.draggable('destroy');
+                }
+
+                __this.draggable({
+                    cancel: '.wpmn_folder_checkbox',
+                    distance: 5,
+                    delay: 0,
+                    helper: function () {
+                        const folderName = $(this).data('folder-name');
+                        const folderIcon = $(this).find('.wpmn_folder_icon').attr('src');
+                        return $(`
+                            <div class="wpmn_drag_helper_pill wpmn_folder_drag_helper">
+                                <img src="${folderIcon}" class="wpmn_drag_folder_icon" />
+                                <span>${folderName}</span>
+                            </div>
+                        `);
+                    },
+                    cursorAt: { left: 60, top: 15 },
+                    appendTo: 'body',
+                    zIndex: 200000,
+                    revert: 'invalid',
+                    start() {
+                        $(this).closest('.wpmn_folder_node').addClass('is-dragging');
+                        $(this).css('opacity', 0.5);
+                    },
+                    stop() {
+                        $(this).closest('.wpmn_folder_node').removeClass('is-dragging');
+                        $(this).css('opacity', 1);
+                    }
+                });
+            });
+
+            // Handle droppable on folder rows for sorting/nesting
+            sidebar.find('.wpmn_folder_row').each((_, el) => {
+                const __this = $(el);
+                const btn = __this.find('.wpmn_folder_button');
                 const slug = btn.data('folder-slug');
 
-                if (btn.hasClass('ui-droppable')) {
-                    btn.droppable('destroy');
+                if (__this.hasClass('ui-droppable')) {
+                    __this.droppable('destroy');
                 }
 
                 if (!slug || (slug !== 'uncategorized' && !slug.startsWith('term-'))) return;
 
-                btn.droppable({
-                    accept: '.attachments .attachment, .wpmn_media_layout #the-list tr.wpmn_draggable',
-                    hoverClass: 'is-drop-hover',
+                __this.droppable({
+                    accept: '.attachments .attachment, .wpmn_media_layout #the-list tr.wpmn_draggable, .wpmn_folder_button[data-folder-id]',
+                    hoverClass: 'has-media-hover',
                     tolerance: 'pointer',
-                    drop: (_, ui) => {
-                        const folderId = slug.startsWith('term-') ? parseInt(slug.replace('term-', ''), 10) : 0;
-                        const ids = this.getDraggedMediaIds(ui);
-                        if (!ids.length) return alert(wpmn_admin_media.admin.getText('noSelection'));
-                        this.assignMediaToFolder(folderId, ids);
+                    over: (event, ui) => {
+                        if (!ui.draggable.hasClass('wpmn_folder_button')) return;
+                    },
+                    out: (event, ui) => {
+                        __this.find('.wpmn_drop_indicator').hide();
+                        __this.find('.wpmn_folder_btn_wrapper').removeClass('is-nest-hover');
+                    },
+                    drop: (event, ui) => {
+                        const targetFolderId = slug.startsWith('term-') ? parseInt(slug.replace('term-', ''), 10) : 0;
+                        __this.find('.wpmn_drop_indicator').hide();
+                        __this.find('.wpmn_folder_btn_wrapper').removeClass('is-nest-hover');
+
+                        if (ui.draggable.hasClass('wpmn_folder_button')) {
+                            const draggedFolderId = parseInt(ui.draggable.data('folder-id'));
+
+                            // Reorder logic based on mouse position
+                            const offsetY = event.pageY - __this.offset().top;
+                            const height = __this.outerHeight();
+
+                            let action = 'nest';
+                            if (offsetY < height * 0.3) action = 'before';
+                            else if (offsetY > height * 0.7) action = 'after';
+
+                            if (draggedFolderId === targetFolderId) return;
+                            if (this.childFolder(targetFolderId, draggedFolderId)) {
+                                wpmn_admin_media.admin.showToast(wpmn_admin_media.admin.getText('moveSubfolder', 'Cannot move folder to its subfolder'));
+                                return;
+                            }
+
+                            if (action === 'nest') {
+                                this.moveFolderToParent(draggedFolderId, targetFolderId);
+                            } else {
+                                this.reorderFolder(draggedFolderId, targetFolderId, action);
+                            }
+                        } else {
+                            const ids = this.getDraggedMediaIds(ui);
+                            if (!ids.length) return alert(wpmn_admin_media.admin.getText('noSelection'));
+                            this.assignMediaToFolder(targetFolderId, ids);
+                        }
+                    }
+                });
+
+                // Performance: Separate mousemove to show indicators
+                __this.on('mousemove', function (e) {
+                    if (!$('.is-dragging').length) return;
+
+                    const wrapper = $(this).find('.wpmn_folder_btn_wrapper');
+                    const offsetY = e.pageY - $(this).offset().top;
+                    const height = $(this).outerHeight();
+
+                    $(this).find('.wpmn_drop_indicator').hide();
+                    wrapper.removeClass('is-nest-hover');
+
+                    if (offsetY < height * 0.3) {
+                        $(this).find('.drop-top').show();
+                    } else if (offsetY > height * 0.7) {
+                        $(this).find('.drop-bottom').show();
+                    } else {
+                        wrapper.addClass('is-nest-hover');
                     }
                 });
             });
         }
 
+        reorderFolder(folderId, targetId, position) {
+            wpmn_admin_media.admin.apiCall('reorder_folder', {
+                folder_id: folderId,
+                target_id: targetId,
+                position: position
+            })
+                .then(data => {
+                    this.refreshState(data);
+                    wpmn_admin_media.admin.showToast(wpmn_admin_media.admin.getText('folderMoved', 'Folder reordered successfully'));
+                })
+                .catch(alert);
+        }
+
         getDraggedMediaIds(ui) {
             // Grid view
             if (ui.draggable.hasClass('attachment')) {
-                const selected = $('.attachments .attachment.selected')
-                    .map((_, el) => parseInt($(el).data('id')))
-                    .get();
-
-                return selected.length
-                    ? selected
-                    : [parseInt(ui.draggable.data('id'))];
+                const selected = $('.attachments .attachment.selected').map((_, el) => parseInt($(el).data('id'))).get();
+                return selected.length ? selected : [parseInt(ui.draggable.data('id'))];
             }
 
             // List view
@@ -165,10 +272,8 @@ jQuery(function ($) {
                         parseInt($(el).closest('tr').attr('id').replace('post-', ''))
                     ).get();
                 }
-
                 return [parseInt(ui.draggable.attr('id').replace('post-', ''))];
             }
-
             return [];
         }
 
@@ -187,9 +292,7 @@ jQuery(function ($) {
                     admin.showToast(admin.getText('itemMoved'));
 
                     const active = admin.state.activeFolder;
-                    const isCurrent =
-                        (active === 'uncategorized' && folderId === 0) ||
-                        (active === 'term-' + folderId);
+                    const isCurrent = (active === 'uncategorized' && folderId === 0) || (active === 'term-' + folderId);
 
                     if (isCurrent || active === 'all') return;
 
@@ -229,8 +332,17 @@ jQuery(function ($) {
         }
 
         performSearch(term) {
-            const url = wpmn_media_library.restUrl + 'folders';
 
+            // In Admin Panel, we prefer using the cached folders for instant search
+            if (wpmn_admin_media.admin.state.folders && wpmn_admin_media.admin.state.folders.length) {
+                const results = this.searchLocalFolders(term, wpmn_admin_media.admin.state.folders);
+                wpmn_admin_media.admin.state.searchResults = results;
+                wpmn_admin_media.admin.renderSidebar();
+                return;
+            }
+
+            // Fallback to API if local search isn't viable (though rarely needed in Admin)
+            const url = wpmn_media_library.restUrl + 'folders';
             $.ajax({
                 url: url,
                 method: 'GET',
@@ -245,6 +357,23 @@ jQuery(function ($) {
                     }
                 },
             });
+        }
+
+        searchLocalFolders(term, nodes) {
+            let results = [];
+            for (const node of nodes) {
+                if (node.name.toLowerCase().includes(term)) {
+                    // Clone node to avoid modifying original structure
+                    results.push({
+                        ...node,
+                        children: [] // Flatten results for search view
+                    });
+                }
+                if (node.children && node.children.length) {
+                    results = results.concat(this.searchLocalFolders(term, node.children));
+                }
+            }
+            return results;
         }
 
         handleContextNewFolder(parentId) {

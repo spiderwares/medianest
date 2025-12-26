@@ -33,55 +33,113 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
         /**
          * Register REST API routes
          */
+        /**
+         * Register REST API routes
+         */
         public function wpmn_register_routes() {
 
             // GET http://yoursite/wp-json/medianest/v1/folders
             register_rest_route( 'medianest/v1', '/folders', array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_folders' ],
-                'permission_callback' => '__return_true', 
+                'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
             // GET http://yoursite/wp-json/medianest/v1/folder?folder_id
             register_rest_route( 'medianest/v1', '/folder', array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_folder_details' ],
-                'permission_callback' => '__return_true', 
+                'permission_callback' => [ $this, 'check_api_permission' ], 
             )); 
 
             // POST http://yoursite/wp-json/medianest/v1/folder/set-attachment
             register_rest_route( 'medianest/v1', '/folder/set-attachment', array(
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'set_attachment' ],
-                'permission_callback' => '__return_true', 
+                'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
             // GET http://yoursite/wp-json/medianest/v1/attachment-id
             register_rest_route( 'medianest/v1', '/attachment-id', array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_attachment_ids' ],
-                'permission_callback' => '__return_true', 
+                'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
             // GET http://yoursite/wp-json/medianest/v1/attachment-count
             register_rest_route( 'medianest/v1', '/attachment-count', array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_attachment_count' ],
-                'permission_callback' => '__return_true', 
+                'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
             // POST http://yoursite/wp-json/medianest/v1/folders
             register_rest_route( 'medianest/v1', '/folders', array(
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'create_new_folder' ],
-                'permission_callback' => '__return_true', 
+                'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
+        }
+
+        /**
+         * Check if API Folder Search is enabled and Key is valid.
+         */
+        public function check_api_permission( $request ) {
+            
+            if ( ! $this->is_valid_api_key( $request ) ) {
+                return new WP_Error( 'invalid_api_key', 'Invalid or missing API Key.', array( 'status' => 401 ) );
+            }
+
+            return true;
+        }
+
+        /**
+         * Validate REST API Key from Header, Parameter, or Bearer Token.
+         */
+        private function is_valid_api_key( $request ) {
+            $settings = get_option( 'wpmn_settings', [] );
+            $saved_key = isset( $settings['rest_api_key'] ) ? $settings['rest_api_key'] : '';
+
+            if ( empty( $saved_key ) ) {
+                return false;
+            }
+
+            // 1. Check in Header: MediaNest-API-Key
+            $header_key = $request->get_header( 'MediaNest-API-Key' );
+            if ( $header_key === $saved_key ) {
+                return true;
+            }
+
+            // 2. Check in Query Param: api_key
+            $param_key = $request->get_param( 'api_key' );
+            if ( $param_key === $saved_key ) {
+                return true;
+            }
+
+            // 3. Check Authorization: Bearer <token>
+            $auth_header = $request->get_header( 'Authorization' );
+            if ( ! empty( $auth_header ) && preg_match( '/Bearer\s+(.*)$/i', $auth_header, $matches ) ) {
+                $bearer_token = trim( $matches[1] );
+                if ( $bearer_token === $saved_key ) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public function get_folders( $request ) {
             
             $search    = sanitize_text_field( $request->get_param( 'search' ) );
             $post_type = sanitize_text_field( $request->get_param( 'post_type' ) );
+            
+            $settings = get_option( 'wpmn_settings', [] );
+            $search_enabled = isset( $settings['api_folder_search'] ) && $settings['api_folder_search'] === 'yes';
+
+            // If API Search is disabled settings, ignore the search parameter
+            if ( ! $search_enabled && ! empty( $search ) ) {
+                $search = '';
+            }
             
             $args   = array(
                 'taxonomy'   => 'wpmn_media_folder',

@@ -16,6 +16,7 @@ jQuery(function ($) {
             this.fetchFolders();
             this.dragAndDropRefresh();
             this.updateCustomToolbar();
+            this.initResizer();
 
             setTimeout(() => {
                 const settings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
@@ -166,7 +167,6 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_context_menu_item', this.handleContextMenuClick.bind(this));
             $(document.body).on('click', '.wpmn_generate_api_btn', this.handleGenerateApiKey.bind(this));
             $(document.body).on('change', '.wpmn_folder_dropdown', this.handleAttachmentFolderChange.bind(this));
-            this.initResizer();
         }
 
         initResizer() {
@@ -666,13 +666,7 @@ jQuery(function ($) {
         }
 
         updateCustomToolbar() {
-            let target = $('.media-toolbar.wp-filter');
-
-            if (!target.length) {
-                if ($('.wp-filter').length) {
-                    target = $('.wp-filter');
-                }
-            }
+            let target = $('.media-toolbar');
 
             if (!target.length) return;
 

@@ -152,6 +152,10 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
             return apply_filters( 'wpmn_import_export_fields', $fields );
         }
 
+        public static function post_type_field() {
+            return apply_filters( 'wpmn_post_type_fields', array() );
+        }
+
     }
 
 endif;

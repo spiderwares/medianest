@@ -127,6 +127,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                     WPMN_Helper::generate_api_key_request();
                     break;
 
+				case 'reorder_folder':
+					WPMN_Helper::reorder_folder_request();
+					break;
+
 				default:
 					do_action( 'wpmn_ajax_' . $type, $_POST );
 					break;
@@ -145,7 +149,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			$args = array(
 				'taxonomy'   => 'wpmn_media_folder',
 				'hide_empty' => false,
-				'orderby'    => 'term_id',
+				'orderby'    => 'name',
 				'order'      => 'ASC',
                 'meta_query' => array(
                     'relation' => 'OR',
@@ -168,6 +172,18 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
             $terms = get_terms( $args );
 
 			if (is_wp_error($terms)) return [];
+
+			// Sort terms by wpmn_order meta
+			usort($terms, function($a, $b) {
+				$ord_a = (int) get_term_meta($a->term_id, 'wpmn_order', true);
+				$ord_b = (int) get_term_meta($b->term_id, 'wpmn_order', true);
+				
+				if ($ord_a === $ord_b) {
+					return strcasecmp($a->name, $b->name);
+				}
+				return $ord_a <=> $ord_b;
+			});
+
 			$group = [];
 
 			foreach ($terms as $term) :

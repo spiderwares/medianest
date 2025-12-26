@@ -104,7 +104,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             wp_enqueue_script(
 				'wpmn-media-folder',
 				WPMN_URL . 'assets/js/wpmn-media-folder.js',
-				array( 'jquery', 'wpmn-admin' ),
+				array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable', 'wpmn-admin' ),
 				WPMN_VERSION,
 				true
 			);

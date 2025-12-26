@@ -204,9 +204,15 @@
                             options: [
                                 { label: 'None', value: 'none' },
                                 { label: 'Zoom In', value: 'zoomIn' },
+                                { label: 'Zoom Out', value: 'zoomOut' },
                                 { label: 'Shine', value: 'shine' },
                                 { label: 'Opacity', value: 'opacity' },
-                                { label: 'Grayscale', value: 'grayscale' }
+                                { label: 'Grayscale', value: 'grayscale' },
+                                { label: 'Blur', value: 'blur' },
+                                { label: 'Sepia', value: 'sepia' },
+                                { label: 'Lift Up', value: 'liftUp' },
+                                { label: 'Rotate Left', value: 'rotateLeft' },
+                                { label: 'Rotate Right', value: 'rotateRight' }
                             ],
                             help: __('Hover on images to see animations.', 'medianest'),
                             onChange: function (val) { setAttributes({ imageHoverAnimation: val }); }

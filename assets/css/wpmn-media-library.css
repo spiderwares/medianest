@@ -19,8 +19,8 @@
 	padding: 5px;
 	position: sticky;
 	top: 40px;
-	height: calc(100vh - 120px);
-	transition: width 0.15s ease;
+	height: calc(100vh - 117px);
+	transition: width 0.07s ease;
 	display: flex;
 	flex-direction: column;
 	z-index: 999;
@@ -74,11 +74,6 @@
 	z-index: 1000;
 }
 
-/* .wpmn_sidebar_resize_handle:hover~.wpmn_media_sidebar::after,
-.wpmn_media_sidebar:hover::after {
-	background: #c1c5cc;
-} */
-
 .wpmn_media_sidebar:has(.wpmn_sidebar_resize_handle:hover)::after,
 .wpmn_sidebar_is_resizing .wpmn_media_sidebar::after {
 	background: #2271b1 !important;
@@ -98,10 +93,6 @@
 .wpmn_media_layout_collapsed .wpmn_media_sidebar::after {
 	display: block !important;
 	right: -5px;
-}
-
-.wpmn_media_layout_collapsed .wpmn_sidebar_resize_handle {
-	display: none !important;
 }
 
 .wpmn_media_layout_collapsed .wpmn_media_sidebar> :not(.wpmn_media_sidebar_toggle) {
@@ -200,7 +191,7 @@
 
 .wpmn_media_sidebar.in-modal .wpmn_media_sidebar_search[type="search"] {
 	width: 100%;
-	border-radius: 4px;
+	border-radius: 7px;
 	border-color: #d1cbcb;
 	padding: 3px 0px 3px 35px;
 }
@@ -223,6 +214,7 @@ button.wpmn_media_sidebar_new_folder {
 	display: flex !important;
 	align-items: center !important;
 	gap: 6px !important;
+	border-radius: 4px !important;
 }
 
 .wpmn_media_sidebar_action_rename,
@@ -232,17 +224,7 @@ button.wpmn_media_sidebar_action_delete {
 	display: flex !important;
 	gap: 0px !important;
 	font-weight: 500;
-	border-radius: 5px !important;
-}
-
-.wpmn_media_sidebar_action_menu,
-button.wpmn_media_sidebar_action_menu {
-	padding: 5px !important;
-}
-
-.wpmn_media_sidebar_action_menu span,
-button.wpmn_media_sidebar_action_menu span {
-	margin-top: 25%;
+	border-radius: 4px !important;
 }
 
 .wpmn_media_sidebar_new_folder:hover {
@@ -301,12 +283,10 @@ button.wpmn_media_sidebar_action_sort,
 button.wpmn_media_sidebar_action_more {
 	padding: 5px !important;
 	border: none !important;
-	min-width: 32px;
-	height: 32px;
 	display: flex !important;
 	align-items: center !important;
 	justify-content: center !important;
-	border-radius: 5px !important;
+	border-radius: 4px !important;
 }
 
 .wpmn_action_wrapper {
@@ -323,7 +303,7 @@ button.wpmn_media_sidebar_action_more {
 	background: #fff;
 	padding: 10px;
 	border: 1px solid #c1c5cc;
-	border-radius: 7px;
+	border-radius: 4px;
 	overflow: visible;
 }
 
@@ -474,6 +454,7 @@ button.wpmn_media_sidebar_action_more {
 .wpmn_folder_row {
 	display: flex;
 	align-items: center;
+	margin-top: 5px;
 }
 
 .wpmn_toggle_arrow {

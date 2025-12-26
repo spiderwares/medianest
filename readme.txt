@@ -25,25 +25,30 @@ This plugin includes the following open-source libraries and third-party integra
 
 == Key Features ==
 
-⭐ Drag & Drop Interface: Easily move files into folders and reorder folders with drag and drop.
-⭐ Unlimited Folders: Create as many folders and subfolders as you need to organize your content.
-⭐ Context Menu: Right-click on folders to quickly Create, Rename, Delete, change color or see details.
-⭐ Upload to Folder: Select a specific folder from the dropdown before uploading new files.
-⭐ Folder Filtering: Quickly filter your media library to view files in a specific folder.
-⭐ Dynamic "Uncategorized" Folder: Automatically find files that haven't been assigned to a folder.
-⭐ Breadcrumb Navigation: Navigate through your folder hierarchy easily.
-⭐ Resizable Sidebar: Adjust the width of the folder tree sidebar to fit your screen.
-⭐ Import/Export: Export your folder structure to CSV and import it to another site.
-⭐ SVG Support: Securely upload SVG files with built-in sanitization.
-⭐ Gallery Block: Native Gutenberg block to create beautiful galleries from your folders with ease.
-⭐ File Size Sorting: Sort your media files by file size to find large items.
-⭐ REST API Support: Full REST API endpoints for developers to manage folders and attachments programmatically.
+⭐ Drag & Drop Interface – Easily move files into folders and reorder folders with drag and drop.
+⭐ Unlimited Folders – Create as many folders and subfolders as you need to organize your content.
+⭐ Context Menu – Right-click on folders to quickly Create, Rename, and Delete.
+⭐ Upload to Folder – Select a specific folder from the dropdown before uploading new files.
+⭐ Folder Filtering – Quickly filter your media library to view files in a specific folder.
+⭐ Dynamic "Uncategorized" Folder – Automatically find files that haven't been assigned to a folder.
+⭐ Breadcrumb Navigation – Navigate through your folder hierarchy easily.
+⭐ Resizable Sidebar – Adjust the width of the folder tree sidebar to fit your screen.
+⭐ Import/Export – Export your folder structure to CSV and import it to another site.
+⭐ SVG Support – Securely upload SVG files with built-in sanitization.
+⭐ Gallery Block – Native Gutenberg block to create beautiful galleries from your folders with ease.
+⭐ REST API Support – Full REST API endpoints for developers to manage folders and attachments programmatically.
 
 == Pro Features ==
 
-⭐ User Folders: Restrict folder management so users can only see and manage their own folders.
-⭐ Subfolder Counting: Option to count files in the current folder plus all its subfolders.
-⭐ Advanced Permissions: Fine-grained control over who can create, edit, or delete folders.
+⭐ Advanced Folder Sorting – Sort folders by name (Ascending/Descending) or set a custom default order.
+⭐ Comprehensive File Sorting – Organize files within folders by Name, Date, Modified, Author, or Size (Ascending/Descending).
+⭐ Premium Folder Themes – Choose from premium themes like Windows and Dropbox styles for your folder tree tree to match your workflow.
+⭐ Folder Color Customization – Assign custom colors to folders for quick visual identification and better organization.
+⭐ Instant Folder Duplication – Quickly clone folder structures with a single click, preserving your organizational hierarchy.
+⭐ Smart Folder Count Mode – Toggle between counting only immediate files or including all files in parent and subfolders.
+⭐ Full Post Type Support – Enable MediaNest folders for any post type, including Posts, Pages, WooCommerce Products, and custom post types.
+⭐ Folder Downloads – Download the entire contents of a folder as a ZIP file for local backups or sharing.
+⭐ Automatic Global Sorting – Set a global default sorting method that applies automatically across your entire media library.
 
 == Installation ==
 

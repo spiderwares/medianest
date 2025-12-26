@@ -25,41 +25,48 @@ if ( ! class_exists( 'WPMN_Export' ) ) :
 				wp_send_json_error(['message' => 'Failed to fetch folders.']);
 			endif;
 
-			$csv_data   = [['id','name','parent','type','ord','created_by','attachment_ids']];
-			$grouped    = [];
+			$csv_data       = [['id', 'name', 'parent', 'type', 'ord', 'created_by', 'attachment_ids', 'post_type']];
+			$by_post_type   = [];
+			$parent_groups  = [];
 
-			// Group folders by parent
+			// Pre-process terms to group by post_type and parent
 			foreach ($terms as $term) :
-				$grouped[$term->parent][] = $term;
+				$post_type = get_term_meta($term->term_id, 'wpmn_post_type', true) ?: 'attachment';
+				$by_post_type[$post_type][] = $term;
+				$parent_groups[$term->parent][] = $term->term_id;
 			endforeach;
 
-			foreach ($terms as $term) :
-				$created_by  = get_term_meta($term->term_id, 'wpmn_folder_owner', true) ?: 1;
-				$siblings    = isset($grouped[$term->parent]) ? $grouped[$term->parent] : [];
-				$ord         = array_search($term, $siblings) ?: 0;
+			// Iterate through each post type group
+			foreach ($by_post_type as $post_type => $type_terms) :
+				foreach ($type_terms as $term) :
+					$created_by  = get_term_meta($term->term_id, 'wpmn_folder_owner', true) ?: 1;
+					$siblings    = $parent_groups[$term->parent] ?? [];
+					$ord         = array_search($term->term_id, $siblings) ?: 0;
 
-				// Get attachments inside this folder
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-				$attachment_ids = $wpdb->get_col($wpdb->prepare(
-					"SELECT DISTINCT tr.object_id
-					FROM {$wpdb->term_relationships} tr
-					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-					INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
-					WHERE tt.taxonomy = %s AND tt.term_id = %d
-					AND p.post_type = 'attachment' AND p.post_status != 'trash'
-					ORDER BY tr.object_id ASC",
-					'wpmn_media_folder', $term->term_id
-				));
+					// Get objects inside this folder for the specific post type
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+					$attachment_ids = $wpdb->get_col($wpdb->prepare(
+						"SELECT DISTINCT tr.object_id
+						FROM {$wpdb->term_relationships} tr
+						INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
+						WHERE tt.taxonomy = %s AND tt.term_id = %d
+						AND p.post_type = %s AND p.post_status != 'trash'
+						ORDER BY tr.object_id ASC",
+						'wpmn_media_folder', $term->term_id, $post_type
+					));
 
-				$csv_data[] = array(	
-					$term->term_id,
-					$term->name,
-					$term->parent,
-					0,
-					$ord,
-					$created_by,
-					implode('|', $attachment_ids ?: [])
-				);
+					$csv_data[] = array(
+						$term->term_id,
+						$term->name,
+						$term->parent,
+						0,
+						$ord,
+						$created_by,
+						implode('|', $attachment_ids ?: []),
+						$post_type,
+					);
+				endforeach;
 			endforeach;
 
 			// Output CSV

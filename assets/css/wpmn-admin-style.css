@@ -278,12 +278,16 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
 
 /*--------------------------- Drag & Drop ---------------------------*/
 .wpmn_media_sidebar img,
-.wpmn_media_sidebar .wpmn_folder_icon,
 .wpmn_media_sidebar .wpmn_all_files_icon,
 .wpmn_media_sidebar .wpmn_uncategorized_icon {
     user-select: none;
     -webkit-user-drag: none;
     pointer-events: none;
+}
+
+.wpmn_media_sidebar .wpmn_folder_icon {
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .wpmn_drag_helper_pill {
@@ -299,15 +303,76 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-/*--------------------------- List View Drag Icon ---------------------------*/
+.wpmn_folder_drag_helper {
+    background: #5b9dd9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 6px;
+}
 
-.wpmn_media_layout #the-list tr.wpmn_draggable {
+.wpmn_drag_folder_icon {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
+}
+
+.wpmn_folder_btn_wrapper {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.wpmn_drop_indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #2271b1;
+    z-index: 1000;
+    pointer-events: none;
+    display: none;
+}
+
+.wpmn_drop_indicator.drop-top {
+    top: -1px;
+}
+
+.wpmn_drop_indicator.drop-bottom {
+    bottom: -1px;
+}
+
+.wpmn_drop_indicator::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: -3.5px;
+    width: 9px;
+    height: 9px;
+    background: #2271b1;
+    border-radius: 50%;
+}
+
+.wpmn_folder_btn_wrapper.is-nest-hover {
+    background: rgba(34, 113, 177, 0.1);
+    outline: 1px solid #2271b1;
+    border-radius: 4px;
+}
+
+.wpmn_folder_row {
+    position: relative;
+    transition: background 0.2s;
+}
+
+/* .wpmn_media_layout #the-list tr.wpmn_draggable {
     position: relative;
 }
 
 .wpmn_media_layout #the-list tr.wpmn_draggable .check-column {
     position: relative;
-}
+} */
 
 .wpmn_media_layout #the-list tr.wpmn_draggable:hover .check-column::before {
     content: '\f545';
@@ -315,17 +380,14 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     position: absolute;
     top: 55%;
     transform: translateY(-50%);
-    font-size: 20px;
+    font-size: 18px;
+    margin-top: 5px;
     color: #50575e;
     cursor: move;
     z-index: 1;
     pointer-events: none;
     background: none;
-    margin-left: 5px;
-}
-
-.wpmn_media_layout #the-list tr.wpmn_draggable:hover {
-    background-color: #f6f7f7;
+    margin-left: 7px;
 }
 
 .wpmn_media_layout #the-list tr.ui-draggable-dragging {

@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                 <?php echo esc_html__( 'Settings', 'medianest' ); ?>
             </a>
 
+            <?php do_action( 'wpmn_settings_tabs', $active_tab ); ?>
+
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=cosmic-wpmn&tab=tools' ) ); ?>" 
                class="<?php echo esc_attr( $active_tab === 'tools' ? 'nav-tab nav-tab-active' : 'nav-tab' ); ?>">
                 <img src="<?php echo esc_url( WPMN_URL . 'assets/img/tools.svg'); ?>" />
@@ -27,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
             <a href="<?php echo esc_url( admin_url( 'admin.php?page=cosmic-wpmn&tab=import-export' ) ); ?>" 
                class="<?php echo esc_attr( $active_tab === 'import-export' ? 'nav-tab nav-tab-active' : 'nav-tab' ); ?>">
-                <img src="<?php echo esc_url( WPMN_URL . 'assets/img/import_export.svg'); ?>" />
+                <img src="<?php echo esc_url( WPMN_URL . 'assets/img/import-export.svg'); ?>" />
                 <?php echo esc_html__( 'Import/Export', 'medianest' ); ?>
             </a>
 

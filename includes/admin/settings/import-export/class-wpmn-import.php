@@ -71,6 +71,10 @@ if ( ! class_exists( 'WPMN_Import' ) ) :
 				if (!empty($r['created_by'])) :
 					update_term_meta($new_id, 'wpmn_folder_owner', absint($r['created_by']));
 				endif;
+
+				if (!empty($r['post_type'])) :
+					update_term_meta($new_id, 'wpmn_post_type', sanitize_text_field($r['post_type']));
+				endif;
 			endforeach;
 
 			// STEP 2 — Set parents + assign media

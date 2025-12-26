@@ -24,6 +24,7 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
                 'sortType'         => 'DESC',
                 'layout'           => 'flex',
                 'columns'          => 3,
+                'borderRadius'     => 0,
                 'isCropped'        => true,
                 'className'        => '',
                 'spaceAroundImage'    => 10,
