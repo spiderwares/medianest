@@ -28,6 +28,10 @@ if ( ! defined( 'WPMN_VERSION' ) ) :
     define( 'WPMN_VERSION', '1.0.0' ); // Define the plugin version.
 endif;
 
+if ( ! defined( 'WPMN_REST_API_URL' ) ) :
+    define( 'WPMN_REST_API_URL', 'medianest/v1' ); // Define the plugin version.
+endif;
+
 if ( ! defined( 'WPMN_PATH' ) ) :
     define( 'WPMN_PATH', plugin_dir_path( __FILE__ ) ); // Define the plugin directory path.
 endif;

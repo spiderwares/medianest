@@ -108,6 +108,7 @@ jQuery(function ($) {
             this.toastTimeout = null;
             this.isBulkSelect = false;
             this.clipboard = { action: null, folderId: null };
+            this.allCollapsed = false;
 
             const media = window.location.pathname.includes('upload.php');
             const isList = window.location.pathname.includes('edit.php');
@@ -146,13 +147,13 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_media_sidebar_action_sort', (e) => this.handleMenuToggle(e, '.wpmn_sort_menu'));
             $(document.body).on('click', '.wpmn_media_sidebar_action_more', (e) => this.handleMenuToggle(e, '.wpmn_more_menu'));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="settings"]', this.openSettingsDialog.bind(this));
+            $(document.body).on('click', '.wpmn_more_menu_item[data-action="bulk-select"]', this.enableBulkSelect.bind(this));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="hide-folder-id"]', this.toggleFolderId.bind(this));
+            $(document.body).on('click', '.wpmn_bulk_cancel_btn', this.disableBulkSelect.bind(this));
             $(document.body).on('click', '.wpmn_settings_dialog_close, .wpmn_settings_dialog_cancel', this.closeSettingsDialog.bind(this));
             $(document.body).on('click', '.wpmn_settings_dialog_save', this.saveSettings.bind(this));
             $(document.body).on('click', '.wpmn_theme_btn', this.handleThemeClick.bind(this));
             $(document.body).on('click', '.wpmn_clear_data_btn', this.handleClearData.bind(this));
-            $(document.body).on('click', '.wpmn_more_menu_item[data-action="bulk-select"]', this.enableBulkSelect.bind(this));
-            $(document.body).on('click', '.wpmn_bulk_cancel_btn', this.disableBulkSelect.bind(this));
             $(document.body).on('click', '.wpmn_delete_trigger', this.handleDeleteTrigger.bind(this));
             $(document.body).on('change', '.wpmn_folder_checkbox', this.handleCheckboxChange.bind(this));
             $(document.body).on('click', '.wpmn_generate_size_btn', this.handleGenerateSize.bind(this));
@@ -203,7 +204,7 @@ jQuery(function ($) {
 
         updateModalLayout() {
             if (this.sidebar.hasClass('in-modal')) {
-                const width = this.sidebarWidth + 30; // 330 was original modal width vs 300 sidebar
+                const width = this.sidebarWidth + 30;
                 $('.media-modal .media-frame-menu').css('width', width + 'px');
                 $('.media-modal .media-frame-content, .media-modal .media-frame-title, .media-modal .media-frame-router')
                     .css('left', width + 'px');
@@ -313,7 +314,6 @@ jQuery(function ($) {
             select.val(settings.defaultFolder || 'all');
             $('#wpmn_default_sort').val(settings.defaultSort || 'default');
             $('.wpmn_theme_btn').removeClass('wpmn_theme_btn--active').filter(`[data-theme="${settings.theme || 'default'}"]`).addClass('wpmn_theme_btn--active');
-
             $('.wpmn_dialog_backdrop:not([data-delete-dialog])').prop('hidden', false).addClass('is-visible');
         }
 
@@ -330,11 +330,25 @@ jQuery(function ($) {
                 defaultSort: $('#wpmn_default_sort').val() || 'default',
                 theme: $('.wpmn_theme_btn--active').data('theme') || 'default'
             };
+
+            // Save to localStorage for instant UI updates
             this.setStorage('wpmnSettings', JSON.stringify(settings));
+
+            // Save to database for cross-browser persistence
+            this.apiCall('save_settings', {
+                default_folder: settings.defaultFolder,
+                default_sort: settings.defaultSort,
+                theme_design: settings.theme
+            }).then(() => {
+                this.showToast(this.getText('settingsSaved'));
+            }).catch(err => {
+                console.error('Failed to save settings:', err);
+                this.showToast('Settings saved locally only');
+            });
+
             this.closeSettingsDialog();
             this.renderSidebar();
             this.applySortFromSettings(settings.defaultSort);
-            this.showToast(this.getText('settingsSaved'));
 
             if (settings.defaultFolder && settings.defaultFolder !== oldDefault) {
                 this.changeFolder(settings.defaultFolder);
@@ -373,7 +387,6 @@ jQuery(function ($) {
             wpmn_media_folder.folder.updateActionButtons();
             this.updateCustomToolbar();
 
-            // Remove wpmn_folder from URL in grid mode
             const mediaFrame = wp?.media?.frame?.state;
             if (mediaFrame && window.location.search.includes('wpmn_folder')) {
                 const url = new URL(window.location.href);
@@ -382,8 +395,6 @@ jQuery(function ($) {
             }
 
             this.triggerMediaFilter(slug);
-
-            // Trigger hook for Pro version to re-apply sorts
             if (typeof wp !== 'undefined' && wp.hooks) {
                 wp.hooks.doAction('wpmnFolderChanged', slug);
             }
@@ -499,10 +510,33 @@ jQuery(function ($) {
 
             this.apiCall('get_folders', { post_type: postType })
                 .then(data => {
+                    // Load user settings from database
+                    if (data.settings) {
+                        const localSettings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
+                        const dbSettings = {
+                            defaultFolder: data.settings.default_folder || localSettings.defaultFolder || 'all',
+                            defaultSort: data.settings.default_sort || localSettings.defaultSort || 'default',
+                            theme: data.settings.theme_design || localSettings.theme || 'default'
+                        };
+
+                        // Update localStorage with database settings (database is source of truth)
+                        this.setStorage('wpmnSettings', JSON.stringify(dbSettings));
+
+                        // Apply theme immediately
+                        this.applyTheme(dbSettings.theme);
+                    }
+
                     wpmn_media_folder.folder.refreshState(data);
                     this.updateSidebarLabels(postType);
                 })
                 .catch(console.error);
+        }
+
+        applyTheme(theme) {
+            this.sidebar.removeClass('wpmn_theme_windows wpmn_theme_dropbox');
+            if (theme && theme !== 'default') {
+                this.sidebar.addClass('wpmn_theme_' + theme);
+            }
         }
 
         updateSidebarLabels(postType) {
@@ -520,7 +554,6 @@ jQuery(function ($) {
 
             this.sidebar.find('.wpmn_count_all').text(this.state.counts.all || 0);
             this.sidebar.find('.wpmn_count_uncategorized').text(this.state.counts.uncategorized || 0);
-
             const tree = this.sidebar.find('.wpmn_folder_tree').empty();
             const nodes = wpmn_media_folder.folder.getFilteredTree();
 
@@ -553,8 +586,7 @@ jQuery(function ($) {
             if (this._dragTimer) return;
 
             const getHelper = (count) =>
-                $('<div class="wpmn_drag_helper_pill"></div>')
-                    .text(count === 1 ? 'Move 1 item' : `Move ${count} items`);
+                $('<div class="wpmn_drag_helper_pill"></div>').text(count === 1 ? 'Move 1 item' : `Move ${count} items`);
 
             const draggableOptions = (getCount) => ({
                 helper: function () {
@@ -568,7 +600,6 @@ jQuery(function ($) {
                 start() { $(this).css('opacity', 0.5); },
                 stop() { $(this).css('opacity', 1); }
             });
-
             this._dragTimer = setInterval(() => {
 
                 // Grid view
@@ -592,8 +623,6 @@ jQuery(function ($) {
             if (this.sidebar.length && wrap.length && !wrap.hasClass('wpmn_media_layout') && !$('.media-modal').length) {
                 wrap.children().not(this.sidebar).wrapAll('<div class="wpmn_media_content"></div>');
                 wrap.prepend(this.sidebar).addClass('wpmn_media_layout');
-
-                // Move screen meta elements inside the content wrapper
                 $('#screen-meta, #screen-meta-links').prependTo(wrap.find('.wpmn_media_content'));
 
                 if (this.getStorage('wpmnSidebarCollapsed') === '1') {
@@ -890,6 +919,10 @@ jQuery(function ($) {
             }
 
             menu.css({ left: posX + 'px', top: posY + 'px' }).addClass('is-visible');
+
+            if (typeof wp !== 'undefined' && wp.hooks) {
+                wp.hooks.doAction('wpmnShowContextMenu', menu, folderId);
+            }
         }
 
         hideContextMenu() {
@@ -931,6 +964,11 @@ jQuery(function ($) {
                 case 'download':
                     if (typeof wp !== 'undefined' && wp.hooks) {
                         wp.hooks.doAction('wpmnFolderDownload', folderId);
+                    }
+                    break;
+                case 'pin-folder':
+                    if (typeof wp !== 'undefined' && wp.hooks) {
+                        wp.hooks.doAction('wpmnFolderPin', folderId);
                     }
                     break;
             }

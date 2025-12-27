@@ -123,20 +123,20 @@
     background: transparent;
 }
 
-.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger {
+/* .wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger {
     color: #2271b1 !important;
     border-color: #2271b1 !important;
-}
+} */
 
 .wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger .wpmn_delete_icon {
     filter: invert(33%) sepia(50%) saturate(1764%) hue-rotate(182deg) brightness(92%) contrast(93%);
 
 }
 
-.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover {
+/* .wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover {
     background: #2271b1 !important;
     color: #fff !important;
-}
+} */
 
 .wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover .wpmn_delete_icon {
     filter: brightness(0) invert(1);

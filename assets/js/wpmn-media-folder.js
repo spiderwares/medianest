@@ -333,7 +333,6 @@ jQuery(function ($) {
 
         performSearch(term) {
 
-            // In Admin Panel, we prefer using the cached folders for instant search
             if (wpmn_admin_media.admin.state.folders && wpmn_admin_media.admin.state.folders.length) {
                 const results = this.searchLocalFolders(term, wpmn_admin_media.admin.state.folders);
                 wpmn_admin_media.admin.state.searchResults = results;
@@ -341,7 +340,6 @@ jQuery(function ($) {
                 return;
             }
 
-            // Fallback to API if local search isn't viable (though rarely needed in Admin)
             const url = wpmn_media_library.restUrl + 'folders';
             $.ajax({
                 url: url,
@@ -363,10 +361,9 @@ jQuery(function ($) {
             let results = [];
             for (const node of nodes) {
                 if (node.name.toLowerCase().includes(term)) {
-                    // Clone node to avoid modifying original structure
                     results.push({
                         ...node,
-                        children: [] // Flatten results for search view
+                        children: []
                     });
                 }
                 if (node.children && node.children.length) {

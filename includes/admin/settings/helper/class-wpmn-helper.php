@@ -19,19 +19,44 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 		}
 
 		public static function create_folder( $name, $parent ) {
-			$result = wp_insert_term( $name, 'wpmn_media_folder', array( 'parent' => $parent ) );
+            $settings = get_option( 'wpmn_settings', [] );
+            $user_mode = isset($settings['user_separate_folders']) && $settings['user_separate_folders'] === 'yes';
+            
+            $args = array( 'parent' => $parent );
+            
+            if ( $user_mode && is_user_logged_in() ) :
+                $unique_slug = sanitize_title( $name ) . '-' . get_current_user_id();
+                $args['slug'] = $unique_slug;
+            endif;
+
+			$result = wp_insert_term( $name, 'wpmn_media_folder', $args );
+            
 			if ( is_wp_error( $result ) && $result->get_error_code() === 'term_exists' ) :
 
 				$counter = 1;
 				while ( $counter <= 100 ) :
 					$new_name = $name . ' (' . $counter . ')';
-					if ( ! term_exists( $new_name, 'wpmn_media_folder', $parent ) ) :
-						return wp_insert_term( 
-							$new_name, 
-							'wpmn_media_folder',
-							array( 'parent' => $parent )
-						);
-					endif;
+                    
+                    // Logic to check existence properly with user mode
+                    if ( $user_mode && is_user_logged_in() ) :
+                         $new_unique_slug = sanitize_title( $new_name ) . '-' . get_current_user_id();
+                         $dup_args = array( 'parent' => $parent, 'slug' => $new_unique_slug );
+                         
+                         $dup_result = wp_insert_term( $new_name, 'wpmn_media_folder', $dup_args );
+                         
+                         if ( ! is_wp_error( $dup_result ) ) :
+                             return $dup_result;
+                         endif;
+                    else :
+                        if ( ! term_exists( $new_name, 'wpmn_media_folder', $parent ) ) :
+                            return wp_insert_term( 
+                                $new_name, 
+                                'wpmn_media_folder',
+                                array( 'parent' => $parent )
+                            );
+                        endif;
+                    endif;
+
 					$counter++;
 				endwhile;
 			endif;
@@ -56,6 +81,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
             
             if ( ! is_wp_error( $result ) && isset( $result['term_id'] ) ) :
                 update_term_meta( $result['term_id'], 'wpmn_post_type', $post_type );
+                update_term_meta( $result['term_id'], 'wpmn_folder_author', get_current_user_id() );
             endif;
 
 			self::send_response($result);
@@ -270,6 +296,12 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                 wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
             endif;
 
+            $user_id = get_current_user_id();
+            if ( ! $user_id ) :
+                wp_send_json_error( array( 'message' => esc_html__( 'User not logged in.', 'medianest' ) ) );
+            endif;
+
+            // Global settings (site-wide)
             $settings = get_option( 'wpmn_settings', [] );
             
             if ( isset( $_POST['folder_count_mode'] ) ) :
@@ -277,7 +309,23 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 			endif;
 
             update_option( 'wpmn_settings', $settings );
-            wp_send_json_success();
+
+            // User-specific settings (per-user preferences)
+            if ( isset( $_POST['default_folder'] ) ) :
+                update_user_meta( $user_id, 'wpmn_default_folder', sanitize_text_field( wp_unslash( $_POST['default_folder'] ) ) );
+            endif;
+
+            if ( isset( $_POST['default_sort'] ) ) :
+                update_user_meta( $user_id, 'wpmn_default_sort', sanitize_text_field( wp_unslash( $_POST['default_sort'] ) ) );
+            endif;
+
+            if ( isset( $_POST['theme_design'] ) ) :
+                update_user_meta( $user_id, 'wpmn_theme_design', sanitize_text_field( wp_unslash( $_POST['theme_design'] ) ) );
+            endif;
+
+            wp_send_json_success( array(
+                'message' => esc_html__( 'Settings saved successfully.', 'medianest' )
+            ) );
         }
 
 		public static function reorder_folder_request() {

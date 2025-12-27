@@ -16,6 +16,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
      */
     class WPMN_REST_API {
 
+        public $settings;
         /**
          * Constructor for the class.
          */
@@ -27,6 +28,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
          * Initialize hooks and filters.
          */
         public function events_handler() {
+            $this->settings = get_option( 'wpmn_settings', [] );
             add_action( 'rest_api_init', [ $this, 'wpmn_register_routes' ] );
         }
 
@@ -39,42 +41,54 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
         public function wpmn_register_routes() {
 
             // GET http://yoursite/wp-json/medianest/v1/folders
-            register_rest_route( 'medianest/v1', '/folders', array(
+            register_rest_route( 
+                WPMN_REST_API_URL, '/folders', 
+                array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_folders' ],
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
             // GET http://yoursite/wp-json/medianest/v1/folder?folder_id
-            register_rest_route( 'medianest/v1', '/folder', array(
+            register_rest_route( 
+                WPMN_REST_API_URL, '/folder', 
+                array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_folder_details' ],
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             )); 
 
             // POST http://yoursite/wp-json/medianest/v1/folder/set-attachment
-            register_rest_route( 'medianest/v1', '/folder/set-attachment', array(
+            register_rest_route( 
+                WPMN_REST_API_URL, '/folder/set-attachment', 
+                array(
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'set_attachment' ],
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
             // GET http://yoursite/wp-json/medianest/v1/attachment-id
-            register_rest_route( 'medianest/v1', '/attachment-id', array(
+            register_rest_route( 
+                WPMN_REST_API_URL, '/attachment-id', 
+                array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_attachment_ids' ],
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
             // GET http://yoursite/wp-json/medianest/v1/attachment-count
-            register_rest_route( 'medianest/v1', '/attachment-count', array(
+            register_rest_route( 
+                WPMN_REST_API_URL, '/attachment-count', 
+                array(
                 'methods'             => 'GET',
                 'callback'            => [ $this, 'get_attachment_count' ],
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
             // POST http://yoursite/wp-json/medianest/v1/folders
-            register_rest_route( 'medianest/v1', '/folders', array(
+            register_rest_route( 
+                WPMN_REST_API_URL, '/folders', 
+                array(
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'create_new_folder' ],
                 'permission_callback' => [ $this, 'check_api_permission' ], 
@@ -86,9 +100,9 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
          */
         public function check_api_permission( $request ) {
             
-            if ( ! $this->is_valid_api_key( $request ) ) {
+            if ( ! $this->is_valid_api_key( $request ) ) :
                 return new WP_Error( 'invalid_api_key', 'Invalid or missing API Key.', array( 'status' => 401 ) );
-            }
+            endif;
 
             return true;
         }
@@ -96,35 +110,33 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
         /**
          * Validate REST API Key from Header, Parameter, or Bearer Token.
          */
-        private function is_valid_api_key( $request ) {
-            $settings = get_option( 'wpmn_settings', [] );
-            $saved_key = isset( $settings['rest_api_key'] ) ? $settings['rest_api_key'] : '';
+        public function is_valid_api_key( $request ) {
+            $saved_key = isset( $this->settings['rest_api_key'] ) ? $this->settings['rest_api_key'] : '';
 
-            if ( empty( $saved_key ) ) {
+            if ( empty( $saved_key ) ) :
                 return false;
-            }
+            endif;
 
             // 1. Check in Header: MediaNest-API-Key
             $header_key = $request->get_header( 'MediaNest-API-Key' );
-            if ( $header_key === $saved_key ) {
+            if ( $header_key === $saved_key ) :
                 return true;
-            }
+            endif;
 
             // 2. Check in Query Param: api_key
             $param_key = $request->get_param( 'api_key' );
-            if ( $param_key === $saved_key ) {
+            if ( $param_key === $saved_key ) :
                 return true;
-            }
+            endif;
 
             // 3. Check Authorization: Bearer <token>
             $auth_header = $request->get_header( 'Authorization' );
-            if ( ! empty( $auth_header ) && preg_match( '/Bearer\s+(.*)$/i', $auth_header, $matches ) ) {
+            if ( ! empty( $auth_header ) && preg_match( '/Bearer\s+(.*)$/i', $auth_header, $matches ) ) :
                 $bearer_token = trim( $matches[1] );
-                if ( $bearer_token === $saved_key ) {
+                if ( $bearer_token === $saved_key ) :
                     return true;
-                }
-            }
-
+                endif;
+            endif;
             return false;
         }
 
@@ -132,14 +144,12 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             
             $search    = sanitize_text_field( $request->get_param( 'search' ) );
             $post_type = sanitize_text_field( $request->get_param( 'post_type' ) );
-            
-            $settings = get_option( 'wpmn_settings', [] );
-            $search_enabled = isset( $settings['api_folder_search'] ) && $settings['api_folder_search'] === 'yes';
+            $search_enabled = isset( $this->settings['api_folder_search'] ) && $this->settings['api_folder_search'] === 'yes';
 
             // If API Search is disabled settings, ignore the search parameter
-            if ( ! $search_enabled && ! empty( $search ) ) {
+            if ( ! $search_enabled && ! empty( $search ) ) :
                 $search = '';
-            }
+            endif;
             
             $args   = array(
                 'taxonomy'   => 'wpmn_media_folder',
@@ -148,11 +158,11 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'order'      => 'ASC',
             );
 
-            if ( ! empty( $search ) ) {
+            if ( ! empty( $search ) ) :
                 $args['name__like'] = $search;
-            }
+            endif;
 
-            if ( ! empty( $post_type ) ) {
+            if ( ! empty( $post_type ) ) :
                 $meta_query = array(
                     'relation' => 'OR',
                     array(
@@ -161,17 +171,15 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                         'compare' => '=',
                     ),
                 );
-
-                // For attachments, include legacy folders (no meta)
-                if ( $post_type === 'attachment' ) {
+                if ( $post_type === 'attachment' ) :
                     $meta_query[] = array(
                         'key'     => 'wpmn_post_type',
                         'compare' => 'NOT EXISTS',
                     );
-                }
+                endif;
                 
                 $args['meta_query'] = $meta_query;
-            }
+            endif;
 
             $terms = get_terms( $args );
 
@@ -202,7 +210,9 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
 
                 return rest_ensure_response(array(
                     'success' => true,
-                    'data'    => ['folders' => $folders]
+                    'data'    => array(
+                        'folders' => $folders
+                    )
                 ) );
             endif;
 
@@ -214,7 +224,9 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
 
             return rest_ensure_response(array(
                 'success' => true,
-                'data'    => ['folders' => $this->build_tree(0, $group)]
+                'data'    => array(
+                    'folders' => $this->build_tree(0, $group)
+                )
             ) );
         }
 
@@ -222,7 +234,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             if (empty($group[$parent])) return [];
 
             $list = array();
-            foreach ($group[$parent] as $index => $term) {
+            foreach ($group[$parent] as $index => $term) :
                 $list[] = array(
                     'id'         => (int) $term->term_id,
                     'key'        => (int) $term->term_id,
@@ -235,7 +247,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                     'ord'        => (int) get_term_meta( $term->term_id, 'wpmn_order', true ) ?: $index,
                     'color'      => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
                 );
-            }
+            endforeach;
             return $list;
         }   
 
@@ -271,7 +283,6 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             $ids = array_map('absint', $ids);
 
             foreach ($ids as $att_id) :
-                // Remove existing
                 // phpcs:ignore WordPress.DB.DirectDatabaseQuery
                 $wpdb->query($wpdb->prepare("
                     DELETE tr FROM {$wpdb->term_relationships} tr

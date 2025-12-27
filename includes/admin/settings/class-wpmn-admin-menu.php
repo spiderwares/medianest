@@ -63,14 +63,42 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
          * 
          */
         public function sanitize_settings( $input ) {
+            
+            // Validate existing option
+            if ( ! is_array( $this->settings ) ) :
+                $this->settings = [];
+            endif;
+
+            if ( ! is_array( $input ) ) :
+                $input = [];
+            endif;
+            
+            $settings = array_merge( $this->settings, $input );
+
             add_settings_error(
                 'wpmn_settings',
                 'wpmn_settings_updated',
                 esc_html__( 'Settings saved Successfully.', 'medianest' ),
                 'updated'
             );
-            return $input;
+            return $settings;
         }
+
+        /**
+         * Admin menu for the plugin.
+         */
+        public function admin_menu() {
+
+            add_menu_page(
+				esc_html__( 'Medianest', 'medianest' ),  // Page title.
+                esc_html__( 'Medianest', 'medianest' ),  // Menu title.
+				'manage_options',                  // Capability required to access.
+				'cosmic-wpmn',                     // Menu slug.
+				[ $this, 'admin_menu_content' ],   // Callback function to render content.
+                'dashicons-portfolio',                  // Icon URL.
+				29                                // Position in the menu.
+			);
+        } 
 
         /**
          * Enqueue admin styles.
@@ -160,22 +188,6 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 				)
 			);
         }
-
-        /**
-         * Admin menu for the plugin.
-         */
-        public function admin_menu() {
-
-            add_menu_page(
-				esc_html__( 'Medianest', 'medianest' ),  // Page title.
-                esc_html__( 'Medianest', 'medianest' ),  // Menu title.
-				'manage_options',                  // Capability required to access.
-				'cosmic-wpmn',                     // Menu slug.
-				[ $this, 'admin_menu_content' ],   // Callback function to render content.
-                'dashicons-portfolio',                  // Icon URL.
-				29                                // Position in the menu.
-			);
-        } 
 
         /**
          * Content for the admin menu page.

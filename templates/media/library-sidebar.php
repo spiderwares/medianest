@@ -71,6 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 						<span class="dashicons dashicons-yes-alt"></span>
 						<span><?php echo esc_html__( 'Bulk Select', 'medianest' ); ?></span>
 					</li>
+					<?php echo wp_kses_post( apply_filters( 'wpmn_collapsed_menu_item', '', array() ) ); ?>
 					<li class="wpmn_more_menu_item" data-action="hide-folder-id"
 						data-text-hide="<?php echo esc_attr__( 'Hide folder ID', 'medianest' ); ?>"
 						data-text-show="<?php echo esc_attr__( 'Show Folder ID', 'medianest' ); ?>"
