@@ -1,8 +1,10 @@
 <?php
 
-defined( 'ABSPATH' ) || exit;
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) exit;
 
-if ( ! class_exists( 'WPMN_Gallery_Block' ) ) {
+if ( ! class_exists( 'WPMN_Gallery_Block' ) ) :
+
     class WPMN_Gallery_Block {
 
         public function __construct() {
@@ -105,4 +107,5 @@ if ( ! class_exists( 'WPMN_Gallery_Block' ) ) {
     }
 
     new WPMN_Gallery_Block();
-}
+    
+endif;

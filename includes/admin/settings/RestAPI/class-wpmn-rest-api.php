@@ -100,6 +100,10 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
          */
         public function check_api_permission( $request ) {
             
+            if ( current_user_can( 'upload_files' ) ) :
+                return true;
+            endif;
+
             if ( ! $this->is_valid_api_key( $request ) ) :
                 return new WP_Error( 'invalid_api_key', 'Invalid or missing API Key.', array( 'status' => 401 ) );
             endif;
