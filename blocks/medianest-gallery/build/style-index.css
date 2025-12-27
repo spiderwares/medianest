@@ -200,41 +200,41 @@ ul.wpmn_block_media_gallery.wp-block-gallery.is-cropped .wpmn_block_gallery_item
 }
 
 /* Base transition for all gallery images */
-ul.wpmn_block_media_gallery .wpmn_block_gallery_item figure img {
+.wpmn_block_media_gallery .wpmn_block_gallery_item figure img {
     transition: all 0.3s ease-in-out;
     backface-visibility: hidden;
     transform: translateZ(0);
 }
 
 /* Zoom In */
-.wpmn-block-hover-animation-zoomIn .wpmn_block_gallery_item figure {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-zoomIn .wpmn_block_gallery_item figure {
     overflow: hidden;
 }
 
-.wpmn-block-hover-animation-zoomIn .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-zoomIn .wpmn_block_gallery_item figure:hover img {
     transform: scale(1.2) translateZ(0);
 }
 
 /* Zoom Out */
-.wpmn-block-hover-animation-zoomOut .wpmn_block_gallery_item figure {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-zoomOut .wpmn_block_gallery_item figure {
     overflow: hidden;
 }
 
-.wpmn-block-hover-animation-zoomOut .wpmn_block_gallery_item figure img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-zoomOut .wpmn_block_gallery_item figure img {
     transform: scale(1.2) translateZ(0);
 }
 
-.wpmn-block-hover-animation-zoomOut .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-zoomOut .wpmn_block_gallery_item figure:hover img {
     transform: scale(1) translateZ(0);
 }
 
 /* Shine */
-.wpmn-block-hover-animation-shine .wpmn_block_gallery_item figure {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-shine .wpmn_block_gallery_item figure {
     overflow: hidden;
     position: relative;
 }
 
-.wpmn-block-hover-animation-shine .wpmn_block_gallery_item figure:before {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-shine .wpmn_block_gallery_item figure:before {
     background: linear-gradient(90deg, hsla(0, 0%, 100%, 0) 0, hsla(0, 0%, 100%, .3));
     content: "";
     display: block;
@@ -247,7 +247,7 @@ ul.wpmn_block_media_gallery .wpmn_block_gallery_item figure img {
     z-index: 2;
 }
 
-.wpmn-block-hover-animation-shine .wpmn_block_gallery_item figure:hover:before {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-shine .wpmn_block_gallery_item figure:hover:before {
     animation: shine .75s;
 }
 
@@ -258,49 +258,49 @@ ul.wpmn_block_media_gallery .wpmn_block_gallery_item figure img {
 }
 
 /* Opacity */
-.wpmn-block-hover-animation-opacity .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-opacity .wpmn_block_gallery_item figure:hover img {
     opacity: 0.7;
 }
 
 /* Grayscale */
-.wpmn-block-hover-animation-grayscale .wpmn_block_gallery_item figure img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-grayscale .wpmn_block_gallery_item figure img {
     filter: grayscale(100%);
 }
 
-.wpmn-block-hover-animation-grayscale .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-grayscale .wpmn_block_gallery_item figure:hover img {
     filter: grayscale(0%);
 }
 
 /* Blur */
-.wpmn-block-hover-animation-blur .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-blur .wpmn_block_gallery_item figure:hover img {
     filter: blur(5px);
 }
 
 /* Sepia */
-.wpmn-block-hover-animation-sepia .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-sepia .wpmn_block_gallery_item figure:hover img {
     filter: sepia(100%);
 }
 
 /* Lift Up */
-.wpmn-block-hover-animation-liftUp .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-liftUp .wpmn_block_gallery_item figure:hover img {
     transform: translateY(-10px) translateZ(0);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Rotate Left */
-.wpmn-block-hover-animation-rotateLeft .wpmn_block_gallery_item figure {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-rotateLeft .wpmn_block_gallery_item figure {
     overflow: hidden;
 }
 
-.wpmn-block-hover-animation-rotateLeft .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-rotateLeft .wpmn_block_gallery_item figure:hover img {
     transform: rotate(-10deg) scale(1.2) translateZ(0);
 }
 
 /* Rotate Right */
-.wpmn-block-hover-animation-rotateRight .wpmn_block_gallery_item figure {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-rotateRight .wpmn_block_gallery_item figure {
     overflow: hidden;
 }
 
-.wpmn-block-hover-animation-rotateRight .wpmn_block_gallery_item figure:hover img {
+.wpmn_block_media_gallery.wpmn-block-hover-animation-rotateRight .wpmn_block_gallery_item figure:hover img {
     transform: rotate(10deg) scale(1.2) translateZ(0);
 }
