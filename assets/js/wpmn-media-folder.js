@@ -199,8 +199,8 @@ jQuery(function ($) {
                             const height = __this.outerHeight();
 
                             let action = 'nest';
-                            if (offsetY < height * 0.3) action = 'before';
-                            else if (offsetY > height * 0.7) action = 'after';
+                            if (offsetY < height * 0.25) action = 'before';
+                            else if (offsetY > height * 0.75) action = 'after';
 
                             if (draggedFolderId === targetFolderId) return;
                             if (this.childFolder(targetFolderId, draggedFolderId)) {
@@ -232,9 +232,9 @@ jQuery(function ($) {
                     $(this).find('.wpmn_drop_indicator').hide();
                     wrapper.removeClass('is-nest-hover');
 
-                    if (offsetY < height * 0.3) {
+                    if (offsetY < height * 0.25) {
                         $(this).find('.drop-top').show();
-                    } else if (offsetY > height * 0.7) {
+                    } else if (offsetY > height * 0.75) {
                         $(this).find('.drop-bottom').show();
                     } else {
                         wrapper.addClass('is-nest-hover');

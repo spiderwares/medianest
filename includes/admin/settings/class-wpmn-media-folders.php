@@ -128,7 +128,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                     break;
 
 				case 'reorder_folder':
-					WPMN_Helper::reorder_folder_request();
+					WPMN_Reorder::reorder_folder_request();
 					break;
 
 				default:

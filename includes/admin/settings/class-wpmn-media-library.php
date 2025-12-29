@@ -66,7 +66,10 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             // Check if it's a list view (edit.php)
             $is_list_view = ( $screen->base === 'edit' );
 
-            if ( $is_media || ( $is_supported_post_type && $is_list_view ) ) :
+            // Check if it's a post edit screen (post.php, post-new.php)
+            $is_post_edit = ( $screen->base === 'post' );
+
+            if ( $is_media || $is_post_edit || ( $is_supported_post_type && $is_list_view ) ) :
                 $this->wpmn_render_sidebar();
             endif;
         }
@@ -152,6 +155,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             if ( $screen ) :
                 $post_type = $screen->post_type;
             elseif ( isset( $_GET['post_type'] ) ) :
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                 $post_type = sanitize_text_field( wp_unslash( $_GET['post_type'] ) );
             else :
                 // Fallback for default post type

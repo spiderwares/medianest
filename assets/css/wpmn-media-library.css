@@ -476,7 +476,8 @@ button.wpmn_media_sidebar_action_more {
 	background: #e2e2e2;
 }
 
-.wpmn_folder_button.is-drop-hover {
+.wpmn_folder_button.is-drop-hover,
+.wpmn_folder_btn_wrapper.is-nest-hover .wpmn_folder_button {
 	border-color: #1d2327;
 	background: #dbe9ff;
 }
@@ -841,6 +842,10 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 	margin-bottom: 10px;
 }
 
+.media-frame-content .attachments-browser .wpmn_upload_folder_selector {
+	display: none !important;
+}
+
 .wpmn_count_mode_item {
 	padding: 8px 12px;
 	cursor: pointer;
@@ -860,105 +865,4 @@ button.wpmn_media_sidebar_action_delete.disabled .wpmn_theme_icon {
 
 .wpmn_count_mode_item.is-active .wpmn_check_icon {
 	visibility: visible;
-}
-
-/*--------------------------- Folder Context Menu ---------------------------*/
-
-.wpmn_folder_context_menu {
-	position: fixed;
-	background: #fff;
-	border-radius: 6px;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-	min-width: 230px;
-	z-index: 10001;
-	opacity: 0;
-	transform: scale(0.95);
-	transition: opacity 0.15s ease, transform 0.15s ease;
-	padding: 6px 0;
-}
-
-.wpmn_folder_context_menu.is-visible {
-	opacity: 1;
-	transform: scale(1);
-}
-
-.wpmn_context_menu_item:hover {
-	background: #3c434a1a;
-}
-
-.wpmn_context_menu_item {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 9px 14px;
-	cursor: pointer;
-	font-size: 13px;
-	color: #1d2327;
-	transition: background 0.15s ease;
-	user-select: none;
-}
-
-.wpmn_context_menu_item.disabled {
-	opacity: 0.5;
-}
-
-.wpmn_context_menu_item span:nth-child(2) {
-	flex: 1;
-}
-
-.wpmn_folder_button.is-cut {
-	opacity: 0.5;
-	position: relative;
-}
-
-.wpmn_folder_content,
-.wpmn_folder_content_cut,
-.wpmn_folder_content_paste,
-.wpmn_folder_content_delete,
-.wpmn_folder_content_duplicate,
-.wpmn_folder_content_color,
-.wpmn_folder_content_download,
-.wpmn_folder_content_rename {
-	width: 20px;
-	display: block;
-	flex-shrink: 0;
-	filter: invert(29%) sepia(7%) saturate(618%) hue-rotate(169deg) brightness(96%) contrast(90%);
-}
-
-.wpmn_folder_row.is-renaming {
-	align-items: flex-start;
-}
-
-.wpmn_folder_row.is-renaming .wpmn_toggle_arrow {
-	margin-top: 5px;
-	height: 20px;
-}
-
-.wpmn_toggle_arrow {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 20px;
-	height: 100%;
-}
-
-.wpmn_toggle_arrow::before {
-	content: '';
-	width: 6px;
-	height: 6px;
-	border: solid #000;
-	border-width: 0 2px 2px 0;
-	transform: rotate(-45deg);
-	transition: transform 0.25s;
-}
-
-
-.wpmn_folder_node[aria-expanded='true']>.wpmn_folder_row>.wpmn_toggle_arrow::before {
-	transform: rotate(45deg);
-}
-
-/*--------------------------- Admin Table Columns ---------------------------*/
-
-#wpmn_folder_col {
-	width: 150px;
 }

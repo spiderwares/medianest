@@ -63,6 +63,12 @@
     width: 10%;
 }
 
+/*--------------------------- Admin Table Columns ---------------------------*/
+
+#wpmn_folder_col {
+    width: 150px;
+}
+
 /*--------------------------- Upload Folder ---------------------------*/
 
 #wpmn_select_upload_folder {
@@ -122,26 +128,6 @@
 .wpmn_media_sidebar.is-bulk-select .wpmn_folder_button:hover {
     background: transparent;
 }
-
-/* .wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger {
-    color: #2271b1 !important;
-    border-color: #2271b1 !important;
-} */
-
-.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger .wpmn_delete_icon {
-    filter: invert(33%) sepia(50%) saturate(1764%) hue-rotate(182deg) brightness(92%) contrast(93%);
-
-}
-
-/* .wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover {
-    background: #2271b1 !important;
-    color: #fff !important;
-} */
-
-.wpmn_media_sidebar.is-bulk-select .wpmn_delete_trigger:hover .wpmn_delete_icon {
-    filter: brightness(0) invert(1);
-}
-
 
 button.wpmn_delete_trigger:disabled,
 button.wpmn_delete_trigger.disabled,
@@ -277,6 +263,7 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
 }
 
 /*--------------------------- Drag & Drop ---------------------------*/
+
 .wpmn_media_sidebar img,
 .wpmn_media_sidebar .wpmn_all_files_icon,
 .wpmn_media_sidebar .wpmn_uncategorized_icon {
@@ -366,13 +353,13 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     transition: background 0.2s;
 }
 
-/* .wpmn_media_layout #the-list tr.wpmn_draggable {
+.wpmn_media_layout #the-list tr.wpmn_draggable {
     position: relative;
 }
 
 .wpmn_media_layout #the-list tr.wpmn_draggable .check-column {
     position: relative;
-} */
+}
 
 .wpmn_media_layout #the-list tr.wpmn_draggable:hover .check-column::before {
     content: '\f545';
@@ -467,4 +454,99 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     margin-top: 10px;
     background: #f0f0f1;
     color: #666;
+}
+
+/*--------------------------- Folder Context Menu ---------------------------*/
+
+.wpmn_folder_context_menu {
+    position: fixed;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 230px;
+    z-index: 10001;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    padding: 6px 0;
+}
+
+.wpmn_folder_context_menu.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.wpmn_context_menu_item:hover {
+    background: #3c434a1a;
+}
+
+.wpmn_context_menu_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #1d2327;
+    transition: background 0.15s ease;
+    user-select: none;
+}
+
+.wpmn_context_menu_item.disabled {
+    opacity: 0.5;
+}
+
+.wpmn_context_menu_item span:nth-child(2) {
+    flex: 1;
+}
+
+.wpmn_folder_button.is-cut {
+    opacity: 0.5;
+    position: relative;
+}
+
+.wpmn_folder_content,
+.wpmn_folder_content_cut,
+.wpmn_folder_content_paste,
+.wpmn_folder_content_delete,
+.wpmn_folder_content_duplicate,
+.wpmn_folder_content_color,
+.wpmn_folder_content_download,
+.wpmn_folder_content_rename {
+    width: 20px;
+    display: block;
+    flex-shrink: 0;
+    filter: invert(29%) sepia(7%) saturate(618%) hue-rotate(169deg) brightness(96%) contrast(90%);
+}
+
+.wpmn_folder_row.is-renaming {
+    align-items: flex-start;
+}
+
+.wpmn_folder_row.is-renaming .wpmn_toggle_arrow {
+    margin-top: 5px;
+    height: 20px;
+}
+
+.wpmn_toggle_arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 100%;
+}
+
+.wpmn_toggle_arrow::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border: solid #000;
+    border-width: 0 2px 2px 0;
+    transform: rotate(-45deg);
+    transition: transform 0.25s;
+}
+
+
+.wpmn_folder_node[aria-expanded='true']>.wpmn_folder_row>.wpmn_toggle_arrow::before {
+    transform: rotate(45deg);
 }

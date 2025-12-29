@@ -40,9 +40,9 @@ jQuery(function ($) {
 
         getPostType() {
             if (this.sidebar.hasClass('in-modal')) return 'attachment';
-            const urlParams = new URLSearchParams(window.location.search);
-            const pt = urlParams.get('post_type');
-            if (pt) return pt;
+            const urlParams = new URLSearchParams(window.location.search),
+                post_type = urlParams.get('post_type');
+            if (post_type) return post_type;
             if (window.location.pathname.includes('upload.php')) return 'attachment';
             return wpmn_media_library.postType || 'post';
         }
@@ -116,9 +116,9 @@ jQuery(function ($) {
 
             if (this.state.activeFolder !== 'all' && !activeFolderFromUrl) {
                 if (gridMode) {
-                    setTimeout(() => this.triggerMediaFilter(this.state.activeFolder), 1000);
+                    setTimeout(() => this.triggerMediaFilter(this.state.activeFolder, savedSettings.defaultSort), 1000);
                 } else if (isList || media) {
-                    this.triggerMediaFilter(this.state.activeFolder);
+                    this.triggerMediaFilter(this.state.activeFolder, savedSettings.defaultSort);
                 }
             }
         }
@@ -333,8 +333,6 @@ jQuery(function ($) {
 
             // Save to localStorage for instant UI updates
             this.setStorage('wpmnSettings', JSON.stringify(settings));
-
-            // Save to database for cross-browser persistence
             this.apiCall('save_settings', {
                 default_folder: settings.defaultFolder,
                 default_sort: settings.defaultSort,
@@ -351,7 +349,7 @@ jQuery(function ($) {
             this.applySortFromSettings(settings.defaultSort);
 
             if (settings.defaultFolder && settings.defaultFolder !== oldDefault) {
-                this.changeFolder(settings.defaultFolder);
+                this.changeFolder(settings.defaultFolder, settings.defaultSort);
             }
         }
 
@@ -379,7 +377,7 @@ jQuery(function ($) {
             if (slug && slug !== this.state.activeFolder) this.changeFolder(slug);
         }
 
-        changeFolder(slug) {
+        changeFolder(slug, sortVal = null) {
             this.state.activeFolder = slug;
             this.setStorage('wpmnActiveFolder', slug);
             wpmn_media_folder.folder.highlightActive();
@@ -394,7 +392,7 @@ jQuery(function ($) {
                 window.history.replaceState({}, '', url.toString());
             }
 
-            this.triggerMediaFilter(slug);
+            this.triggerMediaFilter(slug, sortVal);
             if (typeof wp !== 'undefined' && wp.hooks) {
                 wp.hooks.doAction('wpmnFolderChanged', slug);
             }
@@ -519,17 +517,14 @@ jQuery(function ($) {
                             theme: data.settings.theme_design || localSettings.theme || 'default'
                         };
 
-                        // Update localStorage with database settings (database is source of truth)
+                        // Update localStorage with database settings
                         this.setStorage('wpmnSettings', JSON.stringify(dbSettings));
-
-                        // Apply theme immediately
                         this.applyTheme(dbSettings.theme);
                     }
 
                     wpmn_media_folder.folder.refreshState(data);
                     this.updateSidebarLabels(postType);
-                })
-                .catch(console.error);
+                }).catch(console.error);
         }
 
         applyTheme(theme) {
@@ -666,7 +661,6 @@ jQuery(function ($) {
             const wrap = $('#wpbody-content .wrap').toggleClass('wpmn_media_layout_collapsed');
             this.setStorage('wpmnSidebarCollapsed', wrap.hasClass('wpmn_media_layout_collapsed') ? '1' : '0');
 
-            // Trigger resize to fix media grid layout
             setTimeout(() => {
                 $(window).trigger('resize');
             }, 100);
@@ -695,7 +689,7 @@ jQuery(function ($) {
         }
 
         updateCustomToolbar() {
-            let target = $('.media-toolbar');
+            let target = $('.media-toolbar .wp-filter');
 
             if (!target.length) return;
 
@@ -738,17 +732,41 @@ jQuery(function ($) {
             return null;
         }
 
-        triggerMediaFilter(slug) {
-            const mediaFrame = wp?.media?.frame?.state;
-
+        triggerMediaFilter(slug, sortVal = null) {
+            const mediaFrame = wp?.media?.frame;
+            const inModal = $('.media-modal').is(':visible');
             const media = window.location.pathname.includes('upload.php');
             const listView = window.location.pathname.includes('edit.php');
             const gridMode = media && (window.location.search.includes('mode=grid') || !window.location.search.includes('mode=list'));
 
-            if (mediaFrame && gridMode) {
-                wp.media.frame.state().get('library')?.props.set('wpmn_folder', slug);
+            if (mediaFrame && (gridMode || inModal)) {
+
+                const library = mediaFrame.state().get('library');
+                if (library) {
+                    library.props.set('wpmn_folder', slug);
+                } else if (inModal) {
+                    const activeState = mediaFrame.state();
+                    if (activeState && activeState.get('library')) {
+                        activeState.get('library').props.set('wpmn_folder', slug);
+                    }
+                }
+
+                if (sortVal && sortVal !== 'default' && typeof wp !== 'undefined' && wp.hooks) {
+                    wp.hooks.doAction('wpmnSortFolders', sortVal);
+                }
             } else {
                 const url = new URL(window.location.href);
+
+                if (sortVal && sortVal !== 'default') {
+                    const [field, order] = sortVal.split('-');
+                    if (field && order) {
+                        let orderby = field;
+                        if (field === 'size') orderby = 'wpmn_filesize';
+
+                        url.searchParams.set('orderby', orderby);
+                        url.searchParams.set('order', order.toUpperCase());
+                    }
+                }
 
                 if (!media && !listView) {
                     const postType = this.getPostType();
@@ -756,6 +774,10 @@ jQuery(function ($) {
                     const newUrl = new URL(adminUrl);
                     newUrl.searchParams.set('post_type', postType);
                     newUrl.searchParams.set('wpmn_folder', slug);
+
+                    if (url.searchParams.has('orderby')) newUrl.searchParams.set('orderby', url.searchParams.get('orderby'));
+                    if (url.searchParams.has('order')) newUrl.searchParams.set('order', url.searchParams.get('order'));
+
                     window.location.href = newUrl.toString();
                     return;
                 }
@@ -763,6 +785,9 @@ jQuery(function ($) {
                 const currentFolder = url.searchParams.get('wpmn_folder');
                 if (currentFolder !== slug) {
                     url.searchParams.set('wpmn_folder', slug);
+                }
+
+                if (url.toString() !== window.location.href) {
                     window.location.href = url.toString();
                 }
             }
