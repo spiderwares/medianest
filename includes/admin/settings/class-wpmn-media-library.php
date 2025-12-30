@@ -60,12 +60,12 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
             $enabled_post_types = isset( $this->settings['post_types'] ) ? (array) $this->settings['post_types'] : [];
 
-            $is_media = ( $screen->id === 'upload' );
-            $is_supported_post_type = in_array( $screen->post_type, $enabled_post_types );
-            $is_list_view = ( $screen->base === 'edit' );
-            $is_post_edit = ( $screen->base === 'post' );
+            $media               = ( $screen->id === 'upload' );
+            $supported_post_type = in_array( $screen->post_type, $enabled_post_types );
+            $list_view           = ( $screen->base === 'edit' );
+            $post_edit           = ( $screen->base === 'post' );
 
-            if ( $is_media || $is_post_edit || ( $is_supported_post_type && $is_list_view ) ) :
+            if ( $media || $post_edit || ( $supported_post_type && $list_view ) ) :
                 $this->wpmn_render_sidebar();
             endif;
         }
@@ -145,7 +145,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             $folder = ! empty( $_GET['wpmn_folder'] ) ? sanitize_text_field( wp_unslash( $_GET['wpmn_folder'] ) ) : '';
             if ( ! $folder || $folder === 'all' ) return;
 
-            $screen = get_current_screen();
+            $screen    = get_current_screen();
             $post_type = '';
 
             if ( $screen ) :
@@ -232,36 +232,50 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             $labels      = WPMN_Helper::wpmn_get_folder_labels();
             $post_type   = get_post_type( $post->ID );
             
-            // Get only terms for this post type
+            $meta_query = array(
+                'relation' => 'OR',
+                array(
+                    'key'     => 'wpmn_post_type',
+                    'value'   => $post_type,
+                    'compare' => '=',
+                ),
+            );
+
+            if ( $post_type === 'attachment' ) :
+                $meta_query[] = array(
+                    'key'     => 'wpmn_post_type',
+                    'compare' => 'NOT EXISTS',
+                );
+            endif;
+
+            if ( is_user_logged_in() ) :
+                $current_user_id = get_current_user_id();
+                $author_query = array(
+                    'relation' => 'OR',
+                    array(
+                        'key'     => 'wpmn_folder_author',
+                        'value'   => $current_user_id,
+                        'compare' => '=',
+                    ),
+                    array(
+                        'key'     => 'wpmn_folder_author',
+                        'compare' => 'NOT EXISTS',
+                    )
+                );
+
+                $meta_query = array(
+                    'relation' => 'AND',
+                    $meta_query,
+                    $author_query
+                );
+            endif;
+
             $include_terms = get_terms( array(
                 'taxonomy'   => 'wpmn_media_folder',
                 'hide_empty' => false,
                 'fields'     => 'ids',
-                'meta_query' => array(
-                    'relation' => 'OR',
-                    array(
-                        'key'     => 'wpmn_post_type',
-                        'value'   => $post_type,
-                        'compare' => '=',
-                    ),
-                ),
+                'meta_query' => $meta_query,
             ) );
-
-            // Include legacy folders for attachments
-            if ( $post_type === 'attachment' ) :
-                $legacy_terms = get_terms( array(
-                    'taxonomy'   => 'wpmn_media_folder',
-                    'hide_empty' => false,
-                    'fields'     => 'ids',
-                    'meta_query' => array(
-                        array(
-                            'key'     => 'wpmn_post_type',
-                            'compare' => 'NOT EXISTS',
-                        ),
-                    ),
-                ) );
-                $include_terms = array_merge( $include_terms, $legacy_terms );
-            endif;
 
             $select_html = wp_dropdown_categories(array(
                 'taxonomy'          => 'wpmn_media_folder',
@@ -298,11 +312,11 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
             if ( 'wpmn_folder_col' !== $column_name ) return;
 
-            $terms = get_the_terms( $id, 'wpmn_media_folder' );
-            $post_type = get_post_type( $id );
-            $is_attachment = ( 'attachment' === $post_type );
-            $base_url = $is_attachment ? 'upload.php' : 'edit.php';
-            $query_args = array();
+            $terms          = get_the_terms( $id, 'wpmn_media_folder' );
+            $post_type      = get_post_type( $id );
+            $is_attachment  = ( 'attachment' === $post_type );
+            $base_url       = $is_attachment ? 'upload.php' : 'edit.php';
+            $query_args     = array();
 
             if ( $is_attachment ) :
                 $query_args['mode'] = 'list';

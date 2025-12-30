@@ -18,7 +18,7 @@ if ( ! class_exists( 'WPMN_Reorder' ) ) :
 
 			$folder_id = isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
 			$target_id = isset($_POST['target_id']) ? absint($_POST['target_id']) : 0;
-			$position = isset( $_POST['position'] ) ? sanitize_text_field( wp_unslash( $_POST['position'] ) ) : 'after';
+			$position  = isset( $_POST['position'] ) ? sanitize_text_field( wp_unslash( $_POST['position'] ) ) : 'after';
             $post_type = isset( $_POST['post_type'] ) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
 
 			if (!$folder_id || !$target_id) :

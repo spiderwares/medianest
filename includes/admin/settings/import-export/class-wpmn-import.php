@@ -53,8 +53,8 @@ if ( ! class_exists( 'WPMN_Import' ) ) :
 			$id_map = [];
 
 			// STEP 1 — Create all folders
-			foreach ($rows as $r) :
-				$name = sanitize_text_field($r['name']);
+			foreach ($rows as $row) :
+				$name = sanitize_text_field($row['name']);
 				if (!$name) :
 					continue;
 				endif;
@@ -64,35 +64,35 @@ if ( ! class_exists( 'WPMN_Import' ) ) :
 				) );
 
 				$new_id = is_wp_error($result) ? (int) $result->get_error_data() : $result['term_id'];
-				if (isset($r['id'])) :
-					$id_map[$r['id']] = $new_id;
+				if (isset($row['id'])) :
+					$id_map[$row['id']] = $new_id;
 				endif;
 
-				if (!empty($r['created_by'])) :
-					update_term_meta($new_id, 'wpmn_folder_owner', absint($r['created_by']));
+				if (!empty($row['created_by'])) :
+					update_term_meta($new_id, 'wpmn_folder_owner', absint($row['created_by']));
 				endif;
 
-				if (!empty($r['post_type'])) :
-					update_term_meta($new_id, 'wpmn_post_type', sanitize_text_field($r['post_type']));
+				if (!empty($row['post_type'])) :
+					update_term_meta($new_id, 'wpmn_post_type', sanitize_text_field($row['post_type']));
 				endif;
 			endforeach;
 
 			// STEP 2 — Set parents + assign media
-			foreach ($rows as $r) :
-				if (empty($id_map[$r['id']])) :
+			foreach ($rows as $row) :
+				if (empty($id_map[$row['id']])) :
 					continue;
 				endif;
 
-				$new_id = $id_map[$r['id']];
-				if (!empty($r['parent']) && !empty($id_map[$r['parent']])) :
+				$new_id = $id_map[$row['id']];
+				if (!empty($row['parent']) && !empty($id_map[$row['parent']])) :
 					wp_update_term($new_id, 'wpmn_media_folder', array(
-						'parent' => $id_map[$r['parent']]
+						'parent' => $id_map[$row['parent']]
 					) );
 				endif;
 
 				// Attach media
-				if (!empty($r['attachment_ids'])) :
-					$att_ids = array_filter(array_map('absint', explode('|', $r['attachment_ids'])));
+				if (!empty($row['attachment_ids'])) :
+					$att_ids = array_filter(array_map('absint', explode('|', $row['attachment_ids'])));
 					foreach ($att_ids as $att_id) :
 						wp_set_object_terms($att_id, [$new_id], 'wpmn_media_folder', false);
 					endforeach;

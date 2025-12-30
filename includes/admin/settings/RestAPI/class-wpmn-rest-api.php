@@ -16,7 +16,11 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
      */
     class WPMN_REST_API {
 
+        /**
+         * Settings
+         */
         public $settings;
+
         /**
          * Constructor for the class.
          */
@@ -32,9 +36,6 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             add_action( 'rest_api_init', [ $this, 'wpmn_register_routes' ] );
         }
 
-        /**
-         * Register REST API routes
-         */
         /**
          * Register REST API routes
          */
@@ -156,8 +157,8 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
 
         public function get_folders( $request ) {
             
-            $search    = sanitize_text_field( $request->get_param( 'search' ) );
-            $post_type = sanitize_text_field( $request->get_param( 'post_type' ) );
+            $search         = sanitize_text_field( $request->get_param( 'search' ) );
+            $post_type      = sanitize_text_field( $request->get_param( 'post_type' ) );
             $search_enabled = isset( $this->settings['api_folder_search'] ) && $this->settings['api_folder_search'] === 'yes';
 
             // If API Search is disabled settings, ignore the search parameter
@@ -357,11 +358,20 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
         public function create_new_folder($request) {
             $name      = sanitize_text_field($request->get_param('name'));
             $parent_id = absint($request->get_param('parent_id')) ?: 0;
+            $user_id   = absint($request->get_param('user_id')) ?: 0;
 
             if (!$name) return new WP_Error('missing_param', 'name is required', ['status' => 400]);
 
             $term = WPMN_Helper::create_folder($name, $parent_id);
             if (is_wp_error($term)) return $term;
+
+            if ( isset( $term['term_id'] ) ) :
+                update_term_meta( $term['term_id'], 'wpmn_post_type', 'attachment' );
+                
+                if ( $user_id > 0 ) :
+                    update_term_meta( $term['term_id'], 'wpmn_folder_author', $user_id );
+                endif;
+            endif;
 
             return rest_ensure_response(array(
                 'success' => true,

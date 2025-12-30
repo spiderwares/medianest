@@ -19,13 +19,12 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 		}
 
 		public static function create_folder( $name, $parent ) {
-            $settings = get_option( 'wpmn_settings', [] );
-            $user_mode = isset($settings['user_separate_folders']) && $settings['user_separate_folders'] === 'yes';
-            
-            $args = array( 'parent' => $parent );
+            $settings 	= get_option( 'wpmn_settings', [] );
+            $user_mode 	= isset($settings['user_separate_folders']) && $settings['user_separate_folders'] === 'yes';
+            $args 		= array( 'parent' => $parent );
             
             if ( $user_mode && is_user_logged_in() ) :
-                $unique_slug = sanitize_title( $name ) . '-' . get_current_user_id();
+                $unique_slug  = sanitize_title( $name ) . '-' . get_current_user_id();
                 $args['slug'] = $unique_slug;
             endif;
 
@@ -40,7 +39,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                     // Logic to check existence properly with user mode
                     if ( $user_mode && is_user_logged_in() ) :
                          $new_unique_slug = sanitize_title( $new_name ) . '-' . get_current_user_id();
-                         $dup_args = array( 'parent' => $parent, 'slug' => $new_unique_slug );
+                         $dup_args 		  = array( 'parent' => $parent, 'slug' => $new_unique_slug );
                          
                          $dup_result = wp_insert_term( $new_name, 'wpmn_media_folder', $dup_args );
                          
@@ -113,8 +112,8 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                 wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
             endif;
 
-			$id = isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
-			$post_type = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
+			$id 		= isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
+			$post_type  = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
 
 			if (!$id) :
 				wp_send_json_error(['message' => 'Invalid folder.']);
@@ -143,7 +142,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
             endif;
 
 			$ids       = isset($_POST['folder_ids']) ? array_map('absint', (array) $_POST['folder_ids']) : [];
-            $post_type = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
+			$post_type = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
 
 			if (empty($ids)) :
 				wp_send_json_error(['message' => 'No folders selected.']);
@@ -253,7 +252,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 				wp_send_json_error(['message' => $result->get_error_message()]);
 			endif;
             // phpcs:ignore WordPress.Security.NonceVerification.Missing
-            $post_type = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
+            $post_type  = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
 			wp_send_json_success(WPMN_Media_Folders::payload(null, $post_type));
 		}
 

@@ -40,10 +40,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
          */
 		public function register_taxonomy() {
 
-            $settings   = get_option( 'wpmn_settings', [] );
-            $post_types = isset( $settings['post_types'] ) ? (array) $settings['post_types'] : [];
+            $settings     = get_option( 'wpmn_settings', [] );
+            $post_types   = isset( $settings['post_types'] ) ? (array) $settings['post_types'] : [];
             $post_types[] = 'attachment';
-            $post_types = array_unique( $post_types );
+            $post_types   = array_unique( $post_types );
 
 			$labels = array(
 				'name'          => esc_html__('Media Folders', 'medianest'),
@@ -253,12 +253,12 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                 $count = ($count_mode === 'all_files') ? $total : $term->count_with_children;
 
 				$list[] = array(	
-					'id'       => $term->term_id,
-					'name'     => $term->name,
-					'count'    => $count,
-					'total'    => $total,
-					'children' => $children,
-					'color'    => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
+					'id'       	=> $term->term_id,
+					'name'     	=> $term->name,
+					'count'    	=> $count,
+					'total'    	=> $total,
+					'children' 	=> $children,
+					'color'     => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
 					'is_pinned' => get_term_meta( $term->term_id, 'wpmn_is_pinned', true ) === '1',
 				);
 				$list[count($list) - 1] = apply_filters('wpmn_folder_node_data', $list[count($list) - 1], $term);
@@ -287,7 +287,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			global $wpdb;
 
             // Exclude these statuses to match WordPress main query counts
-            $exclude_statuses = array( 'trash', 'auto-draft', 'revision' );
+            $exclude_statuses     = array( 'trash', 'auto-draft', 'revision' );
             $exclude_placeholders = implode( ',', array_fill( 0, count( $exclude_statuses ), '%s' ) );
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
@@ -297,7 +297,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                 array_merge( array( $post_type ), $exclude_statuses )
 			));
 
-            $settings = get_option( 'wpmn_settings', [] );
+            $settings  = get_option( 'wpmn_settings', [] );
             $user_mode = isset($settings['user_separate_folders']) && $settings['user_separate_folders'] === 'yes';
 
             if ( $user_mode && is_user_logged_in() ) :
