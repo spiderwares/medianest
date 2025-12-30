@@ -122,8 +122,8 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 			);
 
 			wp_enqueue_script(
-				'wpmn-admin',
-				WPMN_URL . 'assets/js/wpmn-admin.js',
+				'wpmn-media-library',
+				WPMN_URL . 'assets/js/wpmn-media-library.js',
 				array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable', 'wp-data' ),
 				WPMN_VERSION,
 				true
@@ -132,15 +132,23 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             wp_enqueue_script(
 				'wpmn-media-folder',
 				WPMN_URL . 'assets/js/wpmn-media-folder.js',
-				array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable', 'wpmn-admin' ),
+				array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-droppable', 'wpmn-media-library' ),
 				WPMN_VERSION,
 				true
 			);
 
             wp_enqueue_script(
-                'wpmn-upload-folder',
-                WPMN_URL . 'assets/js/wpmn-upload-folder.js',
-                array( 'jquery', 'wpmn-admin' ),
+                'wpmn-upload-media',
+                WPMN_URL . 'assets/js/wpmn-upload-media.js',
+                array( 'jquery', 'wpmn-media-library' ),
+                WPMN_VERSION,
+                true
+            );
+
+            wp_enqueue_script(
+                'wpmn-admin',
+                WPMN_URL . 'assets/js/wpmn-admin.js',
+                array( 'jquery', 'wpmn-media-library' ),
                 WPMN_VERSION,
                 true
             );
@@ -148,7 +156,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             // Get saved theme design from settings
             $show_breadcrumb = isset( $this->settings['breadcrumb_navigation'] ) ? $this->settings['breadcrumb_navigation'] : 'yes';
 
-			wp_localize_script( 'wpmn-admin',
+			wp_localize_script( 'wpmn-media-library',
 				'wpmn_media_library', array(
 					'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
 					'baseUrl'        => WPMN_URL,
@@ -184,6 +192,8 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
                         'generatingZip'      => esc_html__( 'Generating ZIP file', 'medianest' ),
                         'colorUpdated'       => esc_html__( 'Successfully updated.', 'medianest' ),
                         'duplicated'         => esc_html__( 'Folder duplicated.', 'medianest' ),
+                        'apiKeyGenerated'    => esc_html__( 'API Key generated successfully.', 'medianest' ),
+                        'sizesGenerated'     => esc_html__( 'Attachment sizes generated.', 'medianest' ),
 					),
 				)
 			);

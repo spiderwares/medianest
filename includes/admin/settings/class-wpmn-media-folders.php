@@ -124,7 +124,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                     break;
                 
                 case 'wpmn_generate_api_key':
-                    WPMN_Helper::generate_api_key_request();
+                    WPMN_REST_API::generate_api_key_request();
                     break;
 
 				case 'reorder_folder':
@@ -138,23 +138,23 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 		}
 
 		public static function payload($count_mode = null, $post_type = 'attachment') {
-		$user_id = get_current_user_id();
-		$user_settings = array();
+			$user_id = get_current_user_id();
+			$user_settings = array();
 
-		if ( $user_id ) :
-			$user_settings = array(
-				'default_folder' => get_user_meta( $user_id, 'wpmn_default_folder', true ),
-				'default_sort'   => get_user_meta( $user_id, 'wpmn_default_sort', true ),
-				'theme_design'   => get_user_meta( $user_id, 'wpmn_theme_design', true ),
+			if ( $user_id ) :
+				$user_settings = array(
+					'default_folder' => get_user_meta( $user_id, 'wpmn_default_folder', true ),
+					'default_sort'   => get_user_meta( $user_id, 'wpmn_default_sort', true ),
+					'theme_design'   => get_user_meta( $user_id, 'wpmn_theme_design', true ),
+				);
+			endif;
+
+			return array(
+				'folders'  => self::folder_tree($count_mode, $post_type),
+				'counts'   => self::special_counts($post_type),
+				'settings' => $user_settings,
 			);
-		endif;
-
-		return array(
-			'folders'  => self::folder_tree($count_mode, $post_type),
-			'counts'   => self::special_counts($post_type),
-			'settings' => $user_settings,
-		);
-	}
+		}
 
 		public static function folder_tree($count_mode = null, $post_type = 'attachment') {
 
@@ -173,7 +173,6 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                 ),
 			);
 
-            // For media (attachment), also show folders that have no post type set (legacy folders)
             if ( $post_type === 'attachment' ) :
                 $args['meta_query'][] = array(
                     'key'     => 'wpmn_post_type',
@@ -181,11 +180,8 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                 );
             endif;
             
-            // Check for User Specific Folder Mode
-            $settings = get_option( 'wpmn_settings', [] );
-            $user_mode = isset($settings['user_separate_folders']) && $settings['user_separate_folders'] === 'yes';
-
-            if ( $user_mode && is_user_logged_in() ) :
+            // This ensures folders only show to their creator regardless of settings
+            if ( is_user_logged_in() ) :
                 $current_user_id = get_current_user_id();
                 $post_type_query = $args['meta_query'];
                 
@@ -193,9 +189,16 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                     'relation' => 'AND',
                     $post_type_query,
                     array(
-                        'key'     => 'wpmn_folder_author',
-                        'value'   => $current_user_id,
-                        'compare' => '=',
+                        'relation' => 'OR',
+                        array(
+                            'key'     => 'wpmn_folder_author',
+                            'value'   => $current_user_id,
+                            'compare' => '=',
+                        ),
+                        array(
+                            'key'     => 'wpmn_folder_author',
+                            'compare' => 'NOT EXISTS',
+                        )
                     )
                 );
             endif;
@@ -287,10 +290,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
             $exclude_statuses = array( 'trash', 'auto-draft', 'revision' );
             $exclude_placeholders = implode( ',', array_fill( 0, count( $exclude_statuses ), '%s' ) );
 
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			$total = (int) $wpdb->get_var($wpdb->prepare(
 				"SELECT COUNT(ID) FROM {$wpdb->posts}
-				WHERE post_type=%s AND post_status NOT IN ($exclude_placeholders)",
+				WHERE post_type=%s AND post_status NOT IN ($exclude_placeholders)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 array_merge( array( $post_type ), $exclude_statuses )
 			));
 
@@ -300,12 +303,12 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
             if ( $user_mode && is_user_logged_in() ) :
                 $current_user_id = get_current_user_id();
                 
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
                 $uncat = (int) $wpdb->get_var($wpdb->prepare(
                     "SELECT COUNT(ID) FROM {$wpdb->posts} p
                     WHERE p.post_type=%s
-                    AND p.post_status NOT IN ($exclude_placeholders)
-                    AND NOT EXISTS (
+                    AND p.post_status NOT IN ($exclude_placeholders) " . // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                    "AND NOT EXISTS (
                         SELECT 1 FROM {$wpdb->term_relationships} tr
                         INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
                         INNER JOIN {$wpdb->termmeta} tm ON tt.term_id = tm.term_id
@@ -319,12 +322,12 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
             else :
                 // Default Logic: Count files not in ANY folder
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
                 $uncat = (int) $wpdb->get_var($wpdb->prepare(
                     "SELECT COUNT(ID) FROM {$wpdb->posts} p
                     WHERE p.post_type=%s
-                    AND p.post_status NOT IN ($exclude_placeholders)
-                    AND NOT EXISTS (
+                    AND p.post_status NOT IN ($exclude_placeholders) " . // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                    "AND NOT EXISTS (
                         SELECT 1 FROM {$wpdb->term_relationships} tr
                         INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
                         WHERE tr.object_id = p.ID

@@ -7,15 +7,15 @@
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
+if ( ! class_exists( 'WPMN_Upload_Media' ) ) :
 
 	/**
-     * Main WPMN_Upload_Folder Class
+     * Main WPMN_Upload_Media Class
      *
-     * @class WPMN_Upload_Folder
+     * @class WPMN_Upload_Media
      * @version 1.0.0
      */
-	class WPMN_Upload_Folder {
+	class WPMN_Upload_Media {
 
 		/**
 		 * Constructor for the class.
@@ -78,6 +78,6 @@ if ( ! class_exists( 'WPMN_Upload_Folder' ) ) :
 
 	}
 
-	new WPMN_Upload_Folder();
+	new WPMN_Upload_Media();
 
 endif;

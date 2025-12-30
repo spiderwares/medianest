@@ -462,8 +462,8 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     position: fixed;
     background: #fff;
     border-radius: 6px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    min-width: 230px;
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.15);
+    min-width: 270px;
     z-index: 10001;
     opacity: 0;
     transform: scale(0.95);

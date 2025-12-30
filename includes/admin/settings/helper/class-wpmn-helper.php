@@ -44,9 +44,9 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                          
                          $dup_result = wp_insert_term( $new_name, 'wpmn_media_folder', $dup_args );
                          
-                         if ( ! is_wp_error( $dup_result ) ) :
-                             return $dup_result;
-                         endif;
+						if ( ! is_wp_error( $dup_result ) ) :
+							return $dup_result;
+						endif;
                     else :
                         if ( ! term_exists( $new_name, 'wpmn_media_folder', $parent ) ) :
                             return wp_insert_term( 
@@ -279,17 +279,6 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                 /* translators: %d: number of attachments */
                 'message' => sprintf( esc_html__( 'Generated sizes for %d attachments.', 'medianest' ), $count )
             ) );
-        }
-        public static function generate_api_key_request() {
-            $key = wp_generate_password( 40, false );
-            $options = get_option( 'wpmn_settings', [] );
-            $options['rest_api_key'] = $key;
-            update_option( 'wpmn_settings', $options );
-
-            wp_send_json_success( array(
-                'key'     => $key,
-                'message' => esc_html__( 'API Key generated successfully.', 'medianest' )
-            ));
         }
 
         public static function save_settings_request() {

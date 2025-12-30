@@ -7,7 +7,7 @@ Stable tag: 1.0.0
 Version: 1.0.0
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Tags: media library, media folders, file manager, image gallery
+Tags: media library, media folders, file manager, image gallery, wordpress media library
 
 Organize your WordPress media library with unlimited folders, drag & drop interface, and advanced file management features.
 
@@ -30,13 +30,14 @@ This plugin includes the following open-source libraries and third-party integra
 ⭐ Context Menu – Right-click on folders to quickly Create, Rename, and Delete.
 ⭐ Upload to Folder – Select a specific folder from the dropdown before uploading new files.
 ⭐ Folder Filtering – Quickly filter your media library to view files in a specific folder.
-⭐ Dynamic "Uncategorized" Folder – Automatically find files that haven't been assigned to a folder.
+⭐ Dynamic Uncategorized Folder – Automatically find files that haven't been assigned to a folder.
 ⭐ Breadcrumb Navigation – Navigate through your folder hierarchy easily.
 ⭐ Resizable Sidebar – Adjust the width of the folder tree sidebar to fit your screen.
 ⭐ Import/Export – Export your folder structure to CSV and import it to another site.
 ⭐ SVG Support – Securely upload SVG files with built-in sanitization.
 ⭐ Gallery Block – Native Gutenberg block to create beautiful galleries from your folders with ease.
 ⭐ REST API Support – Full REST API endpoints for developers to manage folders and attachments programmatically.
+⭐ Developer-Friendly – Built with extensibility in mind, allowing for template overrides and custom hooks.
 
 == Pro Features ==
 

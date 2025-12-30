@@ -26,6 +26,16 @@
 	z-index: 999;
 }
 
+body.post-php .wpmn_media_sidebar,
+body.post-new-php .wpmn_media_sidebar {
+	display: none;
+}
+
+body.post-php .media-modal .wpmn_media_sidebar,
+body.post-new-php .media-modal .wpmn_media_sidebar {
+	display: flex;
+}
+
 .wpmn_media_sidebar_toggle {
 	position: absolute;
 	top: 80px;
@@ -34,6 +44,7 @@
 	width: 26px;
 	height: 26px;
 	border-radius: 50%;
+	color: #8f8f8f;
 	border: 1px solid #c1c5cc;
 	background: #ffffff;
 	cursor: pointer;
@@ -41,10 +52,6 @@
 	align-items: center;
 	justify-content: center;
 	z-index: 1001;
-}
-
-.wpmn_media_sidebar_toggle {
-	color: #8f8f8f;
 }
 
 .wpmn_media_sidebar_toggle:hover {
@@ -153,12 +160,9 @@
 	padding: 12px 14px 12px 12px;
 }
 
-.wpmn_media_sidebar.in-modal .wpmn_media_sidebar_toggle {
-	display: none !important;
-}
-
+.wpmn_media_sidebar.in-modal .wpmn_media_sidebar_toggle,
 .wpmn_media_sidebar.in-modal::after {
-	display: none;
+	display: none !important;
 }
 
 .wpmn_sidebar_container .media-frame-menu-heading {
@@ -185,9 +189,9 @@
 	z-index: 2000;
 }
 
-.media-frame-menu .wpmn_media_sidebar {
+/* .media-frame-menu .wpmn_media_sidebar {
 	z-index: 2000;
-}
+} */
 
 .wpmn_media_sidebar.in-modal .wpmn_media_sidebar_search[type="search"] {
 	width: 100%;
@@ -199,12 +203,6 @@
 .media-modal .media-frame-menu {
 	width: 330px !important;
 	display: block !important;
-}
-
-.media-modal .media-frame-content,
-.media-modal .media-frame-title,
-.media-modal .media-frame-router {
-	left: 330px !important;
 }
 
 /*--------------------------- Media Sidebar ---------------------------*/
@@ -330,7 +328,9 @@ button.wpmn_media_sidebar_action_more {
 	z-index: 1001;
 }
 
-.wpmn_sort_menu_list {
+.wpmn_sort_menu_list,
+.wpmn_more_menu_list {
+	box-shadow: 0 15px 20px rgba(0, 0, 0, 0.15);
 	list-style: none;
 	margin: 0;
 	padding: 4px 0;
@@ -347,7 +347,8 @@ button.wpmn_media_sidebar_action_more {
 	font-weight: 600;
 }
 
-.wpmn_sort_menu_item:hover {
+.wpmn_sort_menu_item:hover,
+.wpmn_more_menu_item:hover {
 	background: #f0f0f1;
 }
 
@@ -386,12 +387,6 @@ button.wpmn_media_sidebar_action_more {
 	border-top: 1px solid #dcdcde;
 }
 
-.wpmn_more_menu_list {
-	list-style: none;
-	margin: 0;
-	padding: 4px 0;
-}
-
 .wpmn_more_menu_item {
 	padding: 8px 12px;
 	cursor: pointer;
@@ -400,10 +395,6 @@ button.wpmn_media_sidebar_action_more {
 	gap: 8px;
 	color: #1d2327;
 	font-size: 13px;
-}
-
-.wpmn_more_menu_item:hover {
-	background: #f0f0f1;
 }
 
 .wpmn_more_menu_item .dashicons {

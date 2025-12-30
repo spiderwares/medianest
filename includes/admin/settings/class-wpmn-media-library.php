@@ -35,6 +35,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             add_action( 'attachment_fields_to_edit', array( $this, 'add_folder_field' ), 10, 2 );
             add_filter( 'ajax_query_attachments_args', array( $this, 'wpmn_filter_attachments' ) );
             add_action( 'pre_get_posts', array( $this, 'wpmn_filter_list_view' ) );
+            add_action( 'pre_get_posts', array( $this, 'wpmn_filesize_orderby' ) );
             add_filter( 'manage_media_columns', array( $this, 'add_folder_column' ) );
             add_filter( 'manage_media_columns', array( $this, 'add_file_size_column' ) );
             add_action( 'manage_media_custom_column', array( $this, 'display_file_size_column' ), 10, 2 );
@@ -47,10 +48,9 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             foreach ( $post_types as $pt ) :
             add_filter( "manage_edit-{$pt}_columns", array( $this, 'add_folder_column' ) );
                 add_filter( "manage_{$pt}_posts_columns", array( $this, 'add_folder_column' ) );
-                add_action( "manage_{$pt}_posts_custom_column", array( $this, 'display_folder_column_for_posts' ), 10, 2 );
+                add_action( "manage_{$pt}_posts_custom_column", array( $this, 'display_folder_column' ), 10, 2 );
             endforeach;
 
-            // Pro version hooks
             do_action( 'wpmn_media_library_init', $this );
 		}
 
@@ -62,11 +62,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
             $is_media = ( $screen->id === 'upload' );
             $is_supported_post_type = in_array( $screen->post_type, $enabled_post_types );
-            
-            // Check if it's a list view (edit.php)
             $is_list_view = ( $screen->base === 'edit' );
-
-            // Check if it's a post edit screen (post.php, post-new.php)
             $is_post_edit = ( $screen->base === 'post' );
 
             if ( $is_media || $is_post_edit || ( $is_supported_post_type && $is_list_view ) ) :
@@ -154,11 +150,9 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
             if ( $screen ) :
                 $post_type = $screen->post_type;
-            elseif ( isset( $_GET['post_type'] ) ) :
-                // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            elseif ( isset( $_GET['post_type'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                 $post_type = sanitize_text_field( wp_unslash( $_GET['post_type'] ) );
             else :
-                // Fallback for default post type
                 $post_type = 'post';
             endif;
 
@@ -183,7 +177,6 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                     ),
                 );
 
-                // Check for User Specific Folder Mode logic
                 $user_mode = isset($this->settings['user_separate_folders']) && $this->settings['user_separate_folders'] === 'yes';
 
                 if ( $user_mode && is_user_logged_in() ) :
@@ -222,6 +215,15 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                         )
                     ) );
                 endif;
+            endif;
+        }
+
+        public function wpmn_filesize_orderby( $query ) {
+            if ( ! is_admin() || ! $query->is_main_query() ) return;
+
+            if ( 'wpmn_filesize' === $query->get( 'orderby' ) ) :
+                $query->set( 'meta_key', 'wpmn_filesize' );
+                $query->set( 'orderby', 'meta_value_num' );
             endif;
         }
 
@@ -293,59 +295,27 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
         }
 
         public function display_folder_column( $column_name, $id ) {
+
             if ( 'wpmn_folder_col' !== $column_name ) return;
 
             $terms = get_the_terms( $id, 'wpmn_media_folder' );
-            if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) :
-                $folder_links = array();
-                foreach ( $terms as $term ) :
-                    $url = add_query_arg(
-                        array(
-                            'mode' => 'list',
-                            'wpmn_folder' => 'term-' . $term->term_id
-                        ),
-                        admin_url( 'upload.php' )
-                    );
-                    $folder_links[] = sprintf(
-                        '<a href="%s">%s</a>',
-                        esc_url( $url ),
-                        esc_html( $term->name )
-                    );
-                endforeach;
-                echo wp_kses_post( implode( ', ', $folder_links ) );
-            else :
-                $url = add_query_arg(
-                    array(
-                        'mode' => 'list',
-                        'wpmn_folder' => 'uncategorized'
-                    ),
-                    admin_url( 'upload.php' )
-                );
-                echo sprintf(
-                    '<a href="%s">%s</a>',
-                    esc_url( $url ),
-                    esc_html__( 'Uncategorized', 'medianest' )
-                );
-            endif;
-        }
-
-        public function display_folder_column_for_posts( $column_name, $id ) {
-            if ( 'wpmn_folder_col' !== $column_name ) return;
-
             $post_type = get_post_type( $id );
-            $terms = get_the_terms( $id, 'wpmn_media_folder' );
+            $is_attachment = ( 'attachment' === $post_type );
+            $base_url = $is_attachment ? 'upload.php' : 'edit.php';
+            $query_args = array();
+
+            if ( $is_attachment ) :
+                $query_args['mode'] = 'list';
+            else :
+                $query_args['post_type'] = $post_type;
+            endif;
 
             if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) :
                 $folder_links = array();
                 foreach ( $terms as $term ) :
-                    // Create a link to filter by this folder
-                    $url = add_query_arg(
-                        array(
-                            'wpmn_folder' => 'term-' . $term->term_id,
-                            'post_type'   => $post_type
-                        ),
-                        admin_url( 'edit.php' )
-                    );
+                    $query_args['wpmn_folder'] = 'term-' . $term->term_id;
+                    $url = add_query_arg( $query_args, admin_url( $base_url ) );
+                    
                     $folder_links[] = sprintf(
                         '<a href="%s">%s</a>',
                         esc_url( $url ),
@@ -354,13 +324,9 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                 endforeach;
                 echo wp_kses_post( implode( ', ', $folder_links ) );
             else :
-                $url = add_query_arg(
-                    array(
-                        'wpmn_folder' => 'uncategorized',
-                        'post_type'   => $post_type
-                    ),
-                    admin_url( 'edit.php' )
-                );
+                $query_args['wpmn_folder'] = 'uncategorized';
+                $url = add_query_arg( $query_args, admin_url( $base_url ) );
+                
                 echo sprintf(
                     '<a href="%s">%s</a>',
                     esc_url( $url ),

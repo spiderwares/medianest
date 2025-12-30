@@ -2,7 +2,7 @@
 
 jQuery(function ($) {
 
-    class WPMN_Upload_Folder {
+    class WPMN_Upload_Media {
 
         constructor() {
             this.init();
@@ -26,8 +26,8 @@ jQuery(function ($) {
             $('.wpmn_select_upload_folder').val(folderId);
             localStorage.setItem('wpmn_selected_upload_folder', folderId);
 
-            this.updateUploaderParams(folderId);
-            this.updateBrowserUploader(folderId);
+            this.uploaderParams(folderId);
+            this.browserParams(folderId);
         }
 
         observeDOM() {
@@ -110,15 +110,15 @@ jQuery(function ($) {
             const saved = localStorage.getItem('wpmn_selected_upload_folder');
             if (saved) {
                 $('.wpmn_select_upload_folder').val(saved);
-                this.updateBrowserUploader(saved);
+                this.browserParams(saved);
             }
         }
 
         bindUploader() {
 
-            const bindParams = (up) => {
-                if (up._wpmnBound) return;
-                up._wpmnBound = true;
+            const bindParams = (__this) => {
+                if (__this._wpmnBound) return;
+                __this._wpmnBound = true;
 
                 const setParams = (uploader) => {
                     const folderId = $('.wpmn_select_upload_folder:visible').val() || localStorage.getItem('wpmn_selected_upload_folder');
@@ -129,8 +129,8 @@ jQuery(function ($) {
                     }
                 };
 
-                up.bind('FilesAdded', setParams);
-                up.bind('BeforeUpload', setParams);
+                __this.bind('FilesAdded', setParams);
+                __this.bind('BeforeUpload', setParams);
             };
 
             // Plupload
@@ -165,14 +165,14 @@ jQuery(function ($) {
             }
         }
 
-        updateUploaderParams(folderId) {
+        uploaderParams(folderId) {
             if (window.uploader) {
                 uploader.settings.multipart_params = uploader.settings.multipart_params || {};
                 uploader.settings.multipart_params.wpmn_upload_folder = folderId;
             }
         }
 
-        updateBrowserUploader(folderId) {
+        browserParams(folderId) {
             const form = $('#file_form, form.media-upload-form');
 
             if (!form.length) return;
@@ -189,5 +189,6 @@ jQuery(function ($) {
 
     }
 
-    new WPMN_Upload_Folder();
+    new WPMN_Upload_Media();
+
 });

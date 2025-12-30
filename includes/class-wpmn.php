@@ -107,7 +107,7 @@ if ( ! class_exists( 'WPMN' ) ) :
             require_once WPMN_PATH . 'includes/admin/settings/import-export/class-wpmn-export.php';
             require_once WPMN_PATH . 'includes/admin/settings/reorder/class-wpmn-reorder.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-media-library.php';
-            require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-upload-folder.php';
+            require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-upload-media.php';
         }
 
         /**

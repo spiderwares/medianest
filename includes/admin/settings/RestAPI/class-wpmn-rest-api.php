@@ -95,6 +95,18 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             ));
         }
 
+        public static function generate_api_key_request() {
+            $key = wp_generate_password( 40, false );
+            $options = get_option( 'wpmn_settings', [] );
+            $options['rest_api_key'] = $key;
+            update_option( 'wpmn_settings', $options );
+
+            wp_send_json_success( array(
+                'key'     => $key,
+                'message' => esc_html__( 'API Key generated successfully.', 'medianest' )
+            ));
+        }
+
         /**
          * Check if API Folder Search is enabled and Key is valid.
          */
@@ -115,25 +127,23 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
          * Validate REST API Key from Header, Parameter, or Bearer Token.
          */
         public function is_valid_api_key( $request ) {
+
             $saved_key = isset( $this->settings['rest_api_key'] ) ? $this->settings['rest_api_key'] : '';
 
             if ( empty( $saved_key ) ) :
                 return false;
             endif;
 
-            // 1. Check in Header: MediaNest-API-Key
             $header_key = $request->get_header( 'MediaNest-API-Key' );
             if ( $header_key === $saved_key ) :
                 return true;
             endif;
 
-            // 2. Check in Query Param: api_key
             $param_key = $request->get_param( 'api_key' );
             if ( $param_key === $saved_key ) :
                 return true;
             endif;
 
-            // 3. Check Authorization: Bearer <token>
             $auth_header = $request->get_header( 'Authorization' );
             if ( ! empty( $auth_header ) && preg_match( '/Bearer\s+(.*)$/i', $auth_header, $matches ) ) :
                 $bearer_token = trim( $matches[1] );
@@ -166,30 +176,31 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 $args['name__like'] = $search;
             endif;
 
-            if ( ! empty( $post_type ) ) :
-                $meta_query = array(
-                    'relation' => 'OR',
-                    array(
-                        'key'     => 'wpmn_post_type',
-                        'value'   => $post_type,
-                        'compare' => '=',
-                    ),
-                );
-                if ( $post_type === 'attachment' ) :
-                    $meta_query[] = array(
-                        'key'     => 'wpmn_post_type',
-                        'compare' => 'NOT EXISTS',
-                    );
-                endif;
-                
-                $args['meta_query'] = $meta_query;
-            endif;
+            $args['meta_query'] = array(
+                'relation' => 'OR',
+                array(
+                    'key'     => 'wpmn_post_type',
+                    'value'   => 'attachment',
+                    'compare' => '=',
+                ),
+                array(
+                    'key'     => 'wpmn_post_type',
+                    'compare' => 'NOT EXISTS',
+                ),
+            );
 
             $terms = get_terms( $args );
 
             if (is_wp_error($terms)) :
                 return new WP_Error('fetch_error', 'Failed to fetch folders', ['status' => 500]);
             endif;
+
+            // If search yielded no results, fetch all folders
+                if ( empty( $terms ) && ! empty( $search ) ) :
+                    unset( $args['name__like'] );
+                    $terms  = get_terms( $args );
+                    $search = ''; // Reset search to trigger tree view
+                endif;
 
             // If searching, return flat list of matches
             if ( ! empty( $search ) ) :
@@ -206,9 +217,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                         'data-id'    => $term->term_id,
                         'data-count' => (string) $count,
                         'ord'        => (int) get_term_meta( $term->term_id, 'wpmn_order', true ) ?: $index,
-                        'color'      => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
-                        'count'      => $count,
-                        'name'       => $term->name
+                        'color'      => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: ''
                     );
                 endforeach;
 
