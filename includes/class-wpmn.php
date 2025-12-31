@@ -95,7 +95,7 @@ if ( ! class_exists( 'WPMN' ) ) :
             include_once WPMN_PATH . 'blocks/medianest-gallery/init.php';
 
             // Elementor Support
-            require_once WPMN_PATH . 'includes/admin/settings/PageBuilders/class-wpmn-init.php';
+            require_once WPMN_PATH . 'includes/admin/settings/PageBuilders/Elementor/class-wpmn-init.php';
             \MediaNest\PageBuilders\Elementor\WPMN_Init::getInstance();
         }
         

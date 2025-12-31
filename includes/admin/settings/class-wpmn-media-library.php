@@ -1,9 +1,4 @@
 <?php
-/**
- * Media Library customisations for Medianest.
- *
- * @package Medianest
- */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -18,7 +13,11 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
      */
 	class WPMN_Media_Library {
 
+        /**
+         * Settings
+         */
         public $settings;
+
 		/**
 		 * Constructor for the class.
 		 */
@@ -28,7 +27,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
         /**
          * Initialize hooks and filters.
-        */
+         */
 		public function events_handler() {
             $this->settings = get_option( 'wpmn_settings', [] );
 			add_action( 'admin_footer', array( $this, 'wpmn_maybe_render_sidebar' ) );

@@ -8,6 +8,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Export' ) ) :
 
+	/**
+     * Main WPMN_Export Class
+     *
+     * @class WPMN_Export
+     * @version 1.0.0
+     */
 	class WPMN_Export {
 
         public static function export_folders_request() {

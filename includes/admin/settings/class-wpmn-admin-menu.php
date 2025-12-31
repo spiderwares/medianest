@@ -48,9 +48,8 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
         }
 
         /*
-        * Main WPMN_Admin_Menu Instance..
-        *
-        */
+         * Main WPMN_Admin_Menu Instance.
+         */
         public function register_settings() {
             register_setting(
                 'wpmn_settings',
@@ -60,7 +59,6 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 
         /**
          * Sanitize settings and add success message.
-         * 
          */
         public function sanitize_settings( $input ) {
             

@@ -37,8 +37,6 @@
     transform: scale(1.08);
 }
 
-/*--------------------------- Column Widths ---------------------------*/
-
 .wpmn_gallery_columns_1 .wpmn_gallery_item {
     width: 100%;
 }
@@ -65,12 +63,15 @@
 
 .wpmn-gallery-error,
 .wpmn-gallery-empty {
-    padding: 20px;
-    background-color: #f7f7f7;
-    border-radius: 5px;
+    padding: 30px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 8px;
     text-align: center;
-    color: #666;
+    color: #495057;
     font-style: italic;
+    width: 100%;
+    margin: 10px;
 }
 
 /*--------------------------- Responsive ---------------------------*/

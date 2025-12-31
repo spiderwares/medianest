@@ -7,6 +7,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Init' ) ) :
 
+    /**
+     * Main WPMN_Init Class
+     *
+     * @class WPMN_Init
+     * @version 1.0.0
+     */
     class WPMN_Init {
 
         /**
@@ -14,6 +20,11 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
          */
         private static $instance = null;
 
+        /**
+         * Get the single instance
+         *
+         * @return WPMN_Init
+         */
         public static function getInstance() {
             if (null == self::$instance) {
                 self::$instance = new self();
@@ -21,10 +32,16 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
             return self::$instance;
         }
 
+        /**
+         * Constructor for the class.
+         */
         public function __construct() {
             $this->events_handler();
         }
 
+         /**
+         * Initialize hooks and filters.
+         */
         public function events_handler() {
 
             if ($this->is_elementor_active()) :
@@ -41,7 +58,6 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
 
         /**
          * Check if Elementor is active
-         * 
          */
         private function is_elementor_active() {
             return did_action('elementor/loaded');
@@ -49,7 +65,6 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
         
         /**
          * Register MediaNest category in Elementor
-         * 
          */
         public function register_elementor_category($elements_manager) {
 
@@ -64,7 +79,6 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
 
         /**
          * Register Elementor widgets 
-         * 
          */
         public function register_widgets($widgets_manager) {
 
@@ -77,9 +91,9 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
         
         /**
          * Register Elementor widgets 
-         * 
          */
         public function register_widgets_legacy() {
+            
             if (class_exists('\Elementor\Widget_Base') && class_exists('\Elementor\Plugin')) :
                 require_once(WPMN_PATH . 'includes/admin/settings/PageBuilders/Elementor/widgets/class-wpmn-gallery-widget.php');
                 
@@ -89,7 +103,6 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
 
         /**
          * Load editor scripts
-         * 
          */
         public function editor_scripts() {
 
@@ -103,7 +116,6 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
 
         /**
          * Load frontend styles
-         * 
          */
         public function frontend_styles() {
 

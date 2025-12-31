@@ -6,8 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
 
     /**
-     * Class WPMN_Settings_Fields
-     * Handles the admin settings for Medianest.
+     * Main WPMN_Settings_Fields Class
+     *
+     * @class WPMN_Settings_Fields
+     * @version 1.0.0
      */
     class WPMN_Settings_Fields {
 

@@ -10,15 +10,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 if ( ! class_exists( 'WPMN_Install' ) ) :
 
     /**
-     * WPMN_Install Class
+     * Main WPMN_Install Class
      *
-     * Handles installation processes like creating database tables,
-     * setting up roles, and creating necessary pages on plugin activation.
+     * @class WPMN_Install
+     * @version 1.0.0
      */
     class WPMN_Install {
 
         /**
-         * Hook into WordPress actions and filters.
+         * Initialize hooks and filters.
          */
         public static function init() {
             add_filter( 'plugin_action_links_' . plugin_basename( WPMN_FILE ), array( __CLASS__, 'plugin_action_links' ) );
@@ -26,7 +26,7 @@ if ( ! class_exists( 'WPMN_Install' ) ) :
         }
 
         /**
-         * Install plugin.
+         * Initialize plugin.
          *
          * Creates tables, roles, and necessary pages on plugin activation.
          */

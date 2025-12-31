@@ -2,9 +2,10 @@
 /**
  * Upload Folder Selector Template
  *
- * Outputs the HTML for the upload folder selector. JS and CSS are loaded
- * separately from assets.
+ * @package Medianest
  */
+
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 

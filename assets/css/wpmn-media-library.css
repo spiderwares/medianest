@@ -521,11 +521,6 @@ button.wpmn_media_sidebar_action_more {
 	margin: 0;
 }
 
-/* .wpmn_folder_tree ul {
-	list-style: none;
-	padding-left: 0;
-} */
-
 .wpmn_folder_tree ul ul {
 	margin: 6px 0 0 30px;
 }
@@ -656,7 +651,7 @@ button.wpmn_add_folder {
 	gap: 8px;
 }
 
-/*--------------------------- Notyf Toast Customization ---------------------------*/
+/*--------------------------- Toast Customization ---------------------------*/
 
 .wpmn-notyf-icon {
 	width: 22px;

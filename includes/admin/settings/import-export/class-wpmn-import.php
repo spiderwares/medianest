@@ -8,6 +8,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Import' ) ) :
 	
+	/**
+     * Main WPMN_Import Class
+     *
+     * @class WPMN_Import
+     * @version 1.0.0
+     */
 	class WPMN_Import {
 
 		public static function import_folders_request() {

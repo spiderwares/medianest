@@ -8,6 +8,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Reorder' ) ) :
 
+	/**
+     * Main WPMN_Reorder Class
+     *
+     * @class WPMN_Reorder
+     * @version 1.0.0
+     */
 	class WPMN_Reorder {
 
 		public static function reorder_folder_request() {

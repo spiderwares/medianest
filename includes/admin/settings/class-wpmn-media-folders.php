@@ -18,7 +18,6 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 		/**
          * Constructor for the class.
-		 * 
          */
 		public function __construct() {
 			$this->events_handler();
@@ -26,7 +25,6 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 		/**
          * Initialize hooks and filters.
-		 * 
          */
 		public function events_handler() {
 			add_action( 'init', [ $this, 'register_taxonomy' ] );
@@ -36,7 +34,6 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 		/**
          * Register media folder taxonomy.
-		 * 
          */
 		public function register_taxonomy() {
 

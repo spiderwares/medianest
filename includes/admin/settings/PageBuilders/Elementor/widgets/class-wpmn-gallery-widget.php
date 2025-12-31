@@ -25,8 +25,6 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
 
         /**
          * Get widget title.
-         *
-         * @return string Widget title.
          */
         public function get_title() {
             return esc_html__('MediaNest Gallery', 'medianest');
@@ -34,8 +32,6 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
 
         /**
          * Get widget icon.
-         *
-         * @return string Widget icon.
          */
         public function get_icon() {
             return 'eicon-gallery-grid';
@@ -43,8 +39,6 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
 
         /**
          * Get widget categories.
-         *
-         * @return array Widget categories.
          */
         public function get_categories() {
             return ['medianest'];
@@ -56,19 +50,17 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
         protected function register_controls() {
             $folders = \WPMN_Media_Folders::folder_tree('folder_only', 'attachment');
             
-            // Initialize options array
-            $folder_options = [
+            $folder_options = array(
                 '0' => esc_html__('Select Folder', 'medianest'),
-            ];
+            );
             
-            // Build options including all children with ordered keys
             $this->build_folder_options($folders, $folder_options);
 
             $this->start_controls_section(
                 'content_section',
                 array(
                     'label' => esc_html__('Gallery Settings', 'medianest'),
-                    'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+                    'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
                 )
             );
 
@@ -76,7 +68,7 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
                 'folder_id',
                 array(
                     'label' => esc_html__('Select Folder', 'medianest'),
-                    'type' => \Elementor\Controls_Manager::SELECT,
+                    'type'  => \Elementor\Controls_Manager::SELECT,
                     'options' => $folder_options,
                     'default' => '0',
                     'description' => esc_html__('Choose a folder to display images from', 'medianest'),
@@ -87,7 +79,7 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
                 'columns',
                 array(
                     'label' => esc_html__('Columns', 'medianest'),
-                    'type' => \Elementor\Controls_Manager::SELECT,
+                    'type'  => \Elementor\Controls_Manager::SELECT,
                     'options' => array(
                         '1' => '1',
                         '2' => '2',
@@ -105,7 +97,7 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
                 'link_to',
                 array(  
                     'label' => esc_html__('Link To', 'medianest'),
-                    'type' => \Elementor\Controls_Manager::SELECT,
+                    'type'  => \Elementor\Controls_Manager::SELECT,
                     'options' => array(
                         'none' => esc_html__('None', 'medianest'),
                         'file' => esc_html__('Media File', 'medianest'),
@@ -119,10 +111,14 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
             $this->add_control(
                 'size',
                 array(
-                    'label' => esc_html__('Image Size', 'medianest'),
-                    'type' => \Elementor\Controls_Manager::SELECT,
-                    'options' => array_merge(['full' => esc_html__('Full', 'medianest')], $this->get_image_sizes()),
-                    'default' => 'medium',
+                    'label'       => esc_html__('Image Size', 'medianest'),
+                    'type'        => \Elementor\Controls_Manager::SELECT,
+                    'options'     => array_merge(
+                        array(
+                            'full' => esc_html__('Full', 'medianest')
+                        ), 
+                        $this->get_image_sizes()),
+                    'default'     => 'medium',
                     'description' => esc_html__('Select image size', 'medianest'),
                 )
             );
@@ -131,13 +127,13 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
                 'orderby',
                 array(
                     'label' => esc_html__('Order By', 'medianest'),
-                    'type' => \Elementor\Controls_Manager::SELECT,
+                    'type'  => \Elementor\Controls_Manager::SELECT,
                     'options' => array(
-                        'date' => esc_html__('Date', 'medianest'),
+                        'date'  => esc_html__('Date', 'medianest'),
                         'title' => esc_html__('Title', 'medianest'),
-                        'rand' => esc_html__('Random', 'medianest'),
+                        'rand'  => esc_html__('Random', 'medianest'),
                     ),
-                    'default' => 'date',
+                    'default'     => 'date',
                     'description' => esc_html__('Order images by', 'medianest'),
                 )
             );
@@ -145,13 +141,13 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
             $this->add_control(
                 'order',
                 array(
-                    'label' => esc_html__('Order', 'medianest'),
-                    'type' => \Elementor\Controls_Manager::SELECT,
-                    'options' => array(
+                    'label'  => esc_html__('Order', 'medianest'),
+                    'type'   => \Elementor\Controls_Manager::SELECT,
+                    'options'  => array(
+                        'ASC'  => esc_html__('Ascending', 'medianest'),
                         'DESC' => esc_html__('Descending', 'medianest'),
-                        'ASC' => esc_html__('Ascending', 'medianest'),
                     ),
-                    'default' => 'DESC',
+                    'default'     => 'DESC',
                     'description' => esc_html__('Sort order', 'medianest'),
                 )
             );
@@ -163,17 +159,17 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
                 'style_section',
                 array(
                     'label' => esc_html__('Gallery Style', 'medianest'),
-                    'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                    'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
                 )
             );
 
             $this->add_responsive_control(
                 'image_spacing',
                 array(
-                    'label' => esc_html__('Spacing', 'medianest'),
-                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'label'      => esc_html__('Spacing', 'medianest'),
+                    'type'       => \Elementor\Controls_Manager::SLIDER,
                     'size_units' => array('px', 'em'),
-                    'range' => array(
+                    'range'      => array(
                         'px' => array(
                             'min' => 0,
                             'max' => 50,
@@ -197,18 +193,18 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
             $this->add_group_control(
                 \Elementor\Group_Control_Border::get_type(),
                 array(
-                    'name' => 'image_border',
-                    'selector' => '{{WRAPPER}} .wpmn_gallery_item img',
+                    'name'      => 'image_border',
+                    'selector'  => '{{WRAPPER}} .wpmn_gallery_item img',
                 )
             );
 
             $this->add_control(
                 'image_border_radius',
                 array(
-                    'label' => esc_html__('Border Radius', 'medianest'),
-                    'type' => \Elementor\Controls_Manager::DIMENSIONS,
+                    'label'   => esc_html__('Border Radius', 'medianest'),
+                    'type'    => \Elementor\Controls_Manager::DIMENSIONS,
                     'size_units' => array('px', '%'),
-                    'selectors' => array(
+                    'selectors'  => array(
                         '{{WRAPPER}} .wpmn_gallery_item img' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                     ),
                 )
@@ -226,7 +222,6 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
 
         /**
          * Recursively builds folder options including all children
-         * 
          */
         private function build_folder_options($folders, &$options, $prefix = '') {
             if (!is_array($folders)) return;
@@ -242,10 +237,9 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
 
         /**
          * Get available image sizes
-         * 
          */
         private function get_image_sizes() {
-            $sizes = [];
+            $sizes   = [];
             $wp_sizes = get_intermediate_image_sizes();
             
             foreach ($wp_sizes as $size) :

@@ -8,6 +8,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Helper' ) ) :
 
+	/**
+     * Main WPMN_Helper Class
+     *
+     * @class WPMN_Helper
+     * @version 1.0.0
+     */
 	class WPMN_Helper {
 
 		public static function wpmn_get_folder_labels() {

@@ -1,12 +1,13 @@
 <?php
+
 /**
  * MediaNest Gallery Template for Elementor
  */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
-
 ?>
+
 <div class="wpmn_gallery wpmn_gallery_columns_<?php echo esc_attr( $settings['columns'] ); ?>">
     <?php
     while ( $query->have_posts() ) :
@@ -42,4 +43,3 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     endwhile;
     ?>
 </div>
-<?php

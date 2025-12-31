@@ -5,6 +5,7 @@
  * @package Medianest
  */
 
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 
