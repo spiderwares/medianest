@@ -75,7 +75,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			switch ($type) :
 				case 'get_folders':
 					$count_mode = isset($_POST['folder_count_mode']) ? sanitize_text_field( wp_unslash( $_POST['folder_count_mode'] ) ) : null;
-                    $post_type = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
+                    $post_type  = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
 					wp_send_json_success(apply_filters('wpmn_get_folders_payload', self::payload($count_mode, $post_type), $count_mode, $post_type));
 					break;
 
@@ -180,8 +180,11 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
                 );
             endif;
             
-            // This ensures folders only show to their creator regardless of settings
-            if ( is_user_logged_in() ) :
+            // Check if user_separate_folders setting is enabled
+            $settings  = get_option( 'wpmn_settings', [] );
+            $user_mode = isset($settings['user_separate_folders']) && $settings['user_separate_folders'] === 'yes';
+            
+            if ( $user_mode && is_user_logged_in() ) :
                 $current_user_id = get_current_user_id();
                 $post_type_query = $args['meta_query'];
                 
@@ -210,9 +213,9 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			// Sort terms by wpmn_order meta
 			usort($terms, function($a, $b) {
 				$prioritize = apply_filters('wpmn_prioritize_terms', [], $a, $b);
-				if (!empty($prioritize)) {
+				if (!empty($prioritize)) :
 					if (isset($prioritize['result'])) return $prioritize['result'];
-				}
+				endif;
 
 				$ord_a = (int) get_term_meta($a->term_id, 'wpmn_order', true);
 				$ord_b = (int) get_term_meta($b->term_id, 'wpmn_order', true);
@@ -245,12 +248,12 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 
 			foreach ($group[$parent] as $term) :
 				$children = self::build_tree($term->term_id, $group, $count_mode);
-				$total = $term->count_with_children;
+				$total 	  = $term->count_with_children;
 				foreach ($children as $c) :
 					$total += $c['total'];
 				endforeach;
 
-                $count = ($count_mode === 'all_files') ? $total : $term->count_with_children;
+                $count 	= ($count_mode === 'all_files') ? $total : $term->count_with_children;
 
 				$list[] = array(	
 					'id'       	=> $term->term_id,

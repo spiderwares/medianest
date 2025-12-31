@@ -248,7 +248,10 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                 );
             endif;
 
-            if ( is_user_logged_in() ) :
+            // Check if user_separate_folders setting is enabled
+            $user_mode = isset($this->settings['user_separate_folders']) && $this->settings['user_separate_folders'] === 'yes';
+
+            if ( $user_mode && is_user_logged_in() ) :
                 $current_user_id = get_current_user_id();
                 $author_query = array(
                     'relation' => 'OR',

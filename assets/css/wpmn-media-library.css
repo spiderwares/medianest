@@ -189,10 +189,6 @@ body.post-new-php .media-modal .wpmn_media_sidebar {
 	z-index: 2000;
 }
 
-/* .media-frame-menu .wpmn_media_sidebar {
-	z-index: 2000;
-} */
-
 .wpmn_media_sidebar.in-modal .wpmn_media_sidebar_search[type="search"] {
 	width: 100%;
 	border-radius: 7px;
@@ -525,10 +521,10 @@ button.wpmn_media_sidebar_action_more {
 	margin: 0;
 }
 
-.wpmn_folder_tree ul {
+/* .wpmn_folder_tree ul {
 	list-style: none;
 	padding-left: 0;
-}
+} */
 
 .wpmn_folder_tree ul ul {
 	margin: 6px 0 0 30px;
@@ -613,7 +609,7 @@ button.wpmn_add_folder {
 	flex-wrap: wrap;
 }
 
-.wpmn_folder_rename_inline__actions {
+.wpmn_folder_rename_inline_actions {
 	width: 100%;
 	display: flex;
 	gap: 3px;
@@ -757,10 +753,6 @@ button.wpmn_add_folder {
 
 .wpmn_settings_field {
 	margin-bottom: 20px;
-}
-
-.wpmn_settings_field:last-child {
-	margin-bottom: 0;
 }
 
 .wpmn_settings_field label {

@@ -422,7 +422,7 @@ jQuery(function ($) {
             const form = $(`<div class="wpmn_folder_rename_inline" data-folder-id="${folder.id}">
         		<img src="${wpmn_media_library.baseUrl || ''}assets/img/folder.svg" class="wpmn_folder_icon">
         		<input type="text" class="wpmn_rename_inline_input" value="${folder.name}">
-        		<div class="wpmn_folder_rename_inline__actions">
+        		<div class="wpmn_folder_rename_inline_actions">
         			<button type="button" class="button button-secondary wpmn_rename_inline_cancel">Cancel</button>
         			<button type="button" class="button button-primary wpmn_rename_inline_save">Save</button>
         		</div>

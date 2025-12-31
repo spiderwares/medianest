@@ -13,7 +13,7 @@ Organize your WordPress media library with unlimited folders, drag & drop interf
 
 == Description ==
 
-**Medianest** transforms your WordPress Media Library into a powerful, organized file manager. Just like on your computer, you can create folders and subfolders to organize your images, videos, and documents. Use the intuitive drag-and-drop interface to move files, arrange folders, and keep your media library clutter-free.
+Medianest transforms your WordPress Media Library into a powerful, organized file manager. Just like on your computer, you can create folders and subfolders to organize your images, videos, and documents. Use the intuitive drag-and-drop interface to move files, arrange folders, and keep your media library clutter-free.
 
 == External Services ==
 

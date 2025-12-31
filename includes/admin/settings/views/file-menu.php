@@ -13,10 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <h2 class="nav-tab-wrapper">
 
             <!-- Settings settings tab -->
-            <a href="<?php echo esc_url( admin_url( 'admin.php?page=cosmic-wpmn&tab=settings' ) ); ?>" 
-               class="<?php echo esc_attr( $active_tab === 'settings' ? 'nav-tab nav-tab-active' : 'nav-tab' ); ?>">
-                <img src="<?php echo esc_url( WPMN_URL . 'assets/img/setting.svg'); ?>" />
-                <?php echo esc_html__( 'Settings', 'medianest' ); ?>
+            <a href="<?php echo esc_url( admin_url( 'admin.php?page=cosmic-wpmn&tab=general' ) ); ?>" 
+               class="<?php echo esc_attr( $active_tab === 'general' ? 'nav-tab nav-tab-active' : 'nav-tab' ); ?>">
+                <img src="<?php echo esc_url( WPMN_URL . 'assets/img/general.svg'); ?>" />
+                <?php echo esc_html__( 'General', 'medianest' ); ?>
             </a>
 
             <?php do_action( 'wpmn_settings_tabs', $active_tab ); ?>

@@ -12,11 +12,11 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
     class WPMN_Settings_Fields {
 
         /**
-         * Generates the settings fields for medianest configuration.
+         * Generates the general fields for medianest configuration.
          *
-         * @return array The settings fields for the settings configuration.
+         * @return array The general fields for the general configuration.
          */
-        public static function settings_field() {
+        public static function general_field() {
 
             $fields = array(
 
@@ -75,7 +75,7 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                 ),
 
                 'theme_design'  => array(
-                    'title'          => esc_html__( 'Select Theme Design', 'medianest' ),
+                    'title'         => esc_html__( 'Select Theme Design', 'medianest' ),
                     'field_type'    => 'wpmnradio',
                     'options'       => array(
                         'default'       =>  'default.svg',

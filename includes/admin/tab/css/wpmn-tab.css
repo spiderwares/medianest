@@ -76,10 +76,6 @@
     padding: 0;
 }
 
-/*---------------------------End Tab Field ---------------------------*/
-
-/*--------------------------- End Switch Field ---------------------------*/
-
 .wpmn_settings_page .wpmn_settings_page_content table .heading th {
     border-left: 2px solid black;
     font-size: 16px;
@@ -163,10 +159,4 @@
 
 .wpmn_switch_field input[type="checkbox"]:checked+label .wpmn_icon_off {
     display: none;
-}
-
-/*--------------------------- End Switch Field ---------------------------*/
-
-.wpmn-form.form-table th {
-    width: 220px;
 }
