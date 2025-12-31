@@ -215,7 +215,7 @@ jQuery(function ($) {
                             }
                         } else {
                             const ids = this.getDraggedMediaIds(ui);
-                            if (!ids.length) return alert(wpmn_media_library.admin.getText('noSelection'));
+                            if (!ids.length) return wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('noSelection'), 'error');
                             this.assignMediaToFolder(targetFolderId, ids);
                         }
                     }
@@ -259,7 +259,7 @@ jQuery(function ($) {
                     this.refreshState(data);
                     wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('folderMoved', 'Folder reordered successfully'));
                 })
-                .catch(alert);
+                .catch(err => wpmn_media_library.admin.showToast(err, 'error'));
         }
 
         getDraggedMediaIds(ui) {
@@ -316,7 +316,7 @@ jQuery(function ($) {
                         });
                     });
                 })
-                .catch(alert)
+                .catch(err => admin.showToast(err, 'error'))
                 .finally(() => {
                     sidebar.find('.wpmn_tree_loader').prop('hidden', true);
                 });
@@ -443,7 +443,7 @@ jQuery(function ($) {
                     wpmn_media_library.admin.sidebar.find('.wpmn_folder_button').removeClass('is-cut');
                     wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('folderMoved'));
                 })
-                .catch(alert);
+                .catch(err => wpmn_media_library.admin.showToast(err, 'error'));
         }
 
         applyIconColor(icon, hex) {

@@ -29,7 +29,7 @@ jQuery(function ($) {
                 wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('allDataCleared'));
                 location.reload();
             }).catch(msg => {
-                wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('errorPrefix') + msg);
+                wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('errorPrefix') + msg, 'error');
                 __this.prop('disabled', false);
             });
         }
@@ -40,7 +40,7 @@ jQuery(function ($) {
                 input = $('#wpmn_import_file'),
                 file = input[0].files[0];
 
-            if (!file) return alert(wpmn_media_library.admin.getText('selectCsvFile'));
+            if (!file) return wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('selectCsvFile'), 'error');
             if (__this.prop('disabled')) return;
 
             __this.prop('disabled', true).text('Importing...');
@@ -53,7 +53,7 @@ jQuery(function ($) {
                 input.val('');
             }).catch(msg => {
                 __this.prop('disabled', false).text('Import Now');
-                wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('errorPrefix') + msg);
+                wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('errorPrefix') + msg, 'error');
             });
         }
 
@@ -105,7 +105,7 @@ jQuery(function ($) {
                 wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('apiKeyGenerated'));
             }).catch(msg => {
                 __this.prop('disabled', false).text('Generate');
-                wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('errorPrefix') + msg);
+                wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('errorPrefix') + msg, 'error');
             });
         }
 
@@ -141,7 +141,7 @@ jQuery(function ($) {
                         } catch (e) { }
                     }
                 })
-                .catch(msg => wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('errorPrefix') + msg))
+                .catch(msg => wpmn_media_library.admin.showToast(wpmn_media_library.admin.getText('errorPrefix') + msg, 'error'))
                 .finally(() => {
                     loader.removeClass('is-active').css('visibility', 'hidden');
                     __this.prop('disabled', false);

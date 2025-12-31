@@ -108,6 +108,22 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             $screen = get_current_screen();
 
             wp_enqueue_style( 
+                'toast-min', 
+                WPMN_URL . 'assets/lib/toast.min.css', 
+                array(), 
+                WPMN_VERSION 
+            );
+
+            wp_enqueue_script(
+				'toast-min',
+				WPMN_URL . 'assets/lib/toast.min.js',
+				array( 'jquery' ),
+				WPMN_VERSION,
+				true
+			);
+            
+
+            wp_enqueue_style( 
                 'wpmn-admin-style', 
                 WPMN_URL . 'assets/css/wpmn-admin-style.css', 
                 array(), 

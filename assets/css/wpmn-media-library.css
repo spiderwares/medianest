@@ -656,47 +656,28 @@ button.wpmn_add_folder {
 	gap: 8px;
 }
 
-/*--------------------------- Toast Message ---------------------------*/
+/*--------------------------- Notyf Toast Customization ---------------------------*/
 
-.wpmn_toast {
-	position: fixed;
-	top: 20px;
-	left: 50%;
-	z-index: 100001;
-	background: #ffffff;
-	border-radius: 6px;
-	box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 8px 14px;
-	min-width: 180px;
-	opacity: 0;
-	transform: translate(-50%, -8px);
-	transition: opacity 0.2s ease, transform 0.2s ease;
-	font-size: 13px;
-	color: #111827;
-}
-
-.wpmn_toast_visible {
-	opacity: 1;
-	transform: translate(-50%, 0);
-}
-
-.wpmn_toast_icon {
-	width: 18px;
-	height: 18px;
+.wpmn-notyf-icon {
+	width: 22px;
+	height: 22px;
+	background: #fff;
 	border-radius: 50%;
-	background: #22c55e;
-	display: flex;
+	display: flex !important;
 	align-items: center;
 	justify-content: center;
-	color: #ffffff;
+	font-style: normal;
 	font-size: 12px;
+	font-weight: bold;
+	margin-right: 12px;
 }
 
-.wpmn_toast_message {
-	margin: 0;
+.wpmn-notyf-icon--success {
+	color: #32bc54;
+}
+
+.wpmn-notyf-icon--error {
+	color: #f24444;
 }
 
 /*--------------------------- Settings Dialog ---------------------------*/

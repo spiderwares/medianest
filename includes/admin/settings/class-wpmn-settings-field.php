@@ -118,7 +118,7 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                 'wpmn_clear_all_data' => array(
                     'title'       => esc_html__( 'Clear Entire Data', 'medianest' ),
                     'field_type'  => 'wpmnbutton',
-                    'desc'        => esc_html__( 'This action will remove all MediaNest data and settings and restore the WordPress media library to its default state.', 'medianest' ),
+                    'desc'        => esc_html__( 'This action will remove all MediaNest data and settings.', 'medianest' ),
                     'button_text' => esc_html__( 'Clear', 'medianest' ),
                     'action'      => 'wpmn_clear_all_data',
                     'btn_class'   => 'wpmn_clear_data_btn', 

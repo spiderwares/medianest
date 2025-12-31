@@ -89,10 +89,14 @@ if ( ! class_exists( 'WPMN' ) ) :
             endif;
             
             require_once WPMN_PATH . 'includes/wpmn-core-functions.php';
-            require_once WPMN_PATH . 'includes/admin/settings/helper/class-wpmn-helper.php';
+            require_once WPMN_PATH . 'includes/admin/settings/Helper/class-wpmn-helper.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-media-folders.php';
             require_once WPMN_PATH . 'includes/admin/settings/RestAPI/class-wpmn-rest-api.php';
             include_once WPMN_PATH . 'blocks/medianest-gallery/init.php';
+
+            // Elementor Support
+            require_once WPMN_PATH . 'includes/admin/settings/PageBuilders/class-wpmn-init.php';
+            \MediaNest\PageBuilders\Elementor\WPMN_Init::getInstance();
         }
         
         /**
@@ -103,9 +107,9 @@ if ( ! class_exists( 'WPMN' ) ) :
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-admin-menu.php';
             require_once WPMN_PATH . 'includes/admin/tab/class-wpmn.tab.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-settings-field.php';
-            require_once WPMN_PATH . 'includes/admin/settings/import-export/class-wpmn-import.php';
-            require_once WPMN_PATH . 'includes/admin/settings/import-export/class-wpmn-export.php';
-            require_once WPMN_PATH . 'includes/admin/settings/reorder/class-wpmn-reorder.php';
+            require_once WPMN_PATH . 'includes/admin/settings/Import-Export/class-wpmn-import.php';
+            require_once WPMN_PATH . 'includes/admin/settings/Import-Export/class-wpmn-export.php';
+            require_once WPMN_PATH . 'includes/admin/settings/Reorder/class-wpmn-reorder.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-media-library.php';
             require_once WPMN_PATH . 'includes/admin/settings/class-wpmn-upload-media.php';
         }

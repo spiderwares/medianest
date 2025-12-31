@@ -98,6 +98,30 @@ jQuery(function ($) {
                 this.sidebar.css('width', this.sidebarWidth + 'px');
                 this.updateModalLayout();
             }
+
+            this.notyf = typeof Notyf !== 'undefined' ? new Notyf({
+                duration: 3000,
+                position: { x: 'center', y: 'top' },
+                types: [
+                    {
+                        type: 'success',
+                        background: '#32bc54',
+                        icon: {
+                            className: 'wpmn-notyf-icon wpmn-notyf-icon--success',
+                            text: '✓'
+                        }
+                    },
+                    {
+                        type: 'error',
+                        background: '#f24444',
+                        icon: {
+                            className: 'wpmn-notyf-icon wpmn-notyf-icon--error',
+                            text: '✕'
+                        }
+                    }
+                ]
+            }) : null;
+
             this.toastTimeout = null;
             this.isBulkSelect = false;
             this.clipboard = { action: null, folderId: null };
@@ -405,11 +429,11 @@ jQuery(function ($) {
                 wpmn_media_folder.folder.refreshState(data);
                 this.toggleNewFolderForm(false);
                 this.showToast(this.getText('created', 'Folder created.'));
-            }).catch(alert);
+            }).catch(err => this.showToast(err, 'error'));
         }
 
         handleRenameFolder() {
-            if (!this.state.activeFolder.startsWith('term-')) return alert(this.getText('selectFolderFirst', 'Select a folder first.'));
+            if (!this.state.activeFolder.startsWith('term-')) return this.showToast(this.getText('selectFolderFirst', 'Select a folder first.'), 'error');
             const folder = wpmn_media_folder.folder.findFolderById(this.state.activeFolder.replace('term-', ''), this.state.folders);
             if (folder) this.startInlineRename(folder);
         }
@@ -441,7 +465,7 @@ jQuery(function ($) {
                 wpmn_media_folder.folder.refreshState(data);
                 this.showToast(this.getText('renamed', 'Folder renamed.'));
                 this.cleanupInlineRename();
-            }).catch(alert);
+            }).catch(err => this.showToast(err, 'error'));
         }
 
         cancelInlineRename(e) {
@@ -458,7 +482,7 @@ jQuery(function ($) {
         }
 
         handleDeleteFolder() {
-            if (!this.state.activeFolder.startsWith('term-')) return alert(this.getText('selectFolderFirst', 'Select a folder first.'));
+            if (!this.state.activeFolder.startsWith('term-')) return this.showToast(this.getText('selectFolderFirst', 'Select a folder first.'), 'error');
             const folder = wpmn_media_folder.folder.findFolderById(this.state.activeFolder.replace('term-', ''), this.state.folders);
             if (folder) this.openDeleteDialog(folder);
         }
@@ -486,12 +510,12 @@ jQuery(function ($) {
                     wpmn_media_folder.folder.refreshState(data);
                     this.disableBulkSelect();
                     this.showToast(this.getText('deleted', 'Folders deleted.'));
-                }).catch(alert).finally(() => this.closeDeleteDialog());
+                }).catch(err => this.showToast(err, 'error')).finally(() => this.closeDeleteDialog());
             } else if (this.pendingDeleteId) {
                 this.apiCall('delete_folder', { folder_id: this.pendingDeleteId }).then(data => {
                     wpmn_media_folder.folder.refreshState(data);
                     this.showToast(this.getText('deleted', 'Folder deleted.'));
-                }).catch(alert).finally(() => this.closeDeleteDialog());
+                }).catch(err => this.showToast(err, 'error')).finally(() => this.closeDeleteDialog());
             }
         }
 
@@ -657,16 +681,9 @@ jQuery(function ($) {
             }, 100);
         }
 
-        showToast(message) {
-            if (!message) return;
-            if (this.toastTimeout) clearTimeout(this.toastTimeout);
-            let toast = $('.wpmn_toast');
-            if (!toast.length) {
-                toast = $('<div class="wpmn_toast" role="status"><span class="wpmn_toast_icon">&#10003;</span><p class="wpmn_toast_message"></p></div>').appendTo('body');
-            }
-            toast.find('.wpmn_toast_message').text(message);
-            toast.addClass('wpmn_toast_visible');
-            this.toastTimeout = setTimeout(() => toast.removeClass('wpmn_toast_visible'), 2500);
+        showToast(message, type = 'success') {
+            if (!message || !this.notyf) return;
+            this.notyf.open({ type: type, message: message });
         }
 
         toggleFolderId(e) {

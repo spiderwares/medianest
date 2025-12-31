@@ -51,6 +51,7 @@ if ( ! class_exists( 'WPMN_Gallery_Block' ) ) :
                 WPMN_VERSION, 
                 true 
             );
+            
             wp_register_script( 
                 'medianest-gallery-lightbox', 
                 WPMN_URL . 'assets/lib/wpmn-photoswipe.js', 

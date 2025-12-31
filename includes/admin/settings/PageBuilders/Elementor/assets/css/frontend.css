@@ -1,0 +1,100 @@
+/*--------------------------- WPMN Elementor Frontend Styles ---------------------------*/
+
+.wpmn_gallery {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -10px;
+    align-items: stretch;
+}
+
+.wpmn_gallery_item {
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.wpmn_gallery_item a {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3/2;
+    overflow: hidden;
+    position: relative;
+    border-radius: 6px;
+    background-color: #f1f1f1;
+}
+
+.wpmn_gallery_item img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.wpmn_gallery_item a:hover img {
+    transform: scale(1.08);
+}
+
+/*--------------------------- Column Widths ---------------------------*/
+
+.wpmn_gallery_columns_1 .wpmn_gallery_item {
+    width: 100%;
+}
+
+.wpmn_gallery_columns_2 .wpmn_gallery_item {
+    width: 50%;
+}
+
+.wpmn_gallery_columns_3 .wpmn_gallery_item {
+    width: 33.3333%;
+}
+
+.wpmn_gallery_columns_4 .wpmn_gallery_item {
+    width: 25%;
+}
+
+.wpmn_gallery_columns_5 .wpmn_gallery_item {
+    width: 20%;
+}
+
+.wpmn_gallery_columns_6 .wpmn_gallery_item {
+    width: 16.6666%;
+}
+
+.wpmn-gallery-error,
+.wpmn-gallery-empty {
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-radius: 5px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/*--------------------------- Responsive ---------------------------*/
+@media (max-width: 1024px) {
+
+    .wpmn_gallery_columns_4 .wpmn_gallery_item,
+    .wpmn_gallery_columns_5 .wpmn_gallery_item,
+    .wpmn_gallery_columns_6 .wpmn_gallery_item {
+        width: 33.3333%;
+    }
+}
+
+@media (max-width: 767px) {
+
+    .wpmn_gallery_columns_3 .wpmn_gallery_item,
+    .wpmn_gallery_columns_4 .wpmn_gallery_item,
+    .wpmn_gallery_columns_5 .wpmn_gallery_item,
+    .wpmn_gallery_columns_6 .wpmn_gallery_item {
+        width: 50%;
+    }
+}
+
+@media (max-width: 480px) {
+    .wpmn_gallery_item {
+        width: 100% !important;
+    }
+}
