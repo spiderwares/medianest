@@ -101,7 +101,7 @@ if ( ! class_exists( 'WPMN_Settings_Fields' ) ) :
                     'title'      => 'REST API key',
                     'field_type' => 'wpmnbutton',
                     'desc'       => esc_html__( 'Please see MediaNest API for developers', 'medianest' ) .
-                                    ' <a href="https://plugin.cosmicinfosoftware.com/medianest/" target="_blank">' . 
+                                    ' <a href="https://documentation.cosmicinfosoftware.com/medianest/documents/plugin-settings/api-settings/" target="_blank">' . 
                                     esc_html__( 'here.', 'medianest' ) . '</a>',
                     'name'       => 'wpmn_settings[rest_api_key]',
                     'button_text' => esc_html__( 'Generate', 'medianest' ),

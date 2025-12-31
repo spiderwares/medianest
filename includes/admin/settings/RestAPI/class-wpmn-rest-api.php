@@ -41,7 +41,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
          */
         public function wpmn_register_routes() {
 
-            // GET http://yoursite/wp-json/medianest/v1/folders
+            // GET https://your-site.com/wp-json/medianest/v1/folders
             register_rest_route( 
                 WPMN_REST_API_URL, '/folders', 
                 array(
@@ -50,7 +50,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
-            // GET http://yoursite/wp-json/medianest/v1/folder?folder_id
+            // GET https://your-site.com/wp-json/medianest/v1/folder?folder_id
             register_rest_route( 
                 WPMN_REST_API_URL, '/folder', 
                 array(
@@ -59,7 +59,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             )); 
 
-            // POST http://yoursite/wp-json/medianest/v1/folder/set-attachment
+            // POST https://your-site.com/wp-json/medianest/v1/folder/set-attachment
             register_rest_route( 
                 WPMN_REST_API_URL, '/folder/set-attachment', 
                 array(
@@ -68,7 +68,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
-            // GET http://yoursite/wp-json/medianest/v1/attachment-id
+            // GET https://your-site.com/wp-json/medianest/v1/attachment-id
             register_rest_route( 
                 WPMN_REST_API_URL, '/attachment-id', 
                 array(
@@ -77,7 +77,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
-            // GET http://yoursite/wp-json/medianest/v1/attachment-count
+            // GET https://your-site.com/wp-json/medianest/v1/attachment-count
             register_rest_route( 
                 WPMN_REST_API_URL, '/attachment-count', 
                 array(
@@ -86,7 +86,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
-            // POST http://yoursite/wp-json/medianest/v1/folders
+            // POST https://your-site.com/wp-json/medianest/v1/folders
             register_rest_route( 
                 WPMN_REST_API_URL, '/folders', 
                 array(

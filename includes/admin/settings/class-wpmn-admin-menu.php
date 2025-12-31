@@ -219,7 +219,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
         public function admin_menu_content() {
 
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Tab navigation parameter, not form processing.
-            $active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'settings';
+            $active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
             require_once WPMN_PATH . 'includes/admin/settings/views/file-menu.php';
         }
 

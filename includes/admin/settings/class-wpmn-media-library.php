@@ -40,6 +40,9 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             add_action( 'manage_media_custom_column', array( $this, 'display_file_size_column' ), 10, 2 );
             add_action( 'manage_media_custom_column', array( $this, 'display_folder_column' ), 10, 2 );
             add_filter( 'manage_upload_sortable_columns', array( $this, 'register_file_size_sortable' ) );
+            add_action( 'add_attachment', array( $this, 'save_attachment_size' ) );
+            add_action( 'edit_attachment', array( $this, 'save_attachment_size' ) );
+
             
             // Add columns for other supported post types
             $post_types = isset( $this->settings['post_types'] ) ? (array) $this->settings['post_types'] : [];
@@ -134,6 +137,13 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                     );
                 endif;
             endif;
+
+            // Handle sorting by file size
+            if ( isset( $_REQUEST['query']['orderby'] ) && 'wpmn_filesize' === $_REQUEST['query']['orderby'] ) :
+                $query['meta_key'] = 'wpmn_filesize';
+                $query['orderby']  = 'meta_value_num';
+            endif;
+
             return $query;
         }
 
@@ -359,12 +369,28 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
         public function display_file_size_column( $column_name, $id ) {
             if ( 'wpmn_filesize' !== $column_name ) return;
 
-            $file_path = get_attached_file( $id );
-            if ( $file_path && file_exists( $file_path ) ) :
-                $bytes = filesize( $file_path );
+            $bytes = get_post_meta( $id, 'wpmn_filesize', true );
+
+            if ( ! $bytes ) :
+                $file_path = get_attached_file( $id );
+                if ( $file_path && file_exists( $file_path ) ) :
+                    $bytes = filesize( $file_path );
+                    update_post_meta( $id, 'wpmn_filesize', $bytes );
+                endif;
+            endif;
+            
+            if ( $bytes ) :
                 echo esc_html( size_format( $bytes, 2 ) );
             else :
                 echo '—';
+            endif;
+        }
+
+        public function save_attachment_size( $post_id ) {
+            $file_path = get_attached_file( $post_id );
+            if ( $file_path && file_exists( $file_path ) ) :
+                $bytes = filesize( $file_path );
+                update_post_meta( $post_id, 'wpmn_filesize', $bytes );
             endif;
         }
 
