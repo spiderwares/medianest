@@ -267,79 +267,91 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 		}
 
 		public static function folder_count($id, $post_type = 'attachment') {
-			global $wpdb;
-
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			return (int) $wpdb->get_var($wpdb->prepare(
-				"SELECT COUNT(DISTINCT tr.object_id)
-				FROM {$wpdb->term_relationships} tr
-				INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-				INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
-				WHERE tt.taxonomy = %s
-				AND tt.term_id = %d
-				AND p.post_type = %s
-				AND p.post_status != %s",
-				'wpmn_media_folder', $id, $post_type, 'trash'
-			) );
+			$args = array(
+				'post_type'      => $post_type,
+				'post_status'    => ( $post_type === 'attachment' ) ? 'inherit' : 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'no_found_rows'  => false,
+				'tax_query'      => array(
+					array(
+						'taxonomy' => 'wpmn_media_folder',
+						'field'    => 'term_id',
+						'terms'    => $id,
+					),
+				),
+			);
+			$query = new WP_Query( $args );
+			return $query->found_posts;
 		}
 
 		public static function special_counts($post_type = 'attachment') {
-			global $wpdb;
+			$counts = wp_count_posts( $post_type );
+			$total  = ( $post_type === 'attachment' ) ? (int) $counts->inherit : (int) $counts->publish;
 
-            // Exclude these statuses to match WordPress main query counts
-            $exclude_statuses     = array( 'trash', 'auto-draft', 'revision' );
-            $exclude_placeholders = implode( ',', array_fill( 0, count( $exclude_statuses ), '%s' ) );
+			$settings  = get_option( 'wpmn_settings', [] );
+			$user_mode = isset($settings['user_separate_folders']) && $settings['user_separate_folders'] === 'yes';
 
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-			$total = (int) $wpdb->get_var($wpdb->prepare(
-				"SELECT COUNT(ID) FROM {$wpdb->posts}
-				WHERE post_type=%s AND post_status NOT IN ($exclude_placeholders)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                array_merge( array( $post_type ), $exclude_statuses )
-			));
+			if ( $user_mode && is_user_logged_in() ) :
+				$current_user_id = get_current_user_id();
+				
+				// Get all folder IDs belonging to this user
+				$user_folders = get_terms( array(
+					'taxonomy'   => 'wpmn_media_folder',
+					'fields'     => 'ids',
+					'hide_empty' => false,
+					'meta_query' => array(
+						array(
+							'key'   => 'wpmn_folder_author',
+							'value' => $current_user_id,
+						),
+					),
+				) );
 
-            $settings  = get_option( 'wpmn_settings', [] );
-            $user_mode = isset($settings['user_separate_folders']) && $settings['user_separate_folders'] === 'yes';
+				$args = array(
+					'post_type'      => $post_type,
+					'post_status'    => ( $post_type === 'attachment' ) ? 'inherit' : 'publish',
+					'posts_per_page' => 1,
+					'fields'         => 'ids',
+					'no_found_rows'  => false,
+				);
 
-            if ( $user_mode && is_user_logged_in() ) :
-                $current_user_id = get_current_user_id();
-                
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-                $uncat = (int) $wpdb->get_var($wpdb->prepare(
-                    "SELECT COUNT(ID) FROM {$wpdb->posts} p
-                    WHERE p.post_type=%s
-                    AND p.post_status NOT IN ($exclude_placeholders) " . // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                    "AND NOT EXISTS (
-                        SELECT 1 FROM {$wpdb->term_relationships} tr
-                        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-                        INNER JOIN {$wpdb->termmeta} tm ON tt.term_id = tm.term_id
-                        WHERE tr.object_id = p.ID
-                        AND tt.taxonomy = %s
-                        AND tm.meta_key = 'wpmn_folder_author'
-                        AND tm.meta_value = %d
-                    )",
-                    array_merge( array( $post_type ), $exclude_statuses, array( 'wpmn_media_folder', $current_user_id ) )
-                ) );
+				if ( ! empty( $user_folders ) && ! is_wp_error( $user_folders ) ) :
+					$args['tax_query'] = array(
+						array(
+							'taxonomy' => 'wpmn_media_folder',
+							'field'    => 'term_id',
+							'terms'    => $user_folders,
+							'operator' => 'NOT IN',
+						),
+					);
+				endif;
 
-            else :
-                // Default Logic: Count files not in ANY folder
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-                $uncat = (int) $wpdb->get_var($wpdb->prepare(
-                    "SELECT COUNT(ID) FROM {$wpdb->posts} p
-                    WHERE p.post_type=%s
-                    AND p.post_status NOT IN ($exclude_placeholders) " . // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                    "AND NOT EXISTS (
-                        SELECT 1 FROM {$wpdb->term_relationships} tr
-                        INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-                        WHERE tr.object_id = p.ID
-                        AND tt.taxonomy = %s
-                    )",
-                    array_merge( array( $post_type ), $exclude_statuses, array( 'wpmn_media_folder' ) )
-                ) );
+				$query = new WP_Query( $args );
+				$uncat = $query->found_posts;
+
+			else :
+				// Default Logic: Count files not in ANY folder
+				$args = array(
+					'post_type'      => $post_type,
+					'post_status'    => ( $post_type === 'attachment' ) ? 'inherit' : 'publish',
+					'posts_per_page' => 1,
+					'fields'         => 'ids',
+					'no_found_rows'  => false,
+					'tax_query'      => array(
+						array(
+							'taxonomy' => 'wpmn_media_folder',
+							'operator' => 'NOT EXISTS',
+						),
+					),
+				);
+				$query = new WP_Query( $args );
+				$uncat = $query->found_posts;
 			endif;
 
 			return array(
-				'all'           => $total,
-				'uncategorized' => $uncat,
+				'all'           => (int) $total,
+				'uncategorized' => (int) $uncat,
 			);
 		}
 	}

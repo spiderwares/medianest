@@ -316,8 +316,6 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
         }
 
         public function set_attachment($request) {
-            global $wpdb;
-
             $folder_id = absint($request->get_param('folder_id'));
             $ids       = (array) $request->get_param('ids');
 
@@ -335,14 +333,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             foreach ($ids as $att_id) :
                 if ( get_post_type($att_id) !== 'attachment' ) continue;
 
-                // DELETE old relation
-                $wpdb->query($wpdb->prepare("
-                    DELETE tr FROM {$wpdb->term_relationships} tr
-                    JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-                    WHERE tr.object_id = %d AND tt.taxonomy = %s", 
-                $att_id, 'wpmn_media_folder'));
-
-                // Assign new folder
+                // Assign new folder (replaces existing ones of the same taxonomy)
                 wp_set_object_terms($att_id, $folder_id, 'wpmn_media_folder', false);
                 clean_object_term_cache($att_id, 'attachment');
                 

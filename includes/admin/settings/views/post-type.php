@@ -22,16 +22,41 @@ $wpmn_fields = WPMN_Settings_Fields::post_type_field();
  * 
  */
 $wpmn_options = get_option( 'wpmn_settings', true );
+?>
 
-/**
- * Load the post type form template for the Post Type tab.
- */
-wpmn_get_template(
-	'fields/settings-forms.php',
-	array(
-		'title'      => 'Post Type',         // Section title.
-		'metaKey'    => 'wpmn_settings',   // Option meta key.
-		'fields'     => $wpmn_fields,           // Field definitions.
-		'options' 	 => $wpmn_options,          // Saved option values.
-	),
-);
+<form method="post" action="options.php" enctype="multipart/form-data">
+    <table class="wpmn-form form-table">
+        <tr class="heading">
+            <th colspan="2">
+                <?php echo esc_html__( 'Post Type', 'medianest' ); ?>
+            </th>
+        </tr>
+        <?php foreach ( $wpmn_fields as $wpmn_key => $wpmn_field ) : 
+            $wpmn_val  = isset( $wpmn_options[ $wpmn_key ] ) ? $wpmn_options[ $wpmn_key ] : ( isset( $wpmn_field['default'] ) ? $wpmn_field['default'] : '' );
+            $wpmn_type = isset( $wpmn_field['field_type'] ) ? $wpmn_field['field_type'] : '';
+        ?>
+        <tr class="<?php echo isset( $wpmn_field['extra_class'] ) ? esc_attr( $wpmn_field['extra_class'] ) : ''; ?>">
+            <th scope="row" class="wpmn-label <?php echo esc_attr( $wpmn_type ); ?>">
+                <?php echo esc_html( $wpmn_field['title'] ); ?>
+            </th>
+            <td>
+                <?php 
+                if ( $wpmn_type === 'wpmncheckbox' ) :
+                    echo wp_kses_post( apply_filters( 'wpmn_checkbox_field', '', $wpmn_field, $wpmn_val, $wpmn_key ) );
+                endif;
+                ?>
+                <?php if ( isset( $wpmn_field['desc'] ) ) : ?>
+                    <p class="description"><?php echo wp_kses_post( $wpmn_field['desc'] ); ?></p>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+        <tr class="submit">
+            <th colspan="2">
+                <?php settings_fields( 'wpmn_settings' );
+                submit_button(); ?>
+            </th>
+        </tr>
+    </table>
+</form>
+<?php

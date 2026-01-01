@@ -126,6 +126,7 @@ jQuery(function ($) {
                     if (folderId) {
                         uploader.settings.multipart_params = uploader.settings.multipart_params || {};
                         uploader.settings.multipart_params.wpmn_upload_folder = folderId;
+                        uploader.settings.multipart_params.nonce = wpmn_media_library.nonce;
                     }
                 };
 
@@ -169,6 +170,7 @@ jQuery(function ($) {
             if (window.uploader) {
                 uploader.settings.multipart_params = uploader.settings.multipart_params || {};
                 uploader.settings.multipart_params.wpmn_upload_folder = folderId;
+                uploader.settings.multipart_params.nonce = wpmn_media_library.nonce;
             }
         }
 
@@ -181,6 +183,12 @@ jQuery(function ($) {
                 input = $('<input>', {
                     type: 'hidden',
                     name: 'wpmn_upload_folder'
+                }).prependTo(form);
+
+                $('<input>', {
+                    type: 'hidden',
+                    name: 'nonce',
+                    value: wpmn_media_library.nonce
                 }).prependTo(form);
             }
 

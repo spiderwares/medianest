@@ -284,7 +284,7 @@ button.wpmn_delete_trigger.disabled .wpmn_delete_icon,
     border-radius: 10px;
     font-size: 13px;
     font-weight: 500;
-    z-index: 200000;
+    z-index: 10001;
     pointer-events: none;
     white-space: nowrap;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);

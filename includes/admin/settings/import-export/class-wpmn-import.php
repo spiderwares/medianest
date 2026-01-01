@@ -26,36 +26,49 @@ if ( ! class_exists( 'WPMN_Import' ) ) :
 				wp_send_json_error(['message' => 'No file uploaded.']);
 			endif;
 
-			$file   = sanitize_text_field( $_FILES['csv_file']['tmp_name'] );
+			$file = sanitize_text_field( $_FILES['csv_file']['tmp_name'] );
 
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-			$handle = fopen($file, "r");
-			if (!$handle) :
-				wp_send_json_error(['message' => 'Cannot read file.']);
+			// Use WP_Filesystem instead of direct fopen
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			if ( ! function_exists( 'WP_Filesystem' ) ) :
+				require_once ABSPATH . 'wp-admin/includes/file.php';
 			endif;
-
-			// Read header (remove BOM)
 			
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fgetcsv
-			$header = fgetcsv($handle);
-			if ($header && isset($header[0])) :
-				$header[0] = preg_replace("/^\xEF\xBB\xBF/", '', $header[0]);
+			if ( ! WP_Filesystem() ) :
+				wp_send_json_error( [ 'message' => 'Failed to initialize filesystem.' ] );
 			endif;
-			if (!$header || !in_array('name', $header)) :
-				wp_send_json_error(['message' => 'Invalid CSV format.']);
+			
+			global $wp_filesystem;
+			$csv_content = $wp_filesystem->get_contents( $file );
+			
+			if ( ! $csv_content ) :
+				wp_send_json_error( [ 'message' => 'Cannot read file.' ] );
 			endif;
 
-			$rows = [];
+			// Split content into lines and parse
+			$lines  = explode( "\n", str_replace( "\r", "", $csv_content ) );
+			$header = array();
+			$rows   = array();
 
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fgetcsv
-			while (($row = fgetcsv($handle)) !== false) :
-				if (count($row) == count($header)) :
-					$rows[] = array_combine($header, $row);
+			foreach ( $lines as $i => $line ) :
+				if ( empty( trim( $line ) ) ) continue;
+				$data = str_getcsv( $line );
+
+				if ( 0 === $i ) :
+					$header = $data;
+					if ( $header && isset( $header[0] ) ) :
+						$header[0] = preg_replace( "/^\xEF\xBB\xBF/", '', $header[0] );
+					endif;
+					
+					if ( ! $header || ! in_array( 'name', $header ) ) :
+						wp_send_json_error( [ 'message' => 'Invalid CSV format.' ] );
+					endif;
+				else :
+					if ( count( $data ) == count( $header ) ) :
+						$rows[] = array_combine( $header, $data );
+					endif;
 				endif;
-			endwhile;
-
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
-			fclose($handle);
+			endforeach;
 			$id_map = [];
 
 			// STEP 1 — Create all folders

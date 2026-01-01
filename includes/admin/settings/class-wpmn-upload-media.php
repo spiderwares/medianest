@@ -36,9 +36,13 @@ if ( ! class_exists( 'WPMN_Upload_Media' ) ) :
                 return;
             endif;
 
+			$wpmn_labels = WPMN_Helper::get_folder_labels();
+
 			wpmn_get_template(
 				'media/upload-folder.php',
-				array(),
+				array(
+					'wpmn_labels' => $wpmn_labels,
+				),
 			);
 		}		
 		
@@ -61,8 +65,16 @@ if ( ! class_exists( 'WPMN_Upload_Media' ) ) :
 		}
 
         public function wpmn_auto_upload( $post_id ) {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$folder = sanitize_text_field( wp_unslash( $_REQUEST['wpmn_upload_folder'] ?? '' ) );
+			// Verify nonce for security
+			if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+				return;
+			endif;
+
+			$folder = sanitize_text_field(
+				wp_unslash(
+					isset( $_REQUEST['wpmn_upload_folder'] ) ? $_REQUEST['wpmn_upload_folder'] : ''
+				)
+			);
 
 			if (!$folder || $folder === 'all' || $folder === 'uncategorized') return;
 

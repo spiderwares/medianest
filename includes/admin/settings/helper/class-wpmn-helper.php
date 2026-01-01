@@ -16,7 +16,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
      */
 	class WPMN_Helper {
 
-		public static function wpmn_get_folder_labels() {
+		public static function get_folder_labels() {
 			return array(
 				'choose_folder'  => esc_html__( 'Choose folder:', 'medianest' ),
 				'all'            => esc_html__( 'All Files', 'medianest' ),
@@ -89,7 +89,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                 update_term_meta( $result['term_id'], 'wpmn_folder_author', get_current_user_id() );
             endif;
 
-			self::send_response($result);
+			self::send_response($result, $post_type);
 		}
 
 		public static function rename_folder_request() {
@@ -100,6 +100,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 
 			$id   = isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
 			$name = isset($_POST['name']) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+			$post_type = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
 
 			if (!$id || !$name) :
 				wp_send_json_error(['message' => 'Invalid folder data.']);
@@ -109,7 +110,7 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 				'name' => $name,
 				'slug' => sanitize_title($name)
 			) );
-			self::send_response($result);
+			self::send_response($result, $post_type);
 		}
 
 		public static function delete_folder_request() {
@@ -166,7 +167,6 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                 wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
             endif;
 
-			global $wpdb;
 			
 			$folder_id = isset($_POST['folder_id']) ? absint($_POST['folder_id']) : 0;
 			$items     = isset($_POST['attachment_ids']) ? array_map('absint', (array) $_POST['attachment_ids']) : [];
@@ -176,44 +176,21 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 				wp_send_json_error(['message' => 'No media selected.']);
 			endif;
 
+			$wpmn_terms = ( $folder_id > 0 ) ? array( $folder_id ) : array();
+
 			foreach ($items as $attachment_id) :
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-				$wpdb->query( $wpdb->prepare(
-					"DELETE tr FROM {$wpdb->term_relationships} tr
-					INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-					WHERE tr.object_id = %d AND tt.taxonomy = %s",
-					$attachment_id, 'wpmn_media_folder'
-				));
-				
-				if ( $folder_id > 0 ) :
-					// Verify term exists and get taxonomy_id
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-					$tt_id = $wpdb->get_var( $wpdb->prepare(
-						"SELECT tt.term_taxonomy_id FROM {$wpdb->term_taxonomy} tt
-						WHERE tt.term_id = %d AND tt.taxonomy = %s",
-						$folder_id, 'wpmn_media_folder'
-					));
-					
-					if ( $tt_id ) :
-						// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-						$wpdb->insert( $wpdb->term_relationships, array(
-							'object_id' => $attachment_id,
-							'term_taxonomy_id' => $tt_id,
-							'term_order' => 0
-						), array( '%d', '%d', '%d' ));
-					endif;
-				endif;
-				
+				wp_set_object_terms( $attachment_id, $wpmn_terms, 'wpmn_media_folder', false );
 				clean_object_term_cache( $attachment_id, $post_type );
 			endforeach;
-			
-			if ( $folder_id > 0 ) :
-				wp_update_term_count_now( array( $folder_id ), 'wpmn_media_folder' );
-			endif;
+
 			wp_send_json_success(WPMN_Media_Folders::payload(null, $post_type));
 		}
 
 		public static function clear_all_data_request() {
+
+			if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
 
 			$terms = get_terms(array(
 				'taxonomy'   => 'wpmn_media_folder',
@@ -236,8 +213,9 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
                 wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
             endif;
 
-			$folder_id  = absint($_POST['folder_id'] ?? 0);
-			$new_parent = absint($_POST['new_parent'] ?? 0);
+			$folder_id  = absint( isset($_POST['folder_id']) ? $_POST['folder_id'] : 0 );
+			$new_parent = absint( isset($_POST['new_parent']) ? $_POST['new_parent'] : 0 );
+			$post_type  = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
 
 			if (!$folder_id) :
 				wp_send_json_error(['message' => 'Invalid folder.']);
@@ -250,19 +228,21 @@ if ( ! class_exists( 'WPMN_Helper' ) ) :
 			$result = wp_update_term($folder_id, 'wpmn_media_folder', array(
 				'parent' => $new_parent
 			) );
-			self::send_response($result);
+			self::send_response($result, $post_type);
 		}
 
-		public static function send_response($result) {
+		public static function send_response($result, $post_type = 'attachment') {
 			if (is_wp_error($result)) :
 				wp_send_json_error(['message' => $result->get_error_message()]);
 			endif;
-            // phpcs:ignore WordPress.Security.NonceVerification.Missing
-            $post_type  = isset($_POST['post_type']) ? sanitize_text_field( wp_unslash( $_POST['post_type'] ) ) : 'attachment';
 			wp_send_json_success(WPMN_Media_Folders::payload(null, $post_type));
 		}
 
         public static function generate_attachment_size_request() {
+            if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                wp_die( esc_html__( 'Security check failed.', 'medianest' ) );
+            endif;
+
             $attachments = get_posts( array(
                 'post_type'      => 'attachment',
                 'post_status'    => 'inherit',

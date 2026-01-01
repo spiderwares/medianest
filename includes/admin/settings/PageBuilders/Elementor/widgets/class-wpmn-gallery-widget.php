@@ -254,7 +254,7 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
          */
         protected function render() {
             $settings       = $this->get_settings_for_display();
-            $folder_id_raw  = $settings['folder_id'] ?? '0';
+            $folder_id_raw  = isset($settings['folder_id']) ? $settings['folder_id'] : '0';
             $folder_id      = (int)str_replace('id_', '', $folder_id_raw);
 
             if ($folder_id <= 0) :

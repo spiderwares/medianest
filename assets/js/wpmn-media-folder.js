@@ -150,7 +150,7 @@ jQuery(function ($) {
                     },
                     cursorAt: { left: 60, top: 15 },
                     appendTo: 'body',
-                    zIndex: 200000,
+                    zIndex: 10001,
                     revert: 'invalid',
                     start() {
                         $(this).closest('.wpmn_folder_node').addClass('is-dragging');

@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 
 <div class="wpmn_upload_folder_selector">
-    <?php $wpmn_labels = WPMN_Helper::wpmn_get_folder_labels(); ?>
     <label>
         <?php echo esc_html( $wpmn_labels['choose_folder'], 'medianest' ); ?>
     </label>

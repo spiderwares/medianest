@@ -1,8 +1,4 @@
 <?php
-/**
- * Template for Medianest Gallery Block
- *
- */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;

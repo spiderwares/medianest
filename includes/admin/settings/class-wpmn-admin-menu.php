@@ -244,8 +244,16 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
                 return $file;
             endif;
 
+            // Use WP_Filesystem instead of direct file_get_contents/file_put_contents
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            if ( ! function_exists( 'WP_Filesystem' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+            WP_Filesystem();
+            global $wp_filesystem;
+
             // Read SVG content
-            $svg = file_get_contents( $file['tmp_name'] );
+            $svg = $wp_filesystem->get_contents( $file['tmp_name'] );
             if ( ! $svg ) :
                 return $file;
             endif;
@@ -259,7 +267,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             endif;
 
             if ( $clean_svg ) :
-                file_put_contents( $file['tmp_name'], $clean_svg );
+                $wp_filesystem->put_contents( $file['tmp_name'], $clean_svg );
             else :
                 $file['error'] = esc_html__( 'SVG sanitization failed.', 'medianest' );
             endif;

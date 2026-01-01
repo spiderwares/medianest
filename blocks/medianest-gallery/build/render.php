@@ -135,7 +135,7 @@ if ( ! class_exists( 'WPMN_Gallery_Render' ) ) {
             endforeach;
 
             ob_start();
-            include WPMN_PATH . 'templates/blocks/medianest-gallery.php';
+            include __DIR__ . '/medianest-gallery.php';
             return ob_get_clean();
         }
         

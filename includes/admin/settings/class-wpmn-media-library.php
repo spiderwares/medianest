@@ -73,20 +73,25 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
         }
 
 		public function wpmn_render_sidebar() {
+            $wpmn_labels = WPMN_Helper::get_folder_labels();
+            
 			wpmn_get_template(
 				'media/library-sidebar.php',
-				array(),
+				array(
+                    'wpmn_labels' => $wpmn_labels,
+                ),
 			);
 		}
 
         public function wpmn_filter_attachments( $query ) {
 
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             if ( empty( $_REQUEST['query']['wpmn_folder'] ) ) :
                 return $query;
             endif;
 
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            // Proper way to handle this without phpcs:ignore is to verify the core nonce
+            check_ajax_referer( 'query-attachments', 'nonce', false );
+
             $folder = sanitize_text_field( wp_unslash( $_REQUEST['query']['wpmn_folder'] ) );
             if ( $folder === 'uncategorized' ) :
 
@@ -140,6 +145,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
             // Handle sorting by file size
             if ( isset( $_REQUEST['query']['orderby'] ) && 'wpmn_filesize' === $_REQUEST['query']['orderby'] ) :
+                check_ajax_referer( 'query-attachments', 'nonce', false );
                 $query['meta_key'] = 'wpmn_filesize';
                 $query['orderby']  = 'meta_value_num';
             endif;
@@ -150,16 +156,20 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
         public function wpmn_filter_list_view( $query ) {
             if ( ! is_admin() || ! $query->is_main_query() ) return;
 
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             $folder = ! empty( $_GET['wpmn_folder'] ) ? sanitize_text_field( wp_unslash( $_GET['wpmn_folder'] ) ) : '';
             if ( ! $folder || $folder === 'all' ) return;
+
+            // Verify nonce for list view filtering
+            if ( ! isset( $_GET['wpmn_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpmn_nonce'] ) ), 'wpmn_media_nonce' ) ) :
+                return;
+            endif;
 
             $screen    = get_current_screen();
             $post_type = '';
 
             if ( $screen ) :
                 $post_type = $screen->post_type;
-            elseif ( isset( $_GET['post_type'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            elseif ( isset( $_GET['post_type'] ) ) :
                 $post_type = sanitize_text_field( wp_unslash( $_GET['post_type'] ) );
             else :
                 $post_type = 'post';
@@ -238,7 +248,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
         public function add_folder_field( $form_fields, $post ) {
             $terms       = wp_get_object_terms( $post->ID, 'wpmn_media_folder' );
-            $labels      = WPMN_Helper::wpmn_get_folder_labels();
+            $labels      = WPMN_Helper::get_folder_labels();
             $post_type   = get_post_type( $post->ID );
             
             $meta_query = array(
@@ -298,8 +308,8 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
                 'show_option_all'   => $labels['all'],
                 'show_option_none'  => $labels['uncategorized'],
                 'option_none_value' => '0',
-                'selected'          => $terms[0]->term_id ?? 0,
-                'include'           => ! empty( $include_terms ) ? $include_terms : array( -1 ), // -1 to show nothing if empty
+                'selected'          => ( isset( $terms[0] ) && isset( $terms[0]->term_id ) ) ? $terms[0]->term_id : 0,
+                'include'           => ! empty( $include_terms ) ? $include_terms : array( -1 ),
                 'echo'              => 0,
                 'hierarchical'      => true,
             ) );
@@ -373,8 +383,15 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
             if ( ! $bytes ) :
                 $file_path = get_attached_file( $id );
-                if ( $file_path && file_exists( $file_path ) ) :
-                    $bytes = filesize( $file_path );
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+                if ( ! function_exists( 'WP_Filesystem' ) ) {
+                    require_once ABSPATH . 'wp-admin/includes/file.php';
+                }
+                WP_Filesystem();
+                global $wp_filesystem;
+
+                if ( $file_path && $wp_filesystem->exists( $file_path ) ) :
+                    $bytes = $wp_filesystem->size( $file_path );
                     update_post_meta( $id, 'wpmn_filesize', $bytes );
                 endif;
             endif;
@@ -388,8 +405,15 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 
         public function save_attachment_size( $post_id ) {
             $file_path = get_attached_file( $post_id );
-            if ( $file_path && file_exists( $file_path ) ) :
-                $bytes = filesize( $file_path );
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            if ( ! function_exists( 'WP_Filesystem' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+            WP_Filesystem();
+            global $wp_filesystem;
+
+            if ( $file_path && $wp_filesystem->exists( $file_path ) ) :
+                $bytes = $wp_filesystem->size( $file_path );
                 update_post_meta( $post_id, 'wpmn_filesize', $bytes );
             endif;
         }

@@ -19,57 +19,6 @@ jQuery(function ($) {
             this.initResizer();
         }
 
-        getStorage(key, defCode) {
-            try { return localStorage.getItem(key) || defCode; } catch { return defCode; }
-        }
-
-        setStorage(key, val) {
-            try { localStorage.setItem(key, val); } catch { }
-        }
-
-        getText(key, def) {
-            return wpmn_media_library.wpmn_folder?.[key] || def;
-        }
-
-        getPostType() {
-            if (this.sidebar.hasClass('in-modal')) return 'attachment';
-            const urlParams = new URLSearchParams(window.location.search),
-                post_type = urlParams.get('post_type');
-            if (post_type) return post_type;
-            if (window.location.pathname.includes('upload.php')) return 'attachment';
-            return wpmn_media_library.postType || 'post';
-        }
-
-        apiCall(request_type, data = {}) {
-            const isFormData = data instanceof FormData,
-                post_type = this.getPostType();
-
-            if (isFormData) {
-                data.append('action', 'wpmn_ajax');
-                data.append('request_type', request_type);
-                data.append('nonce', wpmn_media_library.nonce);
-                if (!data.has('post_type')) data.append('post_type', post_type);
-            }
-
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    type: 'POST',
-                    url: wpmn_media_library.ajaxUrl,
-                    data: isFormData ? data : {
-                        action: 'wpmn_ajax',
-                        request_type,
-                        nonce: wpmn_media_library.nonce,
-                        post_type,
-                        ...data
-                    },
-                    processData: !isFormData,
-                    contentType: isFormData ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
-                    success: (res) => res.success ? resolve(res.data) : reject(res?.data?.message || this.getText('errorGeneric', 'An error occurred.')),
-                    error: () => reject('Network error'),
-                });
-            });
-        }
-
         defaultSettings() {
             this.settings = window.wpmn_media_library || {};
             const savedSettings = JSON.parse(this.getStorage('wpmnSettings', '{}'));
@@ -143,26 +92,20 @@ jQuery(function ($) {
         bindEvents() {
             $(document.body).on('click', '.wpmn_folder_button', this.handleFolderClick.bind(this));
             $(document.body).on('input', '.wpmn_media_sidebar_search', this.handleSearch.bind(this));
-            $(document.body).on('click', '.wpmn_media_sidebar_new_folder', () => this.toggleNewFolderForm(true));
-            $(document.body).on('click', '.wpmn_new_folder_cancel', () => this.toggleNewFolderForm(false));
+            $(document.body).on('click', '.wpmn_media_sidebar_new_folder', this.toggleNewFolderForm.bind(this, true));
+            $(document.body).on('click', '.wpmn_new_folder_cancel', this.toggleNewFolderForm.bind(this, false));
             $(document.body).on('click', '.wpmn_new_folder_save', this.handleCreateFolder.bind(this));
-            $(document.body).on('keydown', '.wpmn_new_folder_input', (e) => {
-                if (e.key === 'Enter') this.handleCreateFolder();
-                if (e.key === 'Escape') this.toggleNewFolderForm(false);
-            });
+            $(document.body).on('keydown', '.wpmn_new_folder_input', this.handleNewFolderKeydown.bind(this));
             $(document.body).on('click', '.wpmn_media_sidebar_action_rename', this.handleRenameFolder.bind(this));
             $(document.body).on('click', '.wpmn_rename_inline_save', this.handleInlineRenameSave.bind(this));
             $(document.body).on('click', '.wpmn_rename_inline_cancel', this.cancelInlineRename.bind(this));
-            $(document.body).on('keydown', '.wpmn_rename_inline_input', (e) => {
-                if (e.key === 'Enter') this.handleInlineRenameSave(e);
-                if (e.key === 'Escape') this.cancelInlineRename(e);
-            });
+            $(document.body).on('keydown', '.wpmn_rename_inline_input', this.handleInlineRenameKeydown.bind(this));
             $(document.body).on('click', '.wpmn_delete_confirm', this.confirmDeleteFolder.bind(this));
             $(document.body).on('click', '.wpmn_delete_cancel', this.closeDeleteDialog.bind(this));
-            $(document.body).on('click', '.wpmn_media_sidebar_toggle', (e) => { e.preventDefault(); this.toggleSidebar(); });
+            $(document.body).on('click', '.wpmn_media_sidebar_toggle', this.handleSidebarToggleClick.bind(this));
             $(document.body).on('click', '.wpmn_toggle_arrow', this.handleToggleClick.bind(this));
-            $(document.body).on('click', '.wpmn_media_sidebar_action_sort', (e) => this.handleMenuToggle(e, '.wpmn_sort_menu'));
-            $(document.body).on('click', '.wpmn_media_sidebar_action_more', (e) => this.handleMenuToggle(e, '.wpmn_more_menu'));
+            $(document.body).on('click', '.wpmn_media_sidebar_action_sort', this.handleSortMenuToggle.bind(this));
+            $(document.body).on('click', '.wpmn_media_sidebar_action_more', this.handleMoreMenuToggle.bind(this));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="settings"]', this.openSettingsDialog.bind(this));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="bulk-select"]', this.enableBulkSelect.bind(this));
             $(document.body).on('click', '.wpmn_more_menu_item[data-action="hide-folder-id"]', this.toggleFolderId.bind(this));
@@ -172,13 +115,95 @@ jQuery(function ($) {
             $(document.body).on('click', '.wpmn_theme_btn', this.handleThemeClick.bind(this));
             $(document.body).on('click', '.wpmn_delete_trigger', this.handleDeleteTrigger.bind(this));
             $(document.body).on('change', '.wpmn_folder_checkbox', this.handleCheckboxChange.bind(this));
-            $(document.body).on('click', (e) => {
-                if (!$(e.target).closest('.wpmn_media_sidebar_action_sort, .wpmn_sort_menu').length) this.sidebar.find('.wpmn_sort_menu').prop('hidden', true);
-                if (!$(e.target).closest('.wpmn_media_sidebar_action_more, .wpmn_more_menu').length) this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
-                if (!$(e.target).closest('.wpmn_folder_context_menu').length) this.hideContextMenu();
-            });
+            $(document.body).on('click', this.handleDocumentClick.bind(this));
             $(document.body).on('contextmenu', '.wpmn_folder_button', this.handleFolderContextMenu.bind(this));
             $(document.body).on('click', '.wpmn_context_menu_item', this.handleContextMenuClick.bind(this));
+        }
+
+        handleNewFolderKeydown(e) {
+            if (e.key === 'Enter') this.handleCreateFolder();
+            if (e.key === 'Escape') this.toggleNewFolderForm(false);
+        }
+
+        handleInlineRenameKeydown(e) {
+            if (e.key === 'Enter') this.handleInlineRenameSave(e);
+            if (e.key === 'Escape') this.cancelInlineRename(e);
+        }
+
+        handleSidebarToggleClick(e) {
+            e.preventDefault();
+            this.toggleSidebar();
+        }
+
+        handleSortMenuToggle(e) {
+            this.handleMenuToggle(e, '.wpmn_sort_menu');
+        }
+
+        handleMoreMenuToggle(e) {
+            this.handleMenuToggle(e, '.wpmn_more_menu');
+        }
+
+        handleDocumentClick(e) {
+            if (!$(e.target).closest('.wpmn_media_sidebar_action_sort, .wpmn_sort_menu').length) {
+                this.sidebar.find('.wpmn_sort_menu').prop('hidden', true);
+            }
+            if (!$(e.target).closest('.wpmn_media_sidebar_action_more, .wpmn_more_menu').length) {
+                this.sidebar.find('.wpmn_more_menu').prop('hidden', true);
+            }
+            if (!$(e.target).closest('.wpmn_folder_context_menu').length) {
+                this.hideContextMenu();
+            }
+        }
+
+        getStorage(key, defCode) {
+            try { return localStorage.getItem(key) || defCode; } catch { return defCode; }
+        }
+
+        setStorage(key, val) {
+            try { localStorage.setItem(key, val); } catch { }
+        }
+
+        getText(key, def) {
+            return wpmn_media_library.wpmn_folder?.[key] || def;
+        }
+
+        getPostType() {
+            if (this.sidebar.hasClass('in-modal')) return 'attachment';
+            const urlParams = new URLSearchParams(window.location.search),
+                post_type = urlParams.get('post_type');
+            if (post_type) return post_type;
+            if (window.location.pathname.includes('upload.php')) return 'attachment';
+            return wpmn_media_library.postType || 'post';
+        }
+
+        apiCall(request_type, data = {}) {
+            const isFormData = data instanceof FormData,
+                post_type = this.getPostType();
+
+            if (isFormData) {
+                data.append('action', 'wpmn_ajax');
+                data.append('request_type', request_type);
+                data.append('nonce', wpmn_media_library.nonce);
+                if (!data.has('post_type')) data.append('post_type', post_type);
+            }
+
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'POST',
+                    url: wpmn_media_library.ajaxUrl,
+                    data: isFormData ? data : {
+                        action: 'wpmn_ajax',
+                        request_type,
+                        nonce: wpmn_media_library.nonce,
+                        post_type,
+                        ...data
+                    },
+                    processData: !isFormData,
+                    contentType: isFormData ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
+                    success: (res) => res.success ? resolve(res.data) : reject(res?.data?.message || this.getText('errorGeneric', 'An error occurred.')),
+                    error: () => reject('Network error'),
+                });
+            });
         }
 
         initResizer() {
@@ -606,7 +631,7 @@ jQuery(function ($) {
                 cursor: 'move',
                 cursorAt: { left: 20, top: 20 },
                 appendTo: 'body',
-                zIndex: 200000,
+                zIndex: 10001,
                 revert: 'invalid',
                 start() { $(this).css('opacity', 0.5); },
                 stop() { $(this).css('opacity', 1); }
@@ -779,6 +804,9 @@ jQuery(function ($) {
                 if (currentFolder !== slug) {
                     url.searchParams.set('wpmn_folder', slug);
                 }
+
+                // Add nonce for secure filtering
+                url.searchParams.set('wpmn_nonce', wpmn_media_library.nonce);
 
                 if (url.toString() !== window.location.href) {
                     window.location.href = url.toString();

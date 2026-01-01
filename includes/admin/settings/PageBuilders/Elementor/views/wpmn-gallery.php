@@ -12,30 +12,30 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     <?php
     while ( $query->have_posts() ) :
         $query->the_post();
-        $attachment_id = get_the_ID();
-        $image_src     = wp_get_attachment_image_src( $attachment_id, $settings['size'] );
-        $image_full    = wp_get_attachment_image_src( $attachment_id, 'full' );
+        $wpmn_attachment_id = get_the_ID();
+        $wpmn_image_src     = wp_get_attachment_image_src( $wpmn_attachment_id, $settings['size'] );
+        $wpmn_image_full    = wp_get_attachment_image_src( $wpmn_attachment_id, 'full' );
         
-        $link = '';
+        $wpmn_link = '';
         switch ( $settings['link_to'] ) :
             case 'file':
-                $link = $image_full[0] ?? '';
+                $wpmn_link = isset( $wpmn_image_full[0] ) ? $wpmn_image_full[0] : '';
                 break;
             case 'post':
-                $link = get_attachment_link( $attachment_id );
+                $wpmn_link = get_attachment_link( $wpmn_attachment_id );
                 break;
         endswitch;
         ?>
         <div class="wpmn_gallery_item">
-            <?php if ( $link ) : ?>
-                <a href="<?php echo esc_url( $link ); ?>">
+            <?php if ( $wpmn_link ) : ?>
+                <a href="<?php echo esc_url( $wpmn_link ); ?>">
             <?php endif;
             
-            if ( $image_src ) : ?>
-                <img src="<?php echo esc_url( $image_src[0] ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" />
+            if ( $wpmn_image_src ) : ?>
+                <img src="<?php echo esc_url( $wpmn_image_src[0] ); ?>" alt="<?php echo esc_attr( get_the_title() ); ?>" />
             <?php endif;
             
-            if ( $link ) : ?>
+            if ( $wpmn_link ) : ?>
                 </a>
             <?php endif; ?>
         </div>

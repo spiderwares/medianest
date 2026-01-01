@@ -16,7 +16,7 @@ if ( ! class_exists( 'WPMN_Export' ) ) :
      */
 	class WPMN_Export {
 
-        public static function export_folders_request() {
+		public static function export_folders_request() {
 
 			global $wpdb;
 
@@ -46,21 +46,25 @@ if ( ! class_exists( 'WPMN_Export' ) ) :
 			foreach ($by_post_type as $post_type => $type_terms) :
 				foreach ($type_terms as $term) :
 					$created_by  = get_term_meta($term->term_id, 'wpmn_folder_owner', true) ?: 1;
-					$siblings    = $parent_groups[$term->parent] ?? [];
+					$siblings 	 = isset( $parent_groups[$term->parent] ) ? $parent_groups[$term->parent] : [];
 					$ord         = array_search($term->term_id, $siblings) ?: 0;
 
 					// Get objects inside this folder for the specific post type
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-					$attachment_ids = $wpdb->get_col($wpdb->prepare(
-						"SELECT DISTINCT tr.object_id
-						FROM {$wpdb->term_relationships} tr
-						INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-						INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
-						WHERE tt.taxonomy = %s AND tt.term_id = %d
-						AND p.post_type = %s AND p.post_status != 'trash'
-						ORDER BY tr.object_id ASC",
-						'wpmn_media_folder', $term->term_id, $post_type
-					));
+					$attachment_ids = get_posts( array(
+						'post_type'      => $post_type,
+						'posts_per_page' => -1,
+						'post_status'    => 'any',
+						'tax_query'      => array(
+							array(
+								'taxonomy' => 'wpmn_media_folder',
+								'field'    => 'term_id',
+								'terms'    => $term->term_id,
+							),
+						),
+						'fields'         => 'ids',
+						'orderby'        => 'ID',
+						'order'          => 'ASC',
+					) );
 
 					$csv_data[] = array(
 						$term->term_id,
@@ -80,15 +84,17 @@ if ( ! class_exists( 'WPMN_Export' ) ) :
 			header('Content-Type: text/csv; charset=utf-8');
 			header("Content-Disposition: attachment; filename=$filename");
 
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-			$output = fopen('php://output', 'w');
+			$output = '';
 			foreach ($csv_data as $row) :
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fputcsv
-				fputcsv($output, $row);
+				$csv_row = [];
+				foreach ($row as $field) :
+					$field = str_replace('"', '""', $field);
+					$csv_row[] = '"' . $field . '"';
+				endforeach;
+				$output .= implode(',', $csv_row) . "\r\n";
 			endforeach;
 
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
-			fclose($output);
+			echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			exit;
 		}
 	}

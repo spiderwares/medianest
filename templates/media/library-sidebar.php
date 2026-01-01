@@ -92,7 +92,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 	</div>
 
 	<div class="wpmn_media_sidebar_folders">
-		<?php $wpmn_labels = WPMN_Helper::wpmn_get_folder_labels(); ?>
 		<div class="wpmn_media_sidebar_section">
 			<button type="button" class="wpmn_folder_button" data-folder-slug="all">
 				<img src="<?php echo esc_url( WPMN_URL . 'assets/img/all-files.svg'); ?>" alt="" class="wpmn_all_files_icon" />
