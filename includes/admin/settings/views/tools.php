@@ -65,4 +65,3 @@ $wpmn_options = get_option( 'wpmn_settings', true );
         </tr>
     </table>
 </form>
-<?php

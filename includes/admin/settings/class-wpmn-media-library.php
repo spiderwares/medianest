@@ -30,11 +30,11 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
          */
 		public function events_handler() {
             $this->settings = get_option( 'wpmn_settings', [] );
-			add_action( 'admin_footer', array( $this, 'wpmn_maybe_render_sidebar' ) );
+			add_action( 'admin_footer', array( $this, 'render_sidebar' ) );
             add_action( 'attachment_fields_to_edit', array( $this, 'add_folder_field' ), 10, 2 );
-            add_filter( 'ajax_query_attachments_args', array( $this, 'wpmn_filter_attachments' ) );
-            add_action( 'pre_get_posts', array( $this, 'wpmn_filter_list_view' ) );
-            add_action( 'pre_get_posts', array( $this, 'wpmn_filesize_orderby' ) );
+            add_filter( 'ajax_query_attachments_args', array( $this, 'filter_attachments' ) );
+            add_action( 'pre_get_posts', array( $this, 'filter_list_view' ) );
+            add_action( 'pre_get_posts', array( $this, 'filesize_orderby' ) );
             add_filter( 'manage_media_columns', array( $this, 'add_folder_column' ) );
             add_filter( 'manage_media_columns', array( $this, 'add_file_size_column' ) );
             add_action( 'manage_media_custom_column', array( $this, 'display_file_size_column' ), 10, 2 );
@@ -56,7 +56,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             do_action( 'wpmn_media_library_init', $this );
 		}
 
-        public function wpmn_maybe_render_sidebar() {
+        public function render_sidebar() {
             $screen = get_current_screen();
             if ( ! $screen ) return;
 
@@ -83,7 +83,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
 			);
 		}
 
-        public function wpmn_filter_attachments( $query ) {
+        public function filter_attachments( $query ) {
 
             if ( empty( $_REQUEST['query']['wpmn_folder'] ) ) :
                 return $query;
@@ -153,7 +153,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             return $query;
         }
 
-        public function wpmn_filter_list_view( $query ) {
+        public function filter_list_view( $query ) {
             if ( ! is_admin() || ! $query->is_main_query() ) return;
 
             $folder = ! empty( $_GET['wpmn_folder'] ) ? sanitize_text_field( wp_unslash( $_GET['wpmn_folder'] ) ) : '';
@@ -237,7 +237,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             endif;
         }
 
-        public function wpmn_filesize_orderby( $query ) {
+        public function filesize_orderby( $query ) {
             if ( ! is_admin() || ! $query->is_main_query() ) return;
 
             if ( 'wpmn_filesize' === $query->get( 'orderby' ) ) :
@@ -404,11 +404,14 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
         }
 
         public function save_attachment_size( $post_id ) {
+
             $file_path = get_attached_file( $post_id );
             require_once ABSPATH . 'wp-admin/includes/file.php';
-            if ( ! function_exists( 'WP_Filesystem' ) ) {
+
+            if ( ! function_exists( 'WP_Filesystem' ) ) :
                 require_once ABSPATH . 'wp-admin/includes/file.php';
-            }
+            endif;
+            
             WP_Filesystem();
             global $wp_filesystem;
 

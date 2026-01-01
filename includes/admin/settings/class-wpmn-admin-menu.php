@@ -43,8 +43,8 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             add_action( 'admin_init', [ $this, 'register_settings' ] );
             add_action( 'admin_menu', [ $this, 'admin_menu' ] );
             add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_styles' ], 15 );
-            add_filter( 'upload_mimes', [ $this, 'wpmn_enable_svg_upload' ] );
-            add_filter( 'wp_handle_upload_prefilter', [ $this, 'wpmn_sanitize_svg_upload' ] );
+            add_filter( 'upload_mimes', [ $this, 'enable_svg_upload' ] );
+            add_filter( 'wp_handle_upload_prefilter', [ $this, 'sanitize_svg_upload' ] );
         }
 
         /*
@@ -226,7 +226,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
         /**
          * Enable SVG upload.
          */
-        public function wpmn_enable_svg_upload( $mimes ) {
+        public function enable_svg_upload( $mimes ) {
             $svg_enabled = isset( $this->settings['secure_svg_upload'] ) ? $this->settings['secure_svg_upload'] : 'no';
             
             if ( $svg_enabled === 'yes' ) :
@@ -237,7 +237,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             return $mimes;
         }
 
-        public function wpmn_sanitize_svg_upload( $file ) {
+        public function sanitize_svg_upload( $file ) {
 
             $type = wp_check_filetype( $file['name'], null );
             if ( $type['type'] !== 'image/svg+xml' ) :
@@ -246,9 +246,10 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
 
             // Use WP_Filesystem instead of direct file_get_contents/file_put_contents
             require_once ABSPATH . 'wp-admin/includes/file.php';
-            if ( ! function_exists( 'WP_Filesystem' ) ) {
+            if ( ! function_exists( 'WP_Filesystem' ) ) :
                 require_once ABSPATH . 'wp-admin/includes/file.php';
-            }
+            endif;
+            
             WP_Filesystem();
             global $wp_filesystem;
 
