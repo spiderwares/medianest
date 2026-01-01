@@ -26,9 +26,9 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
          * @return WPMN_Init
          */
         public static function getInstance() {
-            if (null == self::$instance) {
+            if (null == self::$instance) :
                 self::$instance = new self();
-            }
+            endif;
             return self::$instance;
         }
 
@@ -39,11 +39,10 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
             $this->events_handler();
         }
 
-         /**
+        /**
          * Initialize hooks and filters.
          */
         public function events_handler() {
-
             if ($this->is_elementor_active()) :
                 add_action('elementor/elements/categories_registered', array($this, 'register_elementor_category'));
                 
@@ -81,7 +80,6 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
          * Register Elementor widgets 
          */
         public function register_widgets($widgets_manager) {
-
             require_once(WPMN_PATH . 'includes/admin/settings/PageBuilders/Elementor/widgets/class-wpmn-gallery-widget.php');
             
             if (class_exists('\Elementor\Widget_Base')) :
@@ -93,7 +91,6 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
          * Register Elementor widgets 
          */
         public function register_widgets_legacy() {
-            
             if (class_exists('\Elementor\Widget_Base') && class_exists('\Elementor\Plugin')) :
                 require_once(WPMN_PATH . 'includes/admin/settings/PageBuilders/Elementor/widgets/class-wpmn-gallery-widget.php');
                 
@@ -105,10 +102,9 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
          * Load editor scripts
          */
         public function editor_scripts() {
-
             wp_enqueue_style(
-                'medianest-editor',
-                plugin_dir_url( __FILE__ ) . 'Elementor/assets/css/editor.css',
+                'wpmn-editor',
+                plugin_dir_url( __FILE__ ) . 'Elementor/assets/css/wpmn-editor.css',
                 array(),
                 WPMN_VERSION
             );
@@ -118,10 +114,9 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
          * Load frontend styles
          */
         public function frontend_styles() {
-
             wp_enqueue_style(
-                'medianest-frontend',
-                plugin_dir_url( __FILE__ ) . 'Elementor/assets/css/frontend.css',
+                'wpmn-frontend',
+                plugin_dir_url( __FILE__ ) . 'Elementor/assets/css/wpmn-frontend.css',
                 array(),
                 WPMN_VERSION
             );

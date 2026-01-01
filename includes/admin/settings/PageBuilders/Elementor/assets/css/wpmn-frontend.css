@@ -37,6 +37,8 @@
     transform: scale(1.08);
 }
 
+/*--------------------------- Columns ---------------------------*/
+
 .wpmn_gallery_columns_1 .wpmn_gallery_item {
     width: 100%;
 }
@@ -75,6 +77,7 @@
 }
 
 /*--------------------------- Responsive ---------------------------*/
+
 @media (max-width: 1024px) {
 
     .wpmn_gallery_columns_4 .wpmn_gallery_item,
@@ -95,6 +98,7 @@
 }
 
 @media (max-width: 480px) {
+
     .wpmn_gallery_item {
         width: 100% !important;
     }

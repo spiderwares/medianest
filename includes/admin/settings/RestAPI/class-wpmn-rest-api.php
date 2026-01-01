@@ -50,7 +50,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
-            // GET https://your-site.com/wp-json/medianest/v1/folder?folder_id
+            // GET https://your-site.com/wp-json/medianest/v1/folder/?folder_id
             register_rest_route( 
                 WPMN_REST_API_URL, '/folder', 
                 array(
@@ -68,7 +68,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
-            // GET https://your-site.com/wp-json/medianest/v1/attachment-id
+            // GET https://your-site.com/wp-json/medianest/v1/attachment-id/?folder_id=
             register_rest_route( 
                 WPMN_REST_API_URL, '/attachment-id', 
                 array(
@@ -77,7 +77,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 'permission_callback' => [ $this, 'check_api_permission' ], 
             ));
 
-            // GET https://your-site.com/wp-json/medianest/v1/attachment-count
+            // GET https://your-site.com/wp-json/medianest/v1/attachment-count/?folder_id=
             register_rest_route( 
                 WPMN_REST_API_URL, '/attachment-count', 
                 array(
@@ -166,6 +166,8 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 $search = '';
             endif;
             
+            $user_id = absint( $request->get_param( 'user_id' ) );
+            
             $args   = array(
                 'taxonomy'   => 'wpmn_media_folder',
                 'hide_empty' => false,
@@ -177,7 +179,7 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 $args['name__like'] = $search;
             endif;
 
-            $args['meta_query'] = array(
+            $meta_query = array(
                 'relation' => 'OR',
                 array(
                     'key'     => 'wpmn_post_type',
@@ -189,6 +191,20 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                     'compare' => 'NOT EXISTS',
                 ),
             );
+
+            if ( $user_id > 0 ) :
+                $args['meta_query'] = array(
+                    'relation' => 'AND',
+                    array(
+                        'key'     => 'wpmn_folder_author',
+                        'value'   => $user_id,
+                        'compare' => '=',
+                    ),
+                    $meta_query
+                );
+            else :
+                $args['meta_query'] = $meta_query;
+            endif;
 
             $terms = get_terms( $args );
 
@@ -209,10 +225,10 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 foreach ( $terms as $index => $term ) :
                     $count = WPMN_Media_Folders::folder_count( $term->term_id );
                     $folders[] = array(
-                        'id'         => (int) $term->term_id,
-                        'key'        => (int) $term->term_id,
+                        'id'         => (string) $term->term_id,
+                        'key'        => (string) $term->term_id,
                         'children'   => array(),
-                        'parent'     => (int) $term->parent,
+                        'parent'     => (string) $term->parent,
                         'text'       => $term->name,
                         'title'      => $term->name,
                         'data-id'    => $term->term_id,
@@ -250,10 +266,10 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             $list = array();
             foreach ($group[$parent] as $index => $term) :
                 $list[] = array(
-                    'id'         => (int) $term->term_id,
-                    'key'        => (int) $term->term_id,
+                    'id'         => (string) $term->term_id,
+                    'key'        => (string) $term->term_id,
                     'children'   => $this->build_tree($term->term_id, $group),
-                    'parent'     => (int) $term->parent,
+                    'parent'     => (string) $term->parent,
                     'text'       => $term->name,
                     'title'      => $term->name,
                     'data-id'    => $term->term_id,
@@ -275,12 +291,15 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             endif;
 
             return rest_ensure_response(array(
-                'folder' => array(
-                    'id'     => $term->term_id,
-                    'name'   => $term->name,
-                    'parent' => $term->parent,
-                    'count'  => $term->count,
-                    'color'  => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
+                'success' => true,
+                'data'    => array(
+                    'folder' => array(
+                        'id'     => (string) $term->term_id,
+                        'name'   => $term->name,
+                        'parent' => (string) $term->parent,
+                        'count'  => (string) $term->count,
+                        'color'  => get_term_meta( $term->term_id, 'wpmn_color', true ) ?: '',
+                    )
                 )
             ) );
         }
@@ -288,35 +307,49 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
         public function set_attachment($request) {
             global $wpdb;
 
-            $folder_id = absint($request->get_param('folder'));
+            $folder_id = absint($request->get_param('folder_id'));
             $ids       = (array) $request->get_param('ids');
 
-            if (!$folder_id) return new WP_Error('missing_param', 'folder is required', ['status' => 400]);
+            if (!$folder_id) return new WP_Error('missing_param', 'folder_id is required', ['status' => 400]);
             if (empty($ids)) return new WP_Error('missing_param', 'ids are required', ['status' => 400]);
 
+            $term = get_term($folder_id, 'wpmn_media_folder');
+            if (!$term || is_wp_error($term)) :
+                return new WP_Error('not_found', 'Target folder not found', ['status' => 404]);
+            endif;
+
             $ids = array_map('absint', $ids);
+            $processed_count = 0;
 
             foreach ($ids as $att_id) :
-                // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                if ( get_post_type($att_id) !== 'attachment' ) continue;
+
+                // DELETE old relation
                 $wpdb->query($wpdb->prepare("
                     DELETE tr FROM {$wpdb->term_relationships} tr
                     JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
                     WHERE tr.object_id = %d AND tt.taxonomy = %s", 
                 $att_id, 'wpmn_media_folder'));
 
-                // Assign new
-                if ($folder_id > 0) :
-                    wp_set_object_terms($att_id, $folder_id, 'wpmn_media_folder', false);
-                endif;
-
+                // Assign new folder
+                wp_set_object_terms($att_id, $folder_id, 'wpmn_media_folder', false);
                 clean_object_term_cache($att_id, 'attachment');
+                
+                $processed_count++;
             endforeach;
 
-            if ($folder_id > 0) :
-                wp_update_term_count_now([$folder_id], 'wpmn_media_folder');
+            if ($processed_count === 0) :
+                return new WP_Error('invalid_ids', 'No valid attachment IDs found', ['status' => 400]);
             endif;
 
-            return rest_ensure_response(['success' => true, 'message' => 'Attachments assigned.']);
+            wp_update_term_count_now([$folder_id], 'wpmn_media_folder');
+
+            return rest_ensure_response(array(
+                'success' => true,
+                'data'    => array(
+                    'message' => 'Attachments assigned successfully.'
+                )
+            ));
         }
 
         public function get_attachment_ids($request) {
@@ -343,7 +376,12 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 );
             endif;
 
-            return rest_ensure_response(get_posts($args));
+            return rest_ensure_response(array(
+                'success' => true,
+                'data'    => array(
+                    'attachment_ids' => array_map('strval', get_posts($args))
+                )
+            ) );
         }
 
         public function get_attachment_count($request) {
@@ -351,7 +389,10 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
             if (!$id) return new WP_Error('missing_param', 'folder_id is required', ['status' => 400]);
 
             return rest_ensure_response(array(
-                'count' => WPMN_Media_Folders::folder_count($id)
+                'success' => true,
+                'data'    => array(
+                    'count' => (string) WPMN_Media_Folders::folder_count($id)
+                )
             ) );
         }
 
@@ -375,10 +416,12 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
 
             return rest_ensure_response(array(
                 'success' => true,
-                'folder'  => array(
-                    'id'     => $term['term_id'],
-                    'name'   => $name,
-                    'parent' => $parent_id,
+                'data'    => array(
+                    'folder'  => array(
+                        'id'     => (string) $term['term_id'],
+                        'name'   => $name,
+                        'parent' => (string) $parent_id,
+                    )
                 )
             ) );
         }

@@ -5,12 +5,24 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Gallery_Block' ) ) :
 
+    /**
+     * Main WPMN_Gallery_Block Class
+     *
+     * @class WPMN_Gallery_Block
+     * @version 1.0.0
+     */
     class WPMN_Gallery_Block {
 
+        /**
+         * Constructor for the class.
+         */
         public function __construct() {
             $this->events_handler();
         }
 
+        /**
+         * Initialize hooks and filters.
+         */
         public function events_handler() {
             add_action( 'init', array( $this, 'block_assets' ), 10 );
             add_action( 'rest_api_init', array( $this, 'register_rest_route' ) );

@@ -163,17 +163,17 @@ jQuery(function ($) {
                 });
             });
 
-            // Handle droppable on folder rows for sorting/nesting
-            sidebar.find('.wpmn_folder_row').each((_, el) => {
+            // Handle droppable on folder rows for sorting/nesting and special buttons
+            sidebar.find('.wpmn_folder_row, .wpmn_media_sidebar_section .wpmn_folder_button').each((_, el) => {
                 const __this = $(el),
-                    btn = __this.find('.wpmn_folder_button'),
+                    btn = __this.hasClass('wpmn_folder_button') ? __this : __this.find('.wpmn_folder_button'),
                     slug = btn.data('folder-slug');
 
                 if (__this.hasClass('ui-droppable')) {
                     __this.droppable('destroy');
                 }
 
-                if (!slug || (slug !== 'uncategorized' && !slug.startsWith('term-'))) return;
+                if (!slug || (slug !== 'uncategorized' && slug !== 'all' && !slug.startsWith('term-'))) return;
 
                 __this.droppable({
                     accept: '.attachments .attachment, .wpmn_media_layout #the-list tr.wpmn_draggable, .wpmn_folder_button[data-folder-id]',
@@ -192,6 +192,9 @@ jQuery(function ($) {
                         __this.find('.wpmn_folder_btn_wrapper').removeClass('is-nest-hover');
 
                         if (ui.draggable.hasClass('wpmn_folder_button')) {
+                            const isSpecial = ['all', 'uncategorized'].includes(slug);
+                            if (isSpecial) return;
+
                             const draggedFolderId = parseInt(ui.draggable.data('folder-id'));
 
                             // Reorder logic based on mouse position

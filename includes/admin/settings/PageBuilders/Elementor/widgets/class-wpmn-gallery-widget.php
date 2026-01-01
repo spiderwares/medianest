@@ -286,7 +286,7 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
                 return;
             endif;
             
-            include WPMN_PATH . 'includes/admin/settings/PageBuilders/Elementor/views/gallery.php';
+            include WPMN_PATH . 'includes/admin/settings/PageBuilders/Elementor/views/wpmn-gallery.php';
             wp_reset_postdata();
         }
     }
