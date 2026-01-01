@@ -833,6 +833,23 @@ jQuery(function ($) {
             }
 
             menu.prop('hidden', false);
+
+            // Calculate position to keep it in viewport
+            const menuWidth = menu.outerWidth(),
+                menuHeight = menu.outerHeight(),
+                windowWidth = $(window).width(),
+                windowHeight = $(window).height();
+
+            if (x + menuWidth > windowWidth) {
+                x = windowWidth - menuWidth - 10;
+            }
+            if (x < 10) x = 10;
+
+            if (y + menuHeight > windowHeight) {
+                y = windowHeight - menuHeight - 10;
+            }
+            if (y < 10) y = 10;
+
             menu.css({ left: x + 'px', top: y + 'px' }).addClass('is-visible');
 
             if (typeof wp !== 'undefined' && wp.hooks) {

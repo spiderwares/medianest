@@ -158,7 +158,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 			$args = array(
 				'taxonomy'   => 'wpmn_media_folder',
 				'hide_empty' => false,
-				'orderby'    => 'name',
+				'orderby'    => 'term_id',
 				'order'      => 'ASC',
                 'meta_query' => array(
                     'relation' => 'OR',
@@ -218,7 +218,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 				$ord_b = (int) get_term_meta($b->term_id, 'wpmn_order', true);
 				
 				if ($ord_a === $ord_b) :
-					return strcasecmp($a->name, $b->name);
+					return $a->term_id <=> $b->term_id;
 				endif;
 				return $ord_a <=> $ord_b;
 			});

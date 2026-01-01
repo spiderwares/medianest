@@ -212,6 +212,17 @@ if ( ! class_exists( 'WPMN_REST_API' ) ) :
                 return new WP_Error('fetch_error', 'Failed to fetch folders', ['status' => 500]);
             endif;
 
+            // Sort terms by wpmn_order meta then term_id
+			usort($terms, function($a, $b) {
+				$ord_a = (int) get_term_meta($a->term_id, 'wpmn_order', true);
+				$ord_b = (int) get_term_meta($b->term_id, 'wpmn_order', true);
+				
+				if ($ord_a === $ord_b) :
+					return $a->term_id <=> $b->term_id;
+				endif;
+				return $ord_a <=> $ord_b;
+			});
+
             // If search yielded no results, fetch all folders
                 if ( empty( $terms ) && ! empty( $search ) ) :
                     unset( $args['name__like'] );
