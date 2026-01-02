@@ -275,9 +275,10 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 				'no_found_rows'  => false,
 				'tax_query'      => array(
 					array(
-						'taxonomy' => 'wpmn_media_folder',
-						'field'    => 'term_id',
-						'terms'    => $id,
+						'taxonomy' 		   => 'wpmn_media_folder',
+						'field'    		   => 'term_id',
+						'terms'    		   => $id,
+						'include_children' => false,
 					),
 				),
 			);

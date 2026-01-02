@@ -64,21 +64,6 @@ if ( ! class_exists( 'WPMN' ) ) :
         }
 
         /**
-         * Flush rewrite rules on plugin activation.
-         */
-        public static function plugin_activate() {
-            
-            // Save default options on first activation
-            // $default_options = include_once WPMN_PATH . 'includes/static/wpmn-default-option.php';
-            // $existingOption  = get_option( 'wpmn_settings' );
-
-            // // If the option is not set, update it with the default value
-            // if ( ! $existingOption ) :
-            //     update_option( 'wpmn_settings', $default_options['wpmn_settings'] );
-            // endif;
-        }
-
-        /**
          * Include required files.
          */
         public function includes() {
