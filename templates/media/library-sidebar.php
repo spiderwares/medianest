@@ -126,9 +126,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			</div>
 		</div>
 
-		<div class="wpmn_folder_tree" role="tree">
-			<!-- populated by JS -->
-		</div>
+		<div class="wpmn_folder_tree" role="tree"></div>
 		<div class="wpmn_tree_loader" hidden>
 			<div class="wpmn_spinner"></div>
 		</div>

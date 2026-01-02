@@ -1,7 +1,4 @@
 <?php
-/**
- * Media folder taxonomy
- */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
