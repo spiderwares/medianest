@@ -631,7 +631,7 @@ jQuery(function ($) {
                 cursor: 'move',
                 cursorAt: { left: 20, top: 20 },
                 appendTo: 'body',
-                zIndex: 10001,
+                zIndex: 2147483647,
                 revert: 'invalid',
                 start() { $(this).css('opacity', 0.5); },
                 stop() { $(this).css('opacity', 1); }
@@ -806,7 +806,7 @@ jQuery(function ($) {
                 }
 
                 // Add nonce for secure filtering
-                url.searchParams.set('wpmn_nonce', wpmn_media_library.nonce);
+                // url.searchParams.set('nonce', wpmn_media_library.nonce);
 
                 if (url.toString() !== window.location.href) {
                     window.location.href = url.toString();

@@ -140,7 +140,7 @@ jQuery(function ($) {
                     delay: 0,
                     helper: function () {
                         const folderName = $(this).data('folder-name'),
-                            folderIcon = $(this).find('.wpmn_folder_icon').attr('src');
+                            folderIcon = $(this).find('.wpmn_folder_icon').prop('src');
                         return $(`
                             <div class="wpmn_drag_helper_pill wpmn_folder_drag_helper">
                                 <img src="${folderIcon}" class="wpmn_drag_folder_icon" />
@@ -150,7 +150,7 @@ jQuery(function ($) {
                     },
                     cursorAt: { left: 60, top: 15 },
                     appendTo: 'body',
-                    zIndex: 10001,
+                    zIndex: 2147483647,
                     revert: 'invalid',
                     start() {
                         $(this).closest('.wpmn_folder_node').addClass('is-dragging');

@@ -81,7 +81,6 @@ if ( ! class_exists( 'WPMN' ) ) :
 
             // Elementor Support
             require_once WPMN_PATH . 'includes/admin/settings/PageBuilders/Elementor/class-wpmn-init.php';
-            \MediaNest\PageBuilders\Elementor\WPMN_Init::getInstance();
         }
         
         /**

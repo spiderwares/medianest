@@ -740,8 +740,8 @@ button.wpmn_add_folder {
 }
 
 .wpmn_settings_select {
-	width: 100%;
-	padding: 6px 8px;
+	width: 100% !important;
+	padding: 3px 8px;
 	border: 1px solid #8c8f94;
 	border-radius: 4px;
 	font-size: 13px;

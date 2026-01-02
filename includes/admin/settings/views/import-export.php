@@ -47,12 +47,12 @@ $wpmn_options = get_option( 'wpmn_settings', true );
                 <?php if ( 'wpmn_import_folders' === $wpmn_field['action'] ) : ?>
                     <div>
                         <input type="file" id="wpmn_import_file" accept=".csv" class="wpmn_import_input" />
-                        <button type="button" class="button button-primary wpmn_import_btn" data-action="wpmn_import_folders">
+                        <button type="button" class="wpmn_import_btn" data-action="wpmn_import_folders">
                             <?php echo esc_html( $wpmn_field['button_text'] ); ?>
                         </button>
                     </div>
                 <?php else : ?>
-                    <button type="button" class="button button-primary wpmn_export_btn" data-action="<?php echo esc_attr( $wpmn_field['action'] ); ?>">
+                    <button type="button" class="wpmn_export_btn" data-action="<?php echo esc_attr( $wpmn_field['action'] ); ?>">
                         <?php echo esc_html( $wpmn_field['button_text'] ); ?>
                     </button>
                 <?php endif; ?>

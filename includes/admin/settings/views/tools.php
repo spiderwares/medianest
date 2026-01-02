@@ -47,11 +47,11 @@ $wpmn_options = get_option( 'wpmn_settings', true );
                 <?php if ( 'wpmn_generate_api_key' === $wpmn_field['action'] ) : ?>
                     <div class="wpmn_api_key_wrapper">
                         <input type="text" id="<?php echo esc_attr( $wpmn_key ); ?>" name="<?php echo esc_attr( $wpmn_field['name'] ); ?>" value="<?php echo esc_attr( $wpmn_val ); ?>" class="regular-text wpmn_api_key_input" readonly />
-                        <button type="button" class="button button-primary wpmn_generate_api_btn" data-action="wpmn_generate_api_key"><?php echo esc_html( $wpmn_field['button_text'] ); ?></button>
+                        <button type="button" class="wpmn_generate_api_btn" data-action="wpmn_generate_api_key"><?php echo esc_html( $wpmn_field['button_text'] ); ?></button>
                     </div>
                 <?php else :
                     $wpmn_btn_class = isset( $wpmn_field['btn_class'] ) ? $wpmn_field['btn_class'] : 'wpmn_export_btn'; ?>
-                    <button type="button" class="button button-primary <?php echo esc_attr( $wpmn_btn_class ); ?>" data-action="<?php echo esc_attr( $wpmn_field['action'] ); ?>">
+                    <button type="button" class="<?php echo esc_attr( $wpmn_btn_class ); ?>" data-action="<?php echo esc_attr( $wpmn_field['action'] ); ?>">
                         <?php echo esc_html( $wpmn_field['button_text'] ); ?>
                     </button>
                 <?php endif; ?>

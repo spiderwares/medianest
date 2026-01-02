@@ -135,7 +135,7 @@ if ( ! class_exists( 'WPMN_Media_Folders' ) ) :
 		}
 
 		public static function payload($count_mode = null, $post_type = 'attachment') {
-			$user_id = get_current_user_id();
+			$user_id       = get_current_user_id();
 			$user_settings = array();
 
 			if ( $user_id ) :

@@ -54,6 +54,13 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             endforeach;
 
             do_action( 'wpmn_media_library_init', $this );
+            add_action( 'elementor/editor/footer', array( $this, 'render_sidebar' ) );
+            add_action( 'wp_footer', function () {
+                if ( function_exists( 'et_core_is_fb_enabled' ) && et_core_is_fb_enabled() ) {
+                    $this->render_sidebar();
+                }
+            });
+
 		}
 
         public function render_sidebar() {
@@ -68,11 +75,11 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             $post_edit           = ( $screen->base === 'post' );
 
             if ( $media || $post_edit || ( $supported_post_type && $list_view ) ) :
-                $this->wpmn_render_sidebar();
+                $this->output_sidebar();
             endif;
         }
 
-		public function wpmn_render_sidebar() {
+		public function output_sidebar() {
             $wpmn_labels = WPMN_Helper::get_folder_labels();
             
 			wpmn_get_template(
@@ -160,7 +167,7 @@ if ( ! class_exists( 'WPMN_Media_Library' ) ) :
             if ( ! $folder || $folder === 'all' ) return;
 
             // Verify nonce for list view filtering
-            if ( ! isset( $_GET['wpmn_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpmn_nonce'] ) ), 'wpmn_media_nonce' ) ) :
+            if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpmn_media_nonce' ) ) :
                 return;
             endif;
 

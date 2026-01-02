@@ -1,16 +1,15 @@
 <?php
 
-namespace MediaNest\PageBuilders\Elementor;
-
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
 
     /**
-     * MediaNest Gallery Widget for Elementor
-     * 
-     * @since 1.0.0
+     * Main WPMN_Gallery_Widget Class
+     *
+     * @class WPMN_Gallery_Widget
+     * @version 1.0.0
      */
     class WPMN_Gallery_Widget extends \Elementor\Widget_Base {
 
@@ -67,8 +66,8 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
             $this->add_control(
                 'folder_id',
                 array(
-                    'label' => esc_html__('Select Folder', 'medianest'),
-                    'type'  => \Elementor\Controls_Manager::SELECT,
+                    'label'   => esc_html__('Select Folder', 'medianest'),
+                    'type'    => \Elementor\Controls_Manager::SELECT,
                     'options' => $folder_options,
                     'default' => '0',
                     'description' => esc_html__('Choose a folder to display images from', 'medianest'),
@@ -78,8 +77,8 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
             $this->add_control(
                 'columns',
                 array(
-                    'label' => esc_html__('Columns', 'medianest'),
-                    'type'  => \Elementor\Controls_Manager::SELECT,
+                    'label'   => esc_html__('Columns', 'medianest'),
+                    'type'    => \Elementor\Controls_Manager::SELECT,
                     'options' => array(
                         '1' => '1',
                         '2' => '2',
@@ -96,8 +95,8 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
             $this->add_control(
                 'link_to',
                 array(  
-                    'label' => esc_html__('Link To', 'medianest'),
-                    'type'  => \Elementor\Controls_Manager::SELECT,
+                    'label'   => esc_html__('Link To', 'medianest'),
+                    'type'    => \Elementor\Controls_Manager::SELECT,
                     'options' => array(
                         'none' => esc_html__('None', 'medianest'),
                         'file' => esc_html__('Media File', 'medianest'),
@@ -111,9 +110,9 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
             $this->add_control(
                 'size',
                 array(
-                    'label'       => esc_html__('Image Size', 'medianest'),
-                    'type'        => \Elementor\Controls_Manager::SELECT,
-                    'options'     => array_merge(
+                    'label'    => esc_html__('Image Size', 'medianest'),
+                    'type'     => \Elementor\Controls_Manager::SELECT,
+                    'options'  => array_merge(
                         array(
                             'full' => esc_html__('Full', 'medianest')
                         ), 
@@ -126,8 +125,8 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
             $this->add_control(
                 'orderby',
                 array(
-                    'label' => esc_html__('Order By', 'medianest'),
-                    'type'  => \Elementor\Controls_Manager::SELECT,
+                    'label'   => esc_html__('Order By', 'medianest'),
+                    'type'    => \Elementor\Controls_Manager::SELECT,
                     'options' => array(
                         'date'  => esc_html__('Date', 'medianest'),
                         'title' => esc_html__('Title', 'medianest'),
@@ -239,7 +238,7 @@ if ( ! class_exists( 'WPMN_Gallery_Widget' ) ) :
          * Get available image sizes
          */
         private function get_image_sizes() {
-            $sizes   = [];
+            $sizes    = [];
             $wp_sizes = get_intermediate_image_sizes();
             
             foreach ($wp_sizes as $size) :

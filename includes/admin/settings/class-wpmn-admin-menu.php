@@ -45,6 +45,7 @@ if ( ! class_exists( 'WPMN_Admin_Menu' ) ) :
             add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_styles' ], 15 );
             add_filter( 'upload_mimes', [ $this, 'enable_svg_upload' ] );
             add_filter( 'wp_handle_upload_prefilter', [ $this, 'sanitize_svg_upload' ] );
+            add_action( 'elementor/editor/after_enqueue_scripts', [ $this, 'enqueue_admin_styles' ] );
         }
 
         /*

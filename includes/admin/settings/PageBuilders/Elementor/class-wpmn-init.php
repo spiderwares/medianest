@@ -1,7 +1,5 @@
 <?php
 
-namespace MediaNest\PageBuilders\Elementor;
-
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -104,7 +102,7 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
         public function editor_scripts() {
             wp_enqueue_style(
                 'wpmn-editor',
-                plugin_dir_url( __FILE__ ) . 'Elementor/assets/css/wpmn-editor.css',
+                plugin_dir_url( __FILE__ ) . 'assets/css/wpmn-editor.css',
                 array(),
                 WPMN_VERSION
             );
@@ -116,11 +114,13 @@ if ( ! class_exists( 'WPMN_Init' ) ) :
         public function frontend_styles() {
             wp_enqueue_style(
                 'wpmn-frontend',
-                plugin_dir_url( __FILE__ ) . 'Elementor/assets/css/wpmn-frontend.css',
+                plugin_dir_url( __FILE__ ) . 'assets/css/wpmn-frontend.css',
                 array(),
                 WPMN_VERSION
             );
         }
     }
+
+    WPMN_Init::getInstance();
 
 endif;
