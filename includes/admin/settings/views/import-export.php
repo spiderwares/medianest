@@ -21,7 +21,7 @@ $mddr_fields = MDDR_Settings_Fields::import_export_field();
  * @var array|false $options Retrieved settings or false if not set.
  * 
  */
-$mddr_options = get_option( 'mddr_settings', true );
+$mddr_options = get_option( 'mddr_settings', [] );
 ?>
 
 <table class="mddr-form form-table">

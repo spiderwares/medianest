@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 <div class="mddr_page mddr_settings_page wrap">
 
     <h2 class="mddr_notice_wrapper"></h2>
+    <?php settings_errors( 'mddr_settings' ); ?>
 
     <!-- Navigation tabs for plugin settings -->
     <div class="mddr_settings_page_nav">
@@ -37,9 +38,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     </div>
 
     <!-- Content area for the active settings tab -->
-    <div class="mddr_settings_page_content">
-        <?php
-        require_once MDDR_PATH . 'includes/admin/settings/views/' . $active_tab . '.php';
-        ?>
-    </div>
+    <form method="post" action="options.php">
+        <div class="mddr_settings_page_content">
+            <?php
+            require_once MDDR_PATH . 'includes/admin/settings/views/' . $active_tab . '.php';
+            ?>
+        </div>
+    </form>
 </div>

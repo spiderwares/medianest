@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Media Directory
- * Description:       Sort and organize media files with simple, powerful folder tools.
+ * Description:       Organize and manage your media files using simple folder tools for a cleaner media library.
  * Version:           1.0.0
  * Requires at least: 5.2
  * Requires PHP:      7.4
