@@ -163,6 +163,7 @@ if ( ! class_exists( 'MDDR_Media_Library' ) ) :
         public function filter_list_view( $query ) {
             if ( ! is_admin() || ! $query->is_main_query() ) return;
 
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filtering from URL.
             $folder = ! empty( $_GET['mddr_folder'] ) ? sanitize_text_field( wp_unslash( $_GET['mddr_folder'] ) ) : '';
             if ( ! $folder || $folder === 'all' ) return;
 
@@ -171,7 +172,9 @@ if ( ! class_exists( 'MDDR_Media_Library' ) ) :
 
             if ( $screen ) :
                 $post_type = $screen->post_type;
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filtering from URL.
             elseif ( isset( $_GET['post_type'] ) ) :
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only filtering from URL.
                 $post_type = sanitize_text_field( wp_unslash( $_GET['post_type'] ) );
             else :
                 $post_type = 'post';

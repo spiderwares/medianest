@@ -6,11 +6,11 @@
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-if ( empty( $attributes['selectedFolder'] ) ) :
+if ( empty( $mddr_attributes['selectedFolder'] ) ) :
     return '';
 endif;
 
-$attributes = wp_parse_args( $attributes, array(
+$mddr_attributes = wp_parse_args( $mddr_attributes, array(
     'sortBy'              => 'date',
     'sortType'            => 'DESC',
     'layout'              => 'flex',
@@ -26,20 +26,20 @@ $attributes = wp_parse_args( $attributes, array(
     'imageHoverAnimation' => 'none'
 ) );
 
-$ids = array_map( 'intval', (array) $attributes['selectedFolder'] );
-if ( empty( $ids ) ) :
+$mddr_ids = array_map( 'intval', (array) $mddr_attributes['selectedFolder'] );
+if ( empty( $mddr_ids ) ) :
     return '';
 endif;
 
 // Query Params
-$args = array(
+$mddr_args = array(
     'post_type'      => 'attachment',
     'posts_per_page' => -1,
     'tax_query'      => array(
         array(
             'taxonomy' => 'mddr_media_folder',
             'field'    => 'term_id',
-            'terms'    => $ids,
+            'terms'    => $mddr_ids,
             'operator' => 'IN',
             'include_children' => false
         ),
@@ -47,54 +47,54 @@ $args = array(
     'post_status'    => 'inherit',
 );
 
-if ( 'file_name' !== $attributes['sortBy'] ) :
-    $args['orderby'] = sanitize_text_field( $attributes['sortBy'] );
-    $args['order']   = sanitize_text_field( $attributes['sortType'] );
+if ( 'file_name' !== $mddr_attributes['sortBy'] ) :
+    $mddr_args['orderby'] = sanitize_text_field( $mddr_attributes['sortBy'] );
+    $mddr_args['order']   = sanitize_text_field( $mddr_attributes['sortType'] );
 endif;
 
-$query = new \WP_Query( $args );
-$posts = $query->get_posts();
+$mddr_query = new \WP_Query( $mddr_args );
+$mddr_posts = $mddr_query->get_posts();
 
-if ( 'file_name' === $attributes['sortBy'] ) :
-    usort( $posts, function( $img1, $img2 ) use ( $attributes ) {
+if ( 'file_name' === $mddr_attributes['sortBy'] ) :
+    usort( $mddr_posts, function( $img1, $img2 ) use ( $mddr_attributes ) {
         $val1 = basename( $img1->guid );
         $val2 = basename( $img2->guid );
-        return ( $attributes['sortType'] === 'ASC' ) ? strcmp( $val1, $val2 ) : strcmp( $val2, $val1 );
+        return ( $mddr_attributes['sortType'] === 'ASC' ) ? strcmp( $val1, $val2 ) : strcmp( $val2, $val1 );
     } );
 endif;
 
-$ulClass = 'mddr_block_media_gallery';
-switch ( $attributes['layout'] ) :
-    case 'flex':     $ulClass .= ' wp-block-gallery blocks-gallery-grid'; break;
-    case 'grid':     $ulClass .= ' layout-grid'; break;
-    case 'masonry':  $ulClass .= ' layout-masonry'; break;
-    case 'carousel': $ulClass .= ' layout-carousel'; break;
+$mddr_ulClass = 'mddr_block_media_gallery';
+switch ( $mddr_attributes['layout'] ) :
+    case 'flex':     $mddr_ulClass .= ' wp-block-gallery blocks-gallery-grid'; break;
+    case 'grid':     $mddr_ulClass .= ' layout-grid'; break;
+    case 'masonry':  $mddr_ulClass .= ' layout-masonry'; break;
+    case 'carousel': $mddr_ulClass .= ' layout-carousel'; break;
 endswitch;
 
-$ulClass .= ! empty( $attributes['className'] ) ? ' ' . esc_attr( $attributes['className'] ) : '';
-$ulClass .= ' columns-' . esc_attr( $attributes['columns'] );
-$ulClass .= $attributes['isCropped'] ? ' is-cropped' : '';
-$ulClass .= $attributes['hasLightbox'] ? ' is-lightbox' : '';
+$mddr_ulClass .= ! empty( $mddr_attributes['className'] ) ? ' ' . esc_attr( $mddr_attributes['className'] ) : '';
+$mddr_ulClass .= ' columns-' . esc_attr( $mddr_attributes['columns'] );
+$mddr_ulClass .= $mddr_attributes['isCropped'] ? ' is-cropped' : '';
+$mddr_ulClass .= $mddr_attributes['hasLightbox'] ? ' is-lightbox' : '';
 
-if ( ! empty( $attributes['imageHoverAnimation'] ) && 'none' !== $attributes['imageHoverAnimation'] ) :
-    $ulClass .= ' mddr-block-hover-animation-' . esc_attr( $attributes['imageHoverAnimation'] );
+if ( ! empty( $mddr_attributes['imageHoverAnimation'] ) && 'none' !== $mddr_attributes['imageHoverAnimation'] ) :
+    $mddr_ulClass .= ' mddr-block-hover-animation-' . esc_attr( $mddr_attributes['imageHoverAnimation'] );
 endif;
 
-$styles  = '--columns: ' . esc_attr( $attributes['columns'] ) . ';';
-$styles .= '--space: ' . esc_attr( $attributes['spaceAroundImage'] ) . 'px;';
-$styles .= '--min-width: ' . esc_attr( $attributes['imgMinWidth'] ) . 'px;';
+$mddr_styles  = '--columns: ' . esc_attr( $mddr_attributes['columns'] ) . ';';
+$mddr_styles .= '--space: ' . esc_attr( $mddr_attributes['spaceAroundImage'] ) . 'px;';
+$mddr_styles .= '--min-width: ' . esc_attr( $mddr_attributes['imgMinWidth'] ) . 'px;';
 
 $images = [];
 foreach ( $posts as $post ) :
     if ( ! wp_attachment_is_image( $post ) ) continue;
     
-    $srcKey = ( 'masonry' === $attributes['layout'] || 'list' === $attributes['layout'] ) ? 'full' : 'large';
+    $srcKey = ( 'masonry' === $mddr_attributes['layout'] || 'list' === $mddr_attributes['layout'] ) ? 'full' : 'large';
     $imageSrc = wp_get_attachment_image_src( $post->ID, $srcKey );
     
     if ( ! $imageSrc ) continue;
 
     $href = '';
-    switch ( $attributes['linkTo'] ) :
+    switch ( $mddr_attributes['linkTo'] ) :
         case 'media':      $href = $imageSrc[0]; break;
         case 'attachment': $href = get_attachment_link( $post->ID ); break;
     endswitch;
@@ -110,11 +110,11 @@ foreach ( $posts as $post ) :
         'height'  => $imageSrc[2],
         'alt'     => $alt,
         'link'    => $href,
-        'caption' => $attributes['hasCaption'] ? $post->post_excerpt : '',
+        'caption' => $mddr_attributes['hasCaption'] ? $post->post_excerpt : '',
         'class'   => "wp-image-{$post->ID}"
     );
 
-    if ( $attributes['hasLightbox'] && empty( $images[ count($images) - 1 ]['link'] ) ) :
+    if ( $mddr_attributes['hasLightbox'] && empty( $images[ count($images) - 1 ]['link'] ) ) :
          $images[ count($images) - 1 ]['link'] = $imageSrc[0];
     endif;
 endforeach;
