@@ -694,6 +694,9 @@ jQuery(function ($) {
                 if (this.sidebar.hasClass('in-modal')) {
                     this.updateModalLayout();
                 }
+
+                // Ensure breadcrumb is present if enabled
+                this.updateCustomToolbar();
             }, 1000);
         }
 
@@ -722,13 +725,33 @@ jQuery(function ($) {
         }
 
         updateCustomToolbar() {
-            let target = $('.media-toolbar .wp-filter');
+            const isMediaGrid = window.location.pathname.includes('upload.php') && (window.location.search.includes('mode=grid') || !window.location.search.includes('mode=list'));
+            const isMediaList = window.location.pathname.includes('upload.php') && window.location.search.includes('mode=list');
+            const isOtherList = window.location.pathname.includes('edit.php');
+            const inModal = $('.media-modal').is(':visible');
 
-            if (!target.length) return;
+            // Prioritize .wp-filter as requested by user, with fallbacks for different views
+            let target = $('.wp-filter').first();
+
+            if (!target.length) {
+                if (inModal || isMediaGrid) {
+                    target = $('.media-toolbar').first();
+                } else if (isMediaList || isOtherList) {
+                    target = $('.tablenav.top').first();
+                    if (!target.length) target = $('.wp-header-end').first();
+                    if (!target.length) target = $('.wrap h1').first();
+                }
+            }
+
+            if (!target || !target.length) return;
 
             const settings = JSON.parse(this.getStorage('mddrSettings', '{}'));
             let container = $('.mddr_breadcrumb');
-            if (settings.showBreadcrumb === false || !mddr_media_library.showBreadcrumb) {
+
+            // Source of truth for showing breadcrumb
+            const showBreadcrumb = (settings.showBreadcrumb !== undefined) ? settings.showBreadcrumb : (this.settings.showBreadcrumb !== false);
+
+            if (!showBreadcrumb) {
                 container.remove();
                 return;
             }
@@ -738,17 +761,29 @@ jQuery(function ($) {
                 container.insertAfter(target);
             }
 
-            container.empty().append($('<span class="dashicons dashicons-admin-home"></span>').on('click', () => this.changeFolder('all')));
-            const id = this.state.activeFolder.startsWith('term-') ? this.state.activeFolder.replace('term-', '') : null,
-                path = (id ? this.getFolderPath(id, this.state.folders) : []) || [];
+            container.empty().append($('<span class="dashicons dashicons-admin-home"></span>')
+                .attr('title', this.getText('all', 'All Files'))
+                .on('click', () => this.changeFolder('all')));
+
+            let path = [];
+            if (this.state.activeFolder === 'uncategorized') {
+                path = [{ id: 'uncategorized', name: this.getText('uncategorized', 'Uncategorized') }];
+            } else if (this.state.activeFolder.startsWith('term-')) {
+                const id = this.state.activeFolder.replace('term-', '');
+                path = this.getFolderPath(id, this.state.folders) || [];
+            }
 
             path.forEach((folder, i) => {
                 container.append('<span class="mddr_breadcrumb_line">/</span>');
                 const isLast = i === path.length - 1;
-                const item = $('<span>').addClass(isLast ? 'mddr_breadcrumb_folder' : 'mddr_breadcrumb_folders').text(folder.name);
+                let folderName = folder.name;
+                if (folder.id === 'uncategorized') folderName = this.getText('uncategorized', 'Uncategorized');
+
+                const item = $('<span>').addClass(isLast ? 'mddr_breadcrumb_folder' : 'mddr_breadcrumb_folders').text(folderName);
 
                 if (!isLast) {
-                    item.on('click', () => this.changeFolder(`term-${folder.id}`));
+                    const slug = folder.id === 'uncategorized' ? 'uncategorized' : `term-${folder.id}`;
+                    item.on('click', () => this.changeFolder(slug));
                 }
                 container.append(item);
             });

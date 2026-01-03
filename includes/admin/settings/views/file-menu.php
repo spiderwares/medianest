@@ -7,7 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 <div class="mddr_page mddr_settings_page wrap">
 
     <h2 class="mddr_notice_wrapper"></h2>
-    <?php settings_errors( 'mddr_settings' ); ?>
 
     <!-- Navigation tabs for plugin settings -->
     <div class="mddr_settings_page_nav">

@@ -166,11 +166,6 @@ if ( ! class_exists( 'MDDR_Media_Library' ) ) :
             $folder = ! empty( $_GET['mddr_folder'] ) ? sanitize_text_field( wp_unslash( $_GET['mddr_folder'] ) ) : '';
             if ( ! $folder || $folder === 'all' ) return;
 
-            // Verify nonce for list view filtering
-            if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'mddr_media_nonce' ) ) :
-                return;
-            endif;
-
             $screen    = get_current_screen();
             $post_type = '';
 

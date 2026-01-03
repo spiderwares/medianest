@@ -187,6 +187,8 @@ if ( ! class_exists( 'MDDR_Admin_Menu' ) ) :
                     'showBreadcrumb' => $show_breadcrumb === 'yes',
                     'postType'       => $screen ? $screen->post_type : 'attachment',
 					'mddr_folder'    => array(
+						'all'                => esc_html__( 'All Files', 'media-directory' ),
+						'uncategorized'     => esc_html__( 'Uncategorized', 'media-directory' ),
 						'newFolderPrompt'    => esc_html__( 'Enter folder name', 'media-directory' ),
 						'renamePrompt'       => esc_html__( 'Rename folder', 'media-directory' ),
 						'selectFolderFirst'  => esc_html__( 'Please select a folder first.', 'media-directory' ),
