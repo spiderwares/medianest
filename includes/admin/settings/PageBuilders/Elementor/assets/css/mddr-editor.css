@@ -1,0 +1,35 @@
+/*--------------------------- MDDR Elementor Editor Styles ---------------------------*/
+
+.elementor-element-wrapper [class*="media-directory"] .icon {
+    position: relative;
+}
+
+.elementor-element-wrapper [class*="media-directory"] .icon:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(34, 113, 177, 0.1);
+    border-radius: 3px;
+}
+
+.elementor-element-wrapper [class*="media-directory"] .icon i {
+    color: #6d7882;
+    font-size: 28px;
+}
+
+.elementor-panel .elementor-element .media-directory-icon {
+    position: relative;
+}
+
+.mddr-gallery-icon {
+    background-color: #f7f7f7;
+    padding: 20px;
+    border-radius: 8px;
+    color: #2271b1;
+    font-size: 32px;
+    text-align: center;
+    border: 1px solid #e1e1e1;
+}

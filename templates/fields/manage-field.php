@@ -3,75 +3,75 @@
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-foreach ( $fields as $wpmn_field_key => $wpmn_field ) : 
-    $wpmn_field_val  = isset( $options[ $wpmn_field_key ] ) ? $options[ $wpmn_field_key ] : ( isset( $wpmn_field['default'] ) ? $wpmn_field['default'] : '' );
-    $wpmn_field_type = isset( $wpmn_field['field_type'] ) ? $wpmn_field['field_type'] : '';
+foreach ( $fields as $mddr_field_key => $mddr_field ) : 
+    $mddr_field_val  = isset( $options[ $mddr_field_key ] ) ? $options[ $mddr_field_key ] : ( isset( $mddr_field['default'] ) ? $mddr_field['default'] : '' );
+    $mddr_field_type = isset( $mddr_field['field_type'] ) ? $mddr_field['field_type'] : '';
 ?>
 
-<tr class="<?php echo isset( $wpmn_field['extra_class'] ) ? esc_attr( $wpmn_field['extra_class'] ) : ''; ?>"
+<tr class="<?php echo isset( $mddr_field['extra_class'] ) ? esc_attr( $mddr_field['extra_class'] ) : ''; ?>"
 
-    <?php if ( isset( $wpmn_field['style'] ) && ! empty( $wpmn_field['style'] ) ) : 
-        $wpmn_style = explode( '.', $wpmn_field['style'], 2 ); ?>
-        style="<?php echo esc_attr( ( isset( $options[ $wpmn_style[0] ] ) && $options[ $wpmn_style[0] ] == $wpmn_style[1] ) ? '' : 'display: none;' ); ?>"
+    <?php if ( isset( $mddr_field['style'] ) && ! empty( $mddr_field['style'] ) ) : 
+        $mddr_style = explode( '.', $mddr_field['style'], 2 ); ?>
+        style="<?php echo esc_attr( ( isset( $options[ $mddr_style[0] ] ) && $options[ $mddr_style[0] ] == $mddr_style[1] ) ? '' : 'display: none;' ); ?>"
     <?php endif; ?>>
 
-    <th scope="row" class="wpmn-label <?php echo esc_attr( $wpmn_field_type ); ?>" <?php echo ( $wpmn_field_type === 'wpmntitle' ) ? 'colspan="2"' : ''; ?>>
-        <?php echo esc_html( $wpmn_field['title'] ); ?>
+    <th scope="row" class="mddr-label <?php echo esc_attr( $mddr_field_type ); ?>" <?php echo ( $mddr_field_type === 'mddrtitle' ) ? 'colspan="2"' : ''; ?>>
+        <?php echo esc_html( $mddr_field['title'] ); ?>
     </th>
 
     <?php
-        switch ( $wpmn_field['field_type'] ) :
+        switch ( $mddr_field['field_type'] ) :
 
-            case "wpmnswitch":
-                wpmn_get_template(
+            case "mddrswitch":
+                mddr_get_template(
                     'fields/switch-field.php',
                     array(
-                        'field'     => $wpmn_field,
-                        'field_Val' => $wpmn_field_val,
-                        'field_Key' => $wpmn_field_key,
+                        'field'     => $mddr_field,
+                        'field_Val' => $mddr_field_val,
+                        'field_Key' => $mddr_field_key,
                     ),
                 );
                 break;
 
-            case "wpmnradio":
-                wpmn_get_template(
+            case "mddrradio":
+                mddr_get_template(
                     'fields/radio-field.php',
                     array(
-                        'field'     => $wpmn_field,
-                        'field_Val' => $wpmn_field_val,
-                        'field_Key' => $wpmn_field_key,
+                        'field'     => $mddr_field,
+                        'field_Val' => $mddr_field_val,
+                        'field_Key' => $mddr_field_key,
                     ),
                 );
                 break;
 
-            case "wpmnselect":
-                wpmn_get_template(
+            case "mddrselect":
+                mddr_get_template(
                     'fields/select-field.php',
                     array(
-                        'field'     => $wpmn_field,
-                        'field_Val' => $wpmn_field_val,
-                        'field_Key' => $wpmn_field_key,
+                        'field'     => $mddr_field,
+                        'field_Val' => $mddr_field_val,
+                        'field_Key' => $mddr_field_key,
                     ),
                 );
                 break;
 
-            case "wpmnbutton":
-                wpmn_get_template(
+            case "mddrbutton":
+                mddr_get_template(
                     'fields/button-field.php',
                     array(
-                        'field'     => $wpmn_field,
-                        'field_Val' => $wpmn_field_val,
-                        'field_Key' => $wpmn_field_key,
+                        'field'     => $mddr_field,
+                        'field_Val' => $mddr_field_val,
+                        'field_Key' => $mddr_field_key,
                     ),
                 );
                 break;
 
-            case "wpmncheckbox":
+            case "mddrcheckbox":
                 ob_start();
-                $wpmn_html = ob_get_clean();
+                $mddr_html = ob_get_clean();
     
                 // Apply Pro filter only for srwctime field
-                echo wp_kses_post( apply_filters( 'wpmn_checkbox_field', $wpmn_html, $wpmn_field, $wpmn_field_val, $wpmn_field_key ) );
+                echo wp_kses_post( apply_filters( 'mddr_checkbox_field', $mddr_html, $mddr_field, $mddr_field_val, $mddr_field_key ) );
                 break;
 
         endswitch;

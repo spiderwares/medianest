@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 
 <form method="post" action="options.php" enctype="multipart/form-data">
-    <table class="wpmn-form form-table">
+    <table class="mddr-form form-table">
         <tr class="heading">
             <th colspan="2">
                 <?php echo esc_html( $title ); ?>
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         </tr>
         <tr>
         <?php
-            wpmn_get_template(
+            mddr_get_template(
                 'fields/manage-field.php',
                 array(
                     'metaKey' => $metaKey,
@@ -29,13 +29,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <tr class="submit">
             <th colspan="2">
                 <?php settings_fields( $metaKey );
-                if ( ! isset( $wpmn_show_submit ) ) :
-                    $wpmn_show_submit = true;
+                if ( ! isset( $mddr_show_submit ) ) :
+                    $mddr_show_submit = true;
                 endif;  
-                if ( $wpmn_show_submit ) :
+                if ( $mddr_show_submit ) :
                     submit_button(); 
                 endif;
-                settings_errors( 'wpmn_settings' ); ?>
+                settings_errors( 'mddr_settings' ); ?>
             </th>
         </tr>
     </table>

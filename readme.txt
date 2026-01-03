@@ -1,4 +1,4 @@
-=== Medianest ===
+=== Media Directory ===
 Contributors: cosmicinfosoftware
 Requires at least: 5.2
 Tested up to: 6.9
@@ -13,7 +13,7 @@ Organize your WordPress media library with unlimited folders, drag & drop interf
 
 == Description ==
 
-Medianest transforms your WordPress Media Library into a powerful, organized file manager. Just like on your computer, you can create folders and subfolders to organize your images, videos, and documents. Use the intuitive drag-and-drop interface to move files, arrange folders, and keep your media library clutter-free.
+Media Directory transforms your WordPress Media Library into a powerful, organized file manager. Just like on your computer, you can create folders and subfolders to organize your images, videos, and documents. Use the intuitive drag-and-drop interface to move files, arrange folders, and keep your media library clutter-free.
 
 == External Services ==
 
@@ -47,7 +47,7 @@ This plugin includes the following open-source libraries and third-party integra
 ⭐ Folder Color Customization – Assign custom colors to folders for quick visual identification and better organization.
 ⭐ Instant Folder Duplication – Quickly clone folder structures with a single click, preserving your organizational hierarchy.
 ⭐ Smart Folder Count Mode – Toggle between counting only immediate files or including all files in parent and subfolders.
-⭐ Full Post Type Support – Enable MediaNest folders for any post type, including Posts, Pages, WooCommerce Products, and custom post types.
+⭐ Full Post Type Support – Enable Media Directory folders for any post type, including Posts, Pages, WooCommerce Products, and custom post types.
 ⭐ Folder Downloads – Download the entire contents of a folder as a ZIP file for local backups or sharing.
 ⭐ Automatic Global Sorting – Set a global default sorting method that applies automatically across your entire media library.
 
@@ -57,32 +57,32 @@ This plugin includes the following open-source libraries and third-party integra
 2. Log in to your WordPress dashboard and navigate to Plugins > Add New.
 3. Click Upload Plugin, select the ZIP file, and click Install Now.
 4. Activate the plugin.
-5. Go to Settings > Medianest to configure your preferences, or straight to the Media library to start organizing!
+5. Go to Settings > Media Directory to configure your preferences, or straight to the Media library to start organizing!
 
 == Usage ==
 
 *  Create Folder: Click the "Add Folder" button or right-click in the sidebar to create a new folder.
 *  Move Files: Drag and drop images from the main grid into a folder in the sidebar.
 *  Upload: Choose a target folder from the dropdown menu in the "Add New" media screen.
-*  Gallery: In the Block Editor, search for "Medianest Gallery" to add a gallery from your folders.
+*  Gallery: In the Block Editor, search for "Media Directory Gallery" to add a gallery from your folders.
 
 == Frequently Asked Questions ==
 
 = Does this change the file URL? =
-No. Medianest uses a virtual folder system (custom taxonomy). Your file URLs (e.g., `.../wp-content/uploads/2023/01/image.jpg`) remain exactly the same. It is safe to install and uninstall without breaking links.
+No. Media Directory uses a virtual folder system (custom taxonomy). Your file URLs (e.g., `.../wp-content/uploads/2023/01/image.jpg`) remain exactly the same. It is safe to install and uninstall without breaking links.
 
 = Can I import my existing folder structure? =
-Yes, Medianest allows you to import folder structures via CSV.
+Yes, Media Directory allows you to import folder structures via CSV.
 
 = Does it work with page builders? =
-Medianest works with the native WordPress Media Library, so it is compatible with most page builders that use the standard media modal (Elementor, Divi, Beaver Builder, etc.).
+Media Directory works with the native WordPress Media Library, so it is compatible with most page builders that use the standard media modal (Elementor, Divi, Beaver Builder, etc.).
 
 == Screenshots ==
 
 1. Media Library View - Organized folder tree view in the media library.
 2. Context Menu - Right-click options for managing folders.
 3. Settings Panel - Configuration options for the plugin.
-4. Gallery Block - Using the Medianest Gallery block in Gutenberg.
+4. Gallery Block - Using the Media Directory Gallery block in Gutenberg.
 
 == Changelog ==
 
@@ -96,4 +96,4 @@ Medianest works with the native WordPress Media Library, so it is compatible wit
 == Upgrade Notice ==
 
 = 1.0.0 =
-Initial release of Medianest.
+Initial release of Media Directory.

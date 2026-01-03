@@ -1,0 +1,104 @@
+/*--------------------------- MDDR Elementor Frontend Styles ---------------------------*/
+
+.mddr_gallery {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -10px;
+    align-items: stretch;
+}
+
+.mddr_gallery_item {
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.mddr_gallery_item a {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3/2;
+    overflow: hidden;
+    position: relative;
+    background-color: #f1f1f1;
+}
+
+.mddr_gallery_item img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.mddr_gallery_item a:hover img {
+    transform: scale(1.08);
+}
+
+/*--------------------------- Columns ---------------------------*/
+
+.mddr_gallery_columns_1 .mddr_gallery_item {
+    width: 100%;
+}
+
+.mddr_gallery_columns_2 .mddr_gallery_item {
+    width: 50%;
+}
+
+.mddr_gallery_columns_3 .mddr_gallery_item {
+    width: 33.3333%;
+}
+
+.mddr_gallery_columns_4 .mddr_gallery_item {
+    width: 25%;
+}
+
+.mddr_gallery_columns_5 .mddr_gallery_item {
+    width: 20%;
+}
+
+.mddr_gallery_columns_6 .mddr_gallery_item {
+    width: 16.6666%;
+}
+
+.mddr-gallery-error,
+.mddr-gallery-empty {
+    padding: 30px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 8px;
+    text-align: center;
+    color: #495057;
+    font-style: italic;
+    width: 100%;
+    margin: 10px;
+}
+
+/*--------------------------- Responsive ---------------------------*/
+
+@media (max-width: 1024px) {
+
+    .mddr_gallery_columns_4 .mddr_gallery_item,
+    .mddr_gallery_columns_5 .mddr_gallery_item,
+    .mddr_gallery_columns_6 .mddr_gallery_item {
+        width: 33.3333%;
+    }
+}
+
+@media (max-width: 767px) {
+
+    .mddr_gallery_columns_3 .mddr_gallery_item,
+    .mddr_gallery_columns_4 .mddr_gallery_item,
+    .mddr_gallery_columns_5 .mddr_gallery_item,
+    .mddr_gallery_columns_6 .mddr_gallery_item {
+        width: 50%;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .mddr_gallery_item {
+        width: 100% !important;
+    }
+}

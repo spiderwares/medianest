@@ -1,0 +1,509 @@
+/*--------------------------- File Size Field ---------------------------*/
+
+#mddr_filesize {
+    width: 10%;
+}
+
+/*--------------------------- Admin Table Columns ---------------------------*/
+
+#mddr_folder_col {
+    width: 150px;
+}
+
+/*--------------------------- Upload Folder ---------------------------*/
+
+#mddr_select_upload_folder {
+    width: 130px;
+}
+
+/*--------------------------- Bulk Select ---------------------------*/
+
+.mddr_folder_checkbox {
+    border: 1px solid #787c82 !important;
+    border-radius: 3px !important;
+    background-color: #fff;
+    position: relative;
+    outline: none;
+    margin: 0 !important;
+    display: none !important;
+    flex-shrink: 0;
+    transition: all 0.1s ease-in-out;
+}
+
+.mddr_folder_checkbox:hover {
+    border-color: #2271b1;
+}
+
+.mddr_folder_checkbox:checked {
+    background-color: #007cba;
+    border-color: #007cba !important;
+}
+
+.mddr_folder_checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.mddr_media_sidebar.is-bulk-select .mddr_folder_checkbox {
+    display: block !important;
+    pointer-events: auto;
+    border-radius: 3px !important;
+}
+
+.mddr_media_sidebar.is-bulk-select .mddr_folder_node .mddr_folder_button {
+    pointer-events: none;
+}
+
+.mddr_media_sidebar.is-bulk-select .mddr_folder_button {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.mddr_media_sidebar.is-bulk-select .mddr_folder_button:hover {
+    background: transparent;
+}
+
+button.mddr_delete_trigger:disabled,
+button.mddr_delete_trigger.disabled,
+.mddr_media_sidebar.is-bulk-select button.mddr_delete_trigger:disabled {
+    background: #f6f7f7 !important;
+    border-color: #dcdcde !important;
+    box-shadow: none !important;
+    color: #a7aaad !important;
+    cursor: default !important;
+    transform: none !important;
+    pointer-events: none;
+}
+
+button.mddr_delete_trigger:disabled .mddr_delete_icon,
+button.mddr_delete_trigger.disabled .mddr_delete_icon,
+.mddr_media_sidebar.is-bulk-select button.mddr_delete_trigger:disabled .mddr_delete_icon {
+    filter: grayscale(100%) opacity(0.4);
+}
+
+.mddr_bulk_cancel_btn {
+    display: none !important;
+}
+
+.mddr_media_sidebar.is-bulk-select .mddr_bulk_cancel_btn {
+    display: flex !important;
+}
+
+.mddr_media_sidebar.is-bulk-select .mddr_media_sidebar_action_rename,
+.mddr_media_sidebar.is-bulk-select .mddr_action_wrapper {
+    display: none !important;
+}
+
+.mddr_media_sidebar.is-bulk-select .mddr_media_sidebar_action_delete {
+    display: flex !important;
+}
+
+/*--------------------------- Breadcrumb ---------------------------*/
+
+.mddr_breadcrumb {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.mddr_breadcrumb .dashicons {
+    margin-right: 4px;
+    color: #646970;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.mddr_breadcrumb_line {
+    color: #646970;
+    margin: 0 4px;
+}
+
+.mddr_breadcrumb_folder {
+    color: #3c434a;
+    font-weight: 500;
+}
+
+.mddr_breadcrumb_folders {
+    color: #2271b1;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/*--------------------------- Loader ---------------------------*/
+
+.mddr_tree_loader {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.mddr_tree_loader[hidden] {
+    display: none;
+}
+
+.mddr_spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2271b1;
+    border-radius: 50%;
+    animation: mddr_spin 1s linear infinite;
+}
+
+@keyframes mddr_spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.mddr_media_sidebar_folders {
+    position: relative;
+    min-height: 200px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.mddr_folder_tree {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+.mddr_folder_loader {
+    float: none;
+    margin-left: 5px;
+}
+
+/*--------------------------- Drag & Drop ---------------------------*/
+
+.mddr_media_sidebar img,
+.mddr_media_sidebar .mddr_all_files_icon,
+.mddr_media_sidebar .mddr_uncategorized_icon {
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
+
+.mddr_media_sidebar .mddr_folder_icon {
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.mddr_drag_helper_pill {
+    background: #444;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 10001;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.mddr_folder_drag_helper {
+    background: #5b9dd9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 6px;
+}
+
+.mddr_drag_folder_icon {
+    display: block;
+    max-width: 20px;
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
+}
+
+.mddr_folder_btn_wrapper {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.mddr_drop_indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #2271b1;
+    z-index: 1000;
+    pointer-events: none;
+    display: none;
+}
+
+.mddr_drop_indicator.drop-top {
+    top: -1px;
+}
+
+.mddr_drop_indicator.drop-bottom {
+    bottom: -1px;
+}
+
+.mddr_drop_indicator::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: -3.5px;
+    width: 9px;
+    height: 9px;
+    background: #2271b1;
+    border-radius: 50%;
+}
+
+.mddr_folder_btn_wrapper.is-nest-hover {
+    background: rgba(34, 113, 177, 0.1);
+    outline: 1px solid #2271b1;
+    border-radius: 4px;
+}
+
+.mddr_folder_row {
+    position: relative;
+    transition: background 0.2s;
+}
+
+.mddr_media_layout #the-list tr.mddr_draggable {
+    position: relative;
+}
+
+.mddr_media_layout #the-list tr.mddr_draggable .check-column {
+    position: relative;
+}
+
+.mddr_media_layout #the-list tr.mddr_draggable:hover .check-column::before {
+    content: '\f545';
+    font-family: dashicons;
+    position: absolute;
+    top: 55%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    margin-top: 5px;
+    color: #50575e;
+    cursor: move;
+    z-index: 1;
+    pointer-events: none;
+    background: none;
+    margin-left: 7px;
+}
+
+.mddr_media_layout #the-list tr.ui-draggable-dragging {
+    opacity: 0.6;
+    background-color: #e8f4f8;
+}
+
+/*--------------------------- Clear Data Button ---------------------------*/
+
+.mddr_clear_data_btn {
+    background: #fbeaea;
+    color: #b32d2e;
+    border-color: #fbeaea;
+    margin-top: 15px;
+    width: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 3px 10px;
+    display: inline-block;
+    text-decoration: none;
+    line-height: 2.15384615;
+    min-height: 30px;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 3px;
+}
+
+.mddr_clear_data_btn:hover {
+    background-color: rgb(250, 102, 102);
+    border-color: rgb(250, 102, 102);
+    color: #fff;
+    transition: all 0.3s;
+}
+
+/*--------------------------- Import & Export Button ---------------------------*/
+
+.mddr_export_btn,
+.mddr_generate_size_btn,
+.mddr_import_btn,
+.mddr_generate_api_btn {
+    background: #8044f0;
+    border-color: #8044f0;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 3px 10px;
+    margin-top: 15px !important;
+    width: 100px;
+    display: inline-block;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 2.15384615;
+    min-height: 30px;
+    margin: 0;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 3px;
+}
+
+.mddr_export_btn:hover,
+.mddr_generate_size_btn:hover,
+.mddr_import_btn:hover,
+.mddr_generate_api_btn:hover {
+    background: #570FDC;
+    border-color: #570FDC;
+    transition: all 0.3s;
+}
+
+.mddr_import_input {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.mddr_import_btn {
+    margin-top: 5px;
+    display: inline-block;
+}
+
+/*--------------------------- API Key Button ---------------------------*/
+
+.mddr_api_key_wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 100px;
+}
+
+.mddr_api_key_wrapper input {
+    margin-top: 10px;
+    background: #f0f0f1;
+    color: #666;
+}
+
+/*--------------------------- Folder Context Menu ---------------------------*/
+
+.mddr_folder_context_menu {
+    position: fixed;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.15);
+    min-width: 270px;
+    z-index: 10001;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    padding: 6px 0;
+}
+
+.mddr_folder_context_menu.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.mddr_context_menu_item:hover {
+    background: #3c434a1a;
+}
+
+.mddr_context_menu_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #1d2327;
+    transition: background 0.15s ease;
+    user-select: none;
+}
+
+.mddr_context_menu_item.disabled {
+    opacity: 0.5;
+}
+
+.mddr_context_menu_item span:nth-child(2) {
+    flex: 1;
+}
+
+.mddr_folder_button.is-cut {
+    opacity: 0.5;
+    position: relative;
+}
+
+.mddr_folder_content,
+.mddr_folder_content_cut,
+.mddr_folder_content_paste,
+.mddr_folder_content_delete,
+.mddr_folder_content_duplicate,
+.mddr_folder_content_color,
+.mddr_folder_content_download,
+.mddr_folder_content_rename {
+    width: 20px;
+    display: block;
+    flex-shrink: 0;
+    filter: invert(29%) sepia(7%) saturate(618%) hue-rotate(169deg) brightness(96%) contrast(90%);
+}
+
+.mddr_folder_row.is-renaming {
+    align-items: flex-start;
+}
+
+.mddr_folder_row.is-renaming .mddr_toggle_arrow {
+    margin-top: 5px;
+    height: 20px;
+}
+
+.mddr_toggle_arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 100%;
+}
+
+.mddr_toggle_arrow::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border: solid #000;
+    border-width: 0 2px 2px 0;
+    transform: rotate(-45deg);
+    transition: transform 0.25s;
+}
+
+
+.mddr_folder_node[aria-expanded='true']>.mddr_folder_row>.mddr_toggle_arrow::before {
+    transform: rotate(45deg);
+}
